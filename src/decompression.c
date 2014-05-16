@@ -35,7 +35,10 @@ struct cb_seq *cb_decompress_seq(struct cb_compressed_seq *cseq,
                                                            link->coarse_seq_id);
 
         int coarse_len = link->coarse_end - link->coarse_start;
+
         char *coarse_sub = malloc((coarse_len+1)*sizeof(*coarse_sub));
+        assert(coarse_sub);
+
         memcpy(coarse_sub, chunk->seq + link->coarse_start, coarse_len);
         coarse_sub[coarse_len] = '\0';
 
@@ -58,6 +61,8 @@ struct cb_seq *cb_decompress_seq(struct cb_compressed_seq *cseq,
             for (chunk_length=0; dec_chunk[chunk_length]!='\0'; chunk_length++);
 
             section = malloc((chunk_length + 1)*sizeof(*section));
+            assert(section);
+
             for (i = 0; i <= chunk_length; i++)
                 section[i] = dec_chunk[i];
             ds_vector_append(decompressed_chunks, (void *)section);
@@ -71,7 +76,10 @@ struct cb_seq *cb_decompress_seq(struct cb_compressed_seq *cseq,
         free(coarse_sub);
         fasta_free_seq(chunk);
     }
+
     residues = malloc((decompressed_length+1)*sizeof(*residues));
+    assert(residues);
+
     for (i = 0; i < decompressed_chunks->size; i++) {
         char *current_chunk = (char *)ds_vector_get(decompressed_chunks, i);
         for (j = 0; current_chunk[j] != '\0'; j++)
@@ -154,6 +162,8 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
 
             char *orig_str = malloc((original_end-original_start+2) *
                                     sizeof(*orig_str));
+            assert(orig_str);
+
             for (j = 0; j < original_end-original_start+1; orig_str[j++]='?');
 
             /*Run decode_edit_script for each link_to_coarse in the compressed
@@ -166,6 +176,8 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
 
 printf("%s\n", orig_str);
             struct cb_hit_expansion *expansion = malloc(sizeof(*expansion));
+            assert(expansion);
+
             expansion->offset = (int64_t)original_start;
             expansion->seq = cb_seq_init(link->org_seq_id,
                                          seq->name, orig_str);

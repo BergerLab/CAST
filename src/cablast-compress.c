@@ -87,7 +87,10 @@ main(int argc, char **argv)
     int len_filename = strlen(coarse_filename);
     int len_command = strlen("makeblastdb -dbtype nucl -in  -out") +
                       2 * len_filename + 1;
+
     char *makeblastdb = malloc(len_command * sizeof(makeblastdb));
+    assert(makeblastdb);
+
     sprintf(makeblastdb, "makeblastdb -dbtype nucl -in %s -out %s",
                                  coarse_filename, coarse_filename);
 

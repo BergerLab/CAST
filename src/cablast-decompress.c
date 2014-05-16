@@ -53,12 +53,15 @@ main(int argc, char **argv)
     char *compressed_filename = path_join(args->args[0], CABLAST_COMPRESSED);
     FILE *compressed_file = fopen(compressed_filename, "r");
     struct cb_compressed_seq **compressed = read_compressed(compressed_file);
-    struct fasta_seq **coarse_sequences = malloc(10000 *
-                                                 sizeof(*coarse_sequences));
+    struct fasta_seq **coarse_sequences;
     uint64_t num_coarse_sequences = 0;
     uint64_t last_end;
     int overlap;
     struct cb_link_to_coarse *link;
+
+    coarse_sequences = malloc(10000*sizeof(*coarse_sequences));
+    assert(coarse_sequences);
+
     fsg = fasta_generator_start(path_join(args->args[0],CABLAST_COARSE_FASTA),
                                 FASTA_EXCLUDE_NCBI_BLOSUM62, 100);
     while (NULL != (seq = fasta_generator_next(fsg)))

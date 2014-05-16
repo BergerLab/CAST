@@ -32,6 +32,7 @@ cb_seq_init_range(int32_t id, char *name, char *residues,
     if (len > 0) {
         seq->name = malloc((1 + len) * sizeof(*seq->name));
         assert(seq->name);
+
         strcpy(seq->name, name);
     }
     if (seq->length > 0) {
@@ -39,6 +40,7 @@ cb_seq_init_range(int32_t id, char *name, char *residues,
 
         seq->residues = malloc((1 + seq->length) * sizeof(*seq->residues));
         assert(seq->residues);
+
         strncpy(seq->residues, residues + start, seq->length);
         seq->residues[seq->length] = '\0';
         assert(strlen(seq->residues) > 0);

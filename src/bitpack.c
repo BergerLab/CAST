@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "bitpack.h"
@@ -32,7 +33,10 @@ uint64_t shift_right(uint64_t x, int bits){
 char *read_int_to_bytes(uint64_t number, int length){
     int i;
     uint64_t mask = make_mask(8);
+
     char *bytes = malloc(length * sizeof(*bytes));
+    assert(bytes);
+
     for (i = length-1; i >= 0; i--)
         bytes[length-i-1] = (char)(shift_right(number, 8*i) & mask);
     return bytes;

@@ -51,6 +51,7 @@ trim(char *s, const char *totrim)
     }
 
     newlen = (end >= start) ? (end - start) : 0;
+
     news = malloc((newlen + 1) * sizeof(*news));
     assert(news);
 
@@ -68,13 +69,17 @@ readline(FILE *f, char **line)
     int32_t allocated;
 
     allocated = 1; /* for \0 */
+
     *line = malloc(allocated * sizeof(**line));
     assert(line);
+
     (*line)[0] = '\0';
     while (NULL != fgets(buf, 1024, f)) {
         allocated += strlen(buf);
+
         *line = realloc(*line, allocated * sizeof(**line));
         assert(*line);
+
         strcat(*line, buf);
 
         /* if we have found a new line, quit */
@@ -108,6 +113,8 @@ str_slice(char *str, int32_t start, int32_t end)
     assert(end <= len);
 
     ret = malloc((1 + end - start) * sizeof(*ret));
+    assert(ret);
+
     strncpy(ret, str + start, end - start);
 
     return ret;

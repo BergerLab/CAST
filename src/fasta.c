@@ -34,15 +34,18 @@ fasta_read_all(const char *file_name, const char *exclude)
 
     ff = malloc(sizeof(*ff));
     assert(ff);
+
     ff->length = 0;
 
     allocated = FASTA_INITIAL_SEQUENCE_LENGTH;
+
     ff->seqs = malloc(allocated * sizeof(*ff->seqs));
     assert(ff->seqs);
 
     while (NULL != (new_seq = fasta_read_next(f, exclude))) {
         if (ff->length == allocated) {
             allocated *= 1.5;
+
             ff->seqs = realloc(ff->seqs, allocated * sizeof(*ff->seqs));
             assert(ff->seqs);
         }
@@ -77,12 +80,14 @@ fasta_read_next(FILE *f, const char *exclude)
 
     fs->name = malloc((strlen(line) + 1) * sizeof(*fs->name));
     assert(fs->name);
+
     strcpy(fs->name, line);
     free(line);
 
     /* Now read all of the sequence data for this record */
     fs->seq = malloc(sizeof(*fs->seq));
     assert(fs->seq);
+
     fs->seq[0] = '\0';
     while (!is_new_sequence_start(f)) {
         if (0 == readline(f, &line)) {
@@ -97,6 +102,7 @@ fasta_read_next(FILE *f, const char *exclude)
         fs->seq = realloc(
             fs->seq, sizeof(*fs->seq) * (1 + strlen(line) + strlen(fs->seq)));
         assert(fs->seq);
+
         strcat(fs->seq, line);
         free(line);
     }

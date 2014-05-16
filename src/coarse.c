@@ -120,8 +120,14 @@ cb_coarse_save_binary(struct cb_coarse *coarse_db)
 
     for (i = 0; i < coarse_db->seqs->size; i++) {
         uint64_t coarse_fasta_loc;
-        char *fasta_output = malloc(30000*sizeof(*fasta_output));
-        char *link_header = malloc(30*sizeof(*fasta_output));
+        char *fasta_output, *link_header;
+
+        fasta_output = malloc(30000*sizeof(*fasta_output));
+        assert(fasta_output);
+
+        link_header = malloc(30*sizeof(*fasta_output));
+        assert(link_header);
+
         seq = (struct cb_coarse_seq *) ds_vector_get(coarse_db->seqs, i);
 
         /*At the start of outputting each sequence, output the indices for the
@@ -365,9 +371,13 @@ cb_link_to_compressed_free(struct cb_link_to_compressed *link)
   Returns NULL if EOF is found before a newline.*/
 char *get_coarse_header(FILE *f){
     int c = 0;
-    char *header = malloc(30*sizeof(*header));
+    char *header;
     int header_length = 30;
     int i = 0;
+
+    header = malloc(30*sizeof(*header));
+    assert(header);
+
     while (c != EOF && c != '\n') {
         c = getc(f);
         if (c != EOF) {
@@ -375,14 +385,19 @@ char *get_coarse_header(FILE *f){
             i++;
             if (i == header_length - 1) {
                 header_length *= 2;
+
                 header = realloc(header, header_length*sizeof(*header));
+                assert(header);
             }
         }
         else
             return NULL;
     }
     header[i] = '\0';
+
     header = realloc(header, (i+1)*sizeof(*header));
+    assert(header);
+
     return header;
 }
 
@@ -390,6 +405,8 @@ char *get_coarse_header(FILE *f){
   converts its data to a struct cb_link_to_compressed*/
 struct cb_link_to_compressed *read_coarse_link(FILE *f){
     struct cb_link_to_compressed *link = malloc(sizeof(*link));
+    assert(link);
+
     link->org_seq_id = (uint64_t)read_int_from_file(8, f);
     if (feof(f)) {
         free(link);

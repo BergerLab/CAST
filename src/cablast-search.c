@@ -44,7 +44,10 @@ void blast_coarse(struct opt_args *args, uint64_t dbsize){
            "%s > CaBLAST_temp_blast_results.xml";
     int command_length = strlen(blastn_command) + strlen(input_path) +
                                                   strlen(args->args[1]) + 31;
+
     char *blastn = malloc(command_length * sizeof(*blastn));
+    assert(blastn);
+
     sprintf(blastn,"blastn -db %s -outfmt 5 -query %s -dbsize %lu -task blastn"
                    " -evalue %s > CaBLAST_temp_blast_results.xml",
            input_path, args->args[1], dbsize, search_flags.coarse_evalue);
@@ -68,7 +71,10 @@ void blast_fine(char *subject, uint64_t dbsize, struct fasta_seq *query){
            "blastn -subject  -query CaBLAST_fine_query.fasta -dbsize  "
            "-task blastn -outfmt 5 -evalue 1e-30 > CaBLAST_results.xml";
     int command_length = strlen(blastn_command) + strlen(subject) + 31;
+
     char *blastn = malloc(command_length * sizeof(*blastn));
+    assert(blastn);
+
     sprintf(blastn,
             "blastn -subject %s -query CaBLAST_fine_query.fasta -dbsize %lu "
             "-task blastn -outfmt 5 -evalue 1e-30 > CaBLAST_results.xml",
@@ -104,8 +110,12 @@ void traverse_blast_xml_r(xmlNode *r, void (*f)(xmlNode *, void *), void *acc){
 /*Takes in the xmlNode representing a BLAST hsp and populates a struct hsp
   with its data.*/
 struct hsp *populate_blast_hsp(xmlNode *node){
-    struct hsp *h = malloc(sizeof(*h));
+    struct hsp *h;
     bool hit_frame_fwd = true;
+
+    h = malloc(sizeof(*h));
+    assert(h);
+
     h->xml_name = "Hsp";
     for (; node; node = node->next){
         if (!strcmp((char *)node->name, "Hsp_num"))
@@ -135,6 +145,8 @@ struct hsp *populate_blast_hsp(xmlNode *node){
   with its data.*/
 struct hit *populate_blast_hit(xmlNode *node){
     struct hit *h = malloc(sizeof(*h));
+    assert(h);
+
     h->xml_name = "Hit";
     for (; node; node = node->next) {
         if (!strcmp((char *)node->name, "Hit_num"))
@@ -217,7 +229,10 @@ char *get_blast_args(struct opt_args *args){
             length += (strlen(args->args[i]) + 1);
         else
             index = strcmp(args->args[i], "--blast-args") == 0 ? i : -1;
+
     blast_args = malloc(length*sizeof(*args));
+    assert(blast_args);
+
     if (index == -1)
         *blast_args = '\0';
     else

@@ -150,11 +150,20 @@ make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
     struct cb_nw_tables tables;
     int i, j1, j2;
     int dir_prod = dir1*dir2;
-    int **dp_score = malloc((dp_len1+1)*sizeof(*dp_score));
-    int **dp_from = malloc((dp_len1+1)*sizeof(*dp_from));
+    int **dp_score, **dp_from;
+
+    dp_score = malloc((dp_len1+1)*sizeof(*dp_score));
+    assert(dp_score);
+
+    dp_from = malloc((dp_len1+1)*sizeof(*dp_from));
+    assert(dp_from);
+
     for (i = 0; i < dp_len1+1; i++) {
         dp_score[i] = malloc((dp_len2+1)*sizeof(**dp_score));
+        assert(dp_score[i]);
+
         dp_from[i] = malloc((dp_len2+1)*sizeof(**dp_from));
+        assert(dp_from[i]);
     }
     for (i = 0; i <= dp_len2; i++) {
         dp_score[0][i] = -3*i;
@@ -196,7 +205,10 @@ make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
 int *best_edge(int **dp_score, int dp_len1, int dp_len2){
     int j1, j2;
     int max_dp_score = -1000;
+
     int *best = malloc(2*sizeof(*best));
+    assert(best);
+
     best[0] = -1;
     best[1] = -1;
     for (j2 = 0; j2 <= dp_len2; j2++){
@@ -279,12 +291,21 @@ cb_align_nw(struct cb_align_nw_memory *mem,
     int cur_j1 = best[0];
     int cur_j2 = best[1];
     int dir_prod = dir1 * dir2;
+    int num_steps = 0;
     int **dp_score = tables.dp_score;
     int **dp_from = tables.dp_from;
-    bool *matches_to_add = malloc((cur_j1 + cur_j2)*sizeof(*matches_to_add));
-    char *subs1_dp = malloc((cur_j1 + cur_j2)*sizeof(*subs1_dp));
-    char *subs2_dp = malloc((cur_j1 + cur_j2)*sizeof(*subs2_dp));
-    int num_steps = 0;
+    bool *matches_to_add;
+    char *subs1_dp, *subs2_dp;
+
+    matches_to_add = malloc((cur_j1 + cur_j2)*sizeof(*matches_to_add));
+    assert(matches_to_add);
+
+    subs1_dp = malloc((cur_j1 + cur_j2)*sizeof(*subs1_dp));
+    assert(subs1_dp);
+
+    subs2_dp = malloc((cur_j1 + cur_j2)*sizeof(*subs2_dp));
+    assert(subs2_dp);
+
     align.ref = "\0";
     align.org = "\0";
     align.length = -1;
@@ -340,8 +361,13 @@ cb_align_nw(struct cb_align_nw_memory *mem,
         align.length = -1;
     else {
         align.length = num_steps;
+
         align.org = malloc((align.length+1)*sizeof(*(align.org)));
+        assert(align.org);
+
         align.ref = malloc((align.length+1)*sizeof(*(align.ref)));
+        assert(align.ref);
+
         for (i = 0; i < align.length; i++) {
             /*Don't update the matches array if we are running Needleman-Wunsch
               alignment on a match.*/
@@ -392,6 +418,7 @@ attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
     const int32_t dir_prod = dir1*dir2;
     int32_t progress = 0;
     int32_t consec_mismatch = 0;
+
     i1 += dir1;
     i2 += dir2;
 /*printf("attempt_ext: i1: %d, i2: %d, progress: ", i1-start1, i2-start2);*/

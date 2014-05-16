@@ -70,6 +70,7 @@ cb_database_init(char *dir, int32_t seed_size, bool add)
 
     db = malloc(sizeof(*db));
     assert(db);
+
     db->name = basename(dir);
 
     ffasta = open_db_file(pfasta, "r+");
@@ -122,6 +123,7 @@ cb_database_read(char *dir, int32_t seed_size)
 
     db = malloc(sizeof(*db));
     assert(db);
+
     db->name = basename(dir);
 
     ffasta = open_db_file(pfasta, "r");

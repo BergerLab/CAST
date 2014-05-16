@@ -212,8 +212,12 @@ cb_compressed_write_binary(struct cb_compressed *com_db,
     int i;
     struct cb_link_to_coarse *link;
     int16_t mask = (((int16_t)1)<<8)-1;
-    char *id_string = malloc(20*sizeof(*id_string));
+    char *id_string;
     uint64_t index = ftell(com_db->file_compressed);
+
+    id_string = malloc(20*sizeof(*id_string));
+    assert(id_string);
+
     output_int_to_file(index, 8, com_db->file_index);
     sprintf(id_string, "%ld", seq->id);
 
@@ -384,6 +388,8 @@ cb_link_to_coarse_init_nodiff(int32_t coarse_seq_id,
     assert(link);
 
     link->diff = malloc(2*sizeof(*(link->diff)));
+    assert(link->diff);
+
     link->diff[0] = dir ? '0' : '1';
     link->diff[1] = '\0';
     link->coarse_seq_id = coarse_seq_id;
@@ -413,10 +419,14 @@ cb_compressed_seq_at(struct cb_compressed *com_db, int32_t i)
   Returns NULL if EOF is found before a newline.*/
 char *get_compressed_header(FILE *f){
     int c = 0;
-    char *header = malloc(10000*sizeof(*header));
+    char *header;
     int header_length = 10000;
     int i = 0;
     int chars_read = 0;
+
+    header = malloc(10000*sizeof(*header));
+    assert(header);
+
     while (c != EOF && (char)c != '\n') {
         chars_read++;
         c = getc(f);
@@ -426,13 +436,17 @@ char *get_compressed_header(FILE *f){
             if (i == header_length-1) {
                 header_length *= 2;
                 header = realloc(header, header_length*sizeof(*header));
+                assert(header);
             }
         }
         if (c == EOF)
             return NULL;
     }
     header[i] = '\0';
+
     header = realloc(header, (i+1)*sizeof(*header));
+    assert(header);
+
     return header;
 }
 
@@ -442,10 +456,13 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
     int i;
     unsigned int c = 0;
     uint16_t script_length = (uint16_t)0;
-    struct cb_link_to_coarse *link = malloc(sizeof(*link));
+    struct cb_link_to_coarse *link;
     int chars_to_read;
     char *half_bytes;
     char *diff;
+
+    link = malloc(sizeof(*link));
+    assert(link);
 
     link->coarse_seq_id = read_int_from_file(8, f);
     if (feof(f)) {
@@ -482,7 +499,10 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
     chars_to_read = script_length / 2;
     if (script_length % 2 == 1)
         chars_to_read++;
+
     half_bytes = malloc(chars_to_read*sizeof(*half_bytes));
+    assert(half_bytes);
+
     for (i = 0; i < chars_to_read; i++) {
         c = getc(f);
         if (feof(f)) {
@@ -595,7 +615,10 @@ int64_t *cb_compressed_get_lengths(struct cb_compressed *comdb){
 
     if (num_sequences > 0) {
         int i = 0;
+
         lengths = malloc(num_sequences*sizeof(*lengths));
+        assert(lengths);
+
         for (i = 0; i < num_sequences; i++) {
             int64_t offset = cb_compressed_link_offset(comdb, i);
 
@@ -620,8 +643,11 @@ int64_t *cb_compressed_get_lengths(struct cb_compressed *comdb){
   an array of compressed sequences.*/
 struct cb_compressed_seq **read_compressed(FILE *f){
     int length = 0;
+
     struct cb_compressed_seq **compressed_seqs =
         malloc(1000*sizeof(*compressed_seqs));
+    assert(compressed_seqs);
+
     /*Read each sequence*/
     while (true) {
         struct cb_link_to_coarse *links = NULL;
@@ -654,14 +680,19 @@ struct cb_compressed_seq **read_compressed(FILE *f){
             if (c == '\n')
                 break;
         }
+
         compressed_seqs[length] = malloc(sizeof(*(compressed_seqs[length])));
+        assert(compressed_seqs[length]);
+
         (compressed_seqs[length])->name = header;
         (compressed_seqs[length]->links) = links;
         length++;
     }
 
-    compressed_seqs = realloc(compressed_seqs,
-                              (length+1)*sizeof(*compressed_seqs));
+    compressed_seqs =
+        realloc(compressed_seqs, (length+1)*sizeof(*compressed_seqs));
+    assert(compressed_seqs);
+
     compressed_seqs[length] = NULL;
     return compressed_seqs;
 }

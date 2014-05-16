@@ -60,13 +60,16 @@ cb_compress_start_workers(struct cb_database *db, int32_t num_workers)
 
     wargs = malloc(sizeof(*wargs));
     assert(wargs);
+
     wargs->db = db;
     wargs->jobs = jobs;
 
     workers = malloc(sizeof(*workers));
     assert(workers);
+
     workers->threads = malloc(num_workers * sizeof(*workers->threads));
     assert(workers->threads);
+
     workers->num_workers = num_workers;
     workers->jobs = jobs;
     workers->args = (void*) wargs;
@@ -189,7 +192,11 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
 
     /*Initialize the matches and matches_temp arrays*/
     matches = malloc(max_section_size*sizeof(*matches));
+    assert(matches);
+
     matches_temp = malloc(max_section_size*sizeof(*matches_temp));
+    assert(matches_temp);
+
     for (i = 0; i < max_section_size; i++) {
         matches[i] = true;
         matches_temp[i] = true;
@@ -288,9 +295,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 /*Concatenate the extensions and the k-mer for the coarse
                   sequence*/
                 int index = 0;
+
                 alignment.ref = malloc((strlen(mseqs_rev.rseq) + seed_size +
                                         strlen(mseqs_fwd.rseq) + 1) *
                                         sizeof(*(alignment.ref)));
+                assert(alignment.ref);
+
                 for (i = 0; mseqs_rev.rseq[i] != '\0'; i++)
                     alignment.ref[index++] = mseqs_rev.rseq[i];
                 for (i = 0; i < seed_size; i++)
@@ -302,9 +312,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 /*Concatenate the extensions and the k-mer for the original
                   sequence*/
                 index = 0;
+
                 alignment.org = malloc((strlen(mseqs_rev.oseq) + seed_size +
                                         strlen(mseqs_fwd.oseq) + 1) *
                                         sizeof(*(alignment.org)));
+                assert(alignment.org);
+
                 for (i = 0; mseqs_rev.oseq[i] != '\0'; i++)
                     alignment.org[index++] = mseqs_rev.oseq[i];
                 for (i = 0; i < seed_size; i++)
@@ -439,9 +452,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 /*Concatenate the extensions and the k-mer's reverse complement
                   for the coarse sequence*/
                 int index = 0;
+
                 alignment.ref = malloc((strlen(mseqs_rev.rseq) + seed_size +
                                         strlen(mseqs_fwd.rseq) + 1) *
                                         sizeof(*(alignment.ref)));
+                assert(alignment.ref);
+
                 for (i = 0; mseqs_rev.rseq[i] != '\0'; i++)
                     alignment.ref[index++] = mseqs_rev.rseq[i];
                 for (i = 0; i < seed_size; i++)
@@ -453,9 +469,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 /*Concatenate the extensions and the k-mer's reverse complement
                   for the original sequence*/
                 index = 0;
+
                 alignment.org = malloc((strlen(mseqs_rev.oseq) + seed_size +
                                         strlen(mseqs_fwd.oseq) + 1) *
                                         sizeof(*(alignment.org)));
+                assert(alignment.org);
+
                 for (i = 0; mseqs_rev.oseq[i] != '\0'; i++)
                     alignment.org[index++] = mseqs_rev.oseq[i];
                 for (i = 0; i < seed_size; i++)
@@ -595,8 +614,12 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
 
     /*Initialize the matches and matches_past_clump arrays.*/
     matches = malloc(2*compress_flags.max_chunk_size*sizeof(*matches));
-    matches_past_clump = malloc(2 * compress_flags.max_chunk_size
-                                  * sizeof(*matches_past_clump));
+    assert(matches);
+
+    matches_past_clump = malloc(2*compress_flags.max_chunk_size
+                                 *sizeof(*matches_past_clump));
+    assert(matches_past_clump);
+
     matches_index = compress_flags.gapped_window_size;
     for (i = 0; i < max_section_size; i++) {
         matches[i] = true;
@@ -633,7 +656,10 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
 
         if (m > 0) {
             r_segment = malloc((m+1)*sizeof(*r_segment));
+            assert(r_segment);
+
             o_segment = malloc((m+1)*sizeof(*o_segment));
+            assert(o_segment);
 
             for (i = 0; i < m; i++) {
                 r_segment[i] = rseq[resind+dir1*i];
@@ -691,7 +717,11 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
     }
 
     mseqs.rseq = malloc((mseqs.rlen+1)*sizeof(*(mseqs.rseq)));
+    assert(mseqs.rseq);
+
     mseqs.oseq = malloc((mseqs.olen+1)*sizeof(*(mseqs.oseq)));
+    assert(mseqs.oseq);
+
 
     /*Copy each segment into the overall extension.*/
     for (i = 0; i < rseq_segments->size; i++) {
@@ -710,6 +740,8 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
       extensions.*/
     if (dir1 < 0) {
         char *temp = malloc((mseqs.rlen+1)*sizeof(*temp));
+        assert(temp);
+
         for (i = 0; i < mseqs.rlen; i++)
             temp[i] = mseqs.rseq[mseqs.rlen-i-1];
         temp[mseqs.rlen] = '\0';
@@ -717,6 +749,8 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
         mseqs.rseq = temp;
 
         temp = malloc((mseqs.olen+1)*sizeof(*temp));
+        assert(temp);
+
         for (i = 0; i < mseqs.olen; i++)
             temp[i] = mseqs.oseq[mseqs.olen-i-1];
         temp[mseqs.olen] = '\0';
@@ -754,8 +788,13 @@ extend_match(struct cb_align_nw_memory *mem,
 
     /*Initialize the matches and matches_past_clump arrays.*/
     matches = malloc(2*compress_flags.max_chunk_size*sizeof(*matches));
-    matches_past_clump = malloc(2 * compress_flags.max_chunk_size
-                                  * sizeof(*matches_past_clump));
+    assert(matches);
+
+    matches_past_clump = malloc(2*compress_flags.max_chunk_size
+                                 *sizeof(*matches_past_clump));
+    assert(matches_past_clump);
+
+
     matches_index = compress_flags.gapped_window_size;
     for (i = 0; i < max_section_size; i++) {
         matches[i] = true;

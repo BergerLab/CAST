@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdlib.h>
 #include "DNAutils.h"
 
@@ -31,7 +32,10 @@ int bases_match(char a, char b, int dir_prod){
   of the k-mer and returns a copy of the k-mer.*/
 char *get_kmer(char *DNA_string, int k){
     int i = 0;
+
     char *kmer = malloc(k*sizeof(*kmer));
+    assert(kmer);
+
     for (i = 0; i < k; i++)
         kmer[i] = DNA_string[i];
     kmer[k] = '\0';
@@ -41,7 +45,10 @@ char *get_kmer(char *DNA_string, int k){
 /*Takes in a k-mer and its length and returns the k-mer's reverse complement.*/
 char *kmer_revcomp(char *kmer, int k){
     int i = 0;
+
     char *revcomp = malloc(k*sizeof(*revcomp));
+    assert(revcomp);
+
     for (i = 0; i < k; i++)
         revcomp[i] = base_complement(kmer[k-i-1]);
     revcomp[k] = '\0';
@@ -60,6 +67,8 @@ char *string_revcomp(char *sequence, int length){
     if (length < 0)
         for (length = 0; sequence[length] != '\0'; length++);
     revcomp = malloc((length+1) * sizeof(*revcomp));
+    assert(revcomp);
+
     for (i = 0; i < length; i++)
         revcomp[i] = base_complement(sequence[length-i-1]);
     revcomp[length] = '\0';
