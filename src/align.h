@@ -32,7 +32,7 @@ struct cb_align_nw_memory {
     char *org;
 };
 
-struct cb_nw_tables{
+struct cb_nw_tables {
     int **dp_score;
     int **dp_from;
 };

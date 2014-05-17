@@ -13,7 +13,7 @@
  *@param rstart, rend, ostart, oend: The starting and ending indices of the
  *  coarse and original sequences.
  *@param dir1, dir2: The directions in the coarse and original sequences
- *  in which we are checking for a match (1 = forward, -1 = reverse).
+ *  in which we are extending a match (1 = forward, -1 = reverse).
  *@param i1, i2: The starting indices to align from in the coarse and original
  *  sequences.
  *@param matches: The array keeping track of whether or not previous pairs of
@@ -42,12 +42,11 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
                   bool *matches_past_clump, int *matches_index)
 {
     int32_t i;
-    int32_t matches_since_last_consec = 0;
-    int temp_index = 0;
     int32_t dir_prod = dir1 * dir2;
     int32_t rlen = rend - rstart, olen = oend - ostart;
-    int matches_count = 0,
-        consec_match_clump_size = compress_flags.consec_match_clump_size;
+    int32_t matches_count = 0,
+            consec_match_clump_size = compress_flags.consec_match_clump_size,
+            matches_since_last_consec = 0, temp_index = 0;
     int32_t length = 0, scanned = 0, successive = consec_match_clump_size;
 
     struct ungapped_alignment ungapped;
@@ -264,6 +263,22 @@ int *backtrack_to_clump(struct cb_nw_tables tables, int *pos){
     return pos;
 }
 
+/*@param rseq, oseq: The coarse and original sequences.
+ *@param dp_len1, dp_len2: The lengths of the sections of the coarse and
+ *  original sequences to be aligned.
+ *@param i1, i2: The starting indices to align from in the coarse and original
+ *  sequences.
+ *@param dir1, dir2: The directions in the coarse and original sequences
+ *  in which we are extending a match (1 = forward, -1 = reverse).
+ *@param matches: The array keeping track of whether or not previous pairs of
+ *  bases which were compared matched.  Used for detecting bad windows in which
+ *  less than 85% of the past 100 bases matched.
+ *@param matches_index: The current index in the matches array, passed by
+ *  reference.
+ *
+ *@return: The aligned sequences from a Needleman-Wunsch alignment of the two
+ *  sequences and the length of the alignment in a cb_alignment struct.
+ */
 struct cb_alignment
 cb_align_nw(struct cb_align_nw_memory *mem,
              char *rseq, int dp_len1, int i1, int dir1,
@@ -414,7 +429,6 @@ cb_align_length_nogaps(char *residues)
     return len;
 }
 
-/* returns extension distance (but does not move pointers)*/
 int32_t
 attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
             int32_t start1, int32_t i2, const int32_t dir2, const char *s2,
