@@ -33,16 +33,16 @@ main(int argc, char **argv)
 { 
     struct cb_database *db;
     struct cb_compress_workers *workers;
-    struct opt_config *conf;
-    struct opt_args *args;
     struct fasta_seq_gen *fsg;
     struct fasta_seq *seq;
     struct cb_seq *org_seq;
-    int i, org_seq_id;
+    int i, org_seq_id, len_command;
     struct timeval start, current;
     long double elapsed;
-    conf = load_compress_args();
-    args = opt_config_parse(conf, argc, argv);
+    char *coarse_filename, *makeblastdb;
+    struct opt_config *conf = load_compress_args();
+    struct opt_args *args = opt_config_parse(conf, argc, argv);
+
     if (args->nargs < 2) {
         fprintf(stderr, 
             "Usage: %s [flags] database-dir fasta-file [ fasta-file ... ]\n",
@@ -83,12 +83,11 @@ main(int argc, char **argv)
     cb_coarse_save_seeds_binary(db->coarse_db);
     cb_compressed_save_binary(db->com_db);
 
-    char *coarse_filename = path_join(args->args[0], "coarse.fasta");
-    int len_filename = strlen(coarse_filename);
-    int len_command = strlen("makeblastdb -dbtype nucl -in  -out") +
-                      2 * len_filename + 1;
+    coarse_filename = path_join(args->args[0], "coarse.fasta");
+    len_command = strlen("makeblastdb -dbtype nucl -in  -out") + 2
+                  * strlen(coarse_filename) + 1;
 
-    char *makeblastdb = malloc(len_command * sizeof(makeblastdb));
+    makeblastdb = malloc(len_command * sizeof(makeblastdb));
     assert(makeblastdb);
 
     sprintf(makeblastdb, "makeblastdb -dbtype nucl -in %s -out %s",

@@ -60,6 +60,14 @@ void blast_coarse(struct opt_args *args, uint64_t dbsize){
 void blast_fine(char *subject, uint64_t dbsize, struct fasta_seq *query){
     /*Make a query FASTA file for the sequence we are testing*/
     FILE *fine_blast_query = fopen("CaBLAST_fine_query.fasta", "w");
+    char *blastn_command =
+           "blastn -subject  -query CaBLAST_fine_query.fasta -dbsize  "
+           "-task blastn -outfmt 5 -evalue 1e-30 > CaBLAST_results.xml";
+    int command_length = strlen(blastn_command) + strlen(subject) + 31;
+
+    char *blastn = malloc(command_length*sizeof(*blastn));
+    assert(blastn);
+
     if (fine_blast_query == NULL) {
         fprintf(stderr,"Could not open CaBLAST_fine_query.fasta for writing.");
         return;
@@ -67,13 +75,6 @@ void blast_fine(char *subject, uint64_t dbsize, struct fasta_seq *query){
     fprintf(fine_blast_query, "> %s\n%s\n", query->name, query->seq);
     fclose(fine_blast_query);
 
-    char *blastn_command =
-           "blastn -subject  -query CaBLAST_fine_query.fasta -dbsize  "
-           "-task blastn -outfmt 5 -evalue 1e-30 > CaBLAST_results.xml";
-    int command_length = strlen(blastn_command) + strlen(subject) + 31;
-
-    char *blastn = malloc(command_length * sizeof(*blastn));
-    assert(blastn);
 
     sprintf(blastn,
             "blastn -subject %s -query CaBLAST_fine_query.fasta -dbsize %lu "
