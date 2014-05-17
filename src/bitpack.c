@@ -58,6 +58,7 @@ uint64_t read_int_from_file(int length, FILE *f){
     int i;
     uint64_t bytes = (uint64_t)0;
     uint64_t mask = make_mask(8);
+
     for (i = 0; i < length; i++) {
         uint64_t current_byte = ((uint64_t)getc(f)) & mask;
         bytes <<= 8;

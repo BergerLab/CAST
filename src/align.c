@@ -15,45 +15,40 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
                    int32_t dir2, int32_t i2, bool *matches,
                    bool *matches_past_clump, int *matches_index)
 {
-    int32_t length, scanned, successive;
-    int32_t rlen, olen;
     int32_t i;
-    int32_t matches_since_last_consec;
-    int consec_match_clump_size;
-    int32_t dir_prod;
-    int matches_count;
-    int temp_index;
-    struct ungapped_alignment ungapped;
+    int32_t matches_since_last_consec = 0;
+    int temp_index = 0;
+    int32_t dir_prod = dir1 * dir2;
+    int32_t rlen = rend - rstart, olen = oend - ostart;
+    int matches_count = 0,
+        consec_match_clump_size = compress_flags.consec_match_clump_size;
+    int32_t length = 0, scanned = 0, successive = consec_match_clump_size;
 
+    struct ungapped_alignment ungapped;
     ungapped.length = -1;
     ungapped.found_bad_window = false;
-    length = 0;
-    scanned = 0;
-    consec_match_clump_size = compress_flags.consec_match_clump_size;
-    successive = consec_match_clump_size;
-    rlen = rend - rstart;
-    olen = oend - ostart;
-    dir_prod = dir1 * dir2;
-    temp_index = 0;
-    matches_count = 0;
-    matches_since_last_consec = 0;
 
     for (i = *matches_index - 100; i < *matches_index; i++)
         if (matches[i])
             matches_count++;
+
     while (i1 >= rstart && i1 < rend && i2 >= ostart && i2 < oend) {
-        int cur_ismatch = bases_match(rseq[i1], oseq[i2], dir_prod);
+        bool cur_ismatch = bases_match(rseq[i1], oseq[i2], dir_prod);
+
         i1 += dir1;
         i2 += dir2;
         scanned++;
+
         if (cur_ismatch == 1) {
             matches_past_clump[temp_index] = true;
             temp_index++;
             successive++;
+
             if (successive >= consec_match_clump_size) {
                 int update = check_and_update(matches, matches_index, 
                                               &matches_count,
                                               matches_past_clump, temp_index);
+
                     length += update;
                     if (update != temp_index) {
                         ungapped.length = length;
@@ -112,16 +107,16 @@ cb_align_nw_memory_init()
     mem = malloc(sizeof(*mem));
     assert(mem);
 
-    mem->table = malloc(seq_size * seq_size * sizeof(*mem->table));
+    mem->table = malloc(seq_size*seq_size*sizeof(*mem->table));
     assert(mem->table);
 
-    mem->zeroes = malloc(seq_size * seq_size * sizeof(*mem->zeroes));
+    mem->zeroes = malloc(seq_size*seq_size*sizeof(*mem->zeroes));
     assert(mem->zeroes);
 
-    mem->ref = malloc(seq_size * sizeof(*mem->ref));
+    mem->ref = malloc(seq_size*sizeof(*mem->ref));
     assert(mem->ref);
 
-    mem->org = malloc(seq_size * sizeof(*mem->org));
+    mem->org = malloc(seq_size*sizeof(*mem->org));
     assert(mem->org);
 
     return mem;
@@ -176,6 +171,7 @@ make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
     for (j1 = 1; j1 <= dp_len1; j1++)
         for (j2 = 1; j2 <= dp_len2; j2++){
             int score0, score1, score2;
+
             score0 = dp_score[j1-1][j2-1] +
                      (bases_match(rseq[i1+dir1*(j1-1)], oseq[i2+dir2*(j2-1)],
                                                          dir_prod) ? 1 : -3);
@@ -229,8 +225,10 @@ int *backtrack_to_clump(struct cb_nw_tables tables, int *pos){
     int **dp_score = tables.dp_score;
     int **dp_from = tables.dp_from;
     int consec_match_clump_size = compress_flags.consec_match_clump_size;
+
     while (!(pos[0] == 0 && pos[1] == 0)) {
         int prev_j1, prev_j2;
+
         if (consec_matches == consec_match_clump_size) { /*found chunk; stop*/
             pos[0] += consec_match_clump_size;
             pos[1] += consec_match_clump_size;
@@ -267,9 +265,15 @@ cb_align_nw(struct cb_align_nw_memory *mem,
              bool *matches, int *matches_index)
 {
     struct cb_alignment align;
+    int cur_j1, cur_j2;
+    bool *matches_to_add;
+    char *subs1_dp, *subs2_dp;
+    int dir_prod = dir1 * dir2;
+    int num_steps = 0;
     int matches_count = 0, i = 0;
     struct cb_nw_tables tables = make_nw_tables(rseq, dp_len1, i1, dir1,
                                                  oseq, dp_len2, i2, dir2);
+    int **dp_score = tables.dp_score, **dp_from = tables.dp_from;
     int *best = best_edge(tables.dp_score, dp_len1, dp_len2);
 
     best = backtrack_to_clump(tables, best);
@@ -288,22 +292,17 @@ cb_align_nw(struct cb_align_nw_memory *mem,
        
         return align;
     }
-    int cur_j1 = best[0];
-    int cur_j2 = best[1];
-    int dir_prod = dir1 * dir2;
-    int num_steps = 0;
-    int **dp_score = tables.dp_score;
-    int **dp_from = tables.dp_from;
-    bool *matches_to_add;
-    char *subs1_dp, *subs2_dp;
 
-    matches_to_add = malloc((cur_j1 + cur_j2)*sizeof(*matches_to_add));
+    cur_j1 = best[0];
+    cur_j2 = best[1];
+
+    matches_to_add = malloc((cur_j1+cur_j2)*sizeof(*matches_to_add));
     assert(matches_to_add);
 
-    subs1_dp = malloc((cur_j1 + cur_j2)*sizeof(*subs1_dp));
+    subs1_dp = malloc((cur_j1+cur_j2)*sizeof(*subs1_dp));
     assert(subs1_dp);
 
-    subs2_dp = malloc((cur_j1 + cur_j2)*sizeof(*subs2_dp));
+    subs2_dp = malloc((cur_j1+cur_j2)*sizeof(*subs2_dp));
     assert(subs2_dp);
 
     align.ref = "\0";
@@ -311,6 +310,7 @@ cb_align_nw(struct cb_align_nw_memory *mem,
     align.length = -1;
     while (!(cur_j1 == 0 && cur_j2 == 0)) {
         int prev_j1, prev_j2;
+
         switch (dp_from[cur_j1][cur_j2]) {
             char c1, c2;
         case 0:
@@ -381,6 +381,7 @@ cb_align_nw(struct cb_align_nw_memory *mem,
         align.org[align.length] = '\0';
         align.ref[align.length] = '\0';
     }
+
     free(best);
     for (i = 0; i <= dp_len1; i++) {
         free(tables.dp_score[i]);
@@ -391,6 +392,7 @@ cb_align_nw(struct cb_align_nw_memory *mem,
     free(subs1_dp);
     free(subs2_dp);
     free(matches_to_add);
+
     return align;
 }
 
@@ -398,10 +400,7 @@ cb_align_nw(struct cb_align_nw_memory *mem,
 int32_t
 cb_align_length_nogaps(char *residues)
 {
-    int i, len, rlen;
-
-    len = 0;
-    rlen = strlen(residues);
+    int i = 0, len = 0, rlen = strlen(residues);
     for (i = 0; i < rlen; i++)
         if (residues[i] != '-')
             len++;
@@ -416,12 +415,11 @@ attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
             int32_t len2, int32_t start2)
 {
     const int32_t dir_prod = dir1*dir2;
-    int32_t progress = 0;
-    int32_t consec_mismatch = 0;
+    int32_t progress = 0, consec_mismatch = 0;
 
     i1 += dir1;
     i2 += dir2;
-/*printf("attempt_ext: i1: %d, i2: %d, progress: ", i1-start1, i2-start2);*/
+
     /*Replace this 3 with the flag for max_consec_mismatch*/
     while (consec_mismatch < 3 &&
            i1 >= start1 && i1 < start1+len1 &&
@@ -433,7 +431,6 @@ attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
         i1 += dir1; i2 += dir2;
         progress++;
     }
-/*fprintf(stderr, "attempt_ext, progress = %d\n", progress);*/
     return progress;
 }
 

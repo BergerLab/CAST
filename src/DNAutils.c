@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include "DNAutils.h"
 
@@ -21,11 +22,8 @@ char base_complement(char base){
 
 /*Checks if two bases match.  If one or both bases is an N, it is an
   automatic mismatch*/
-int bases_match(char a, char b, int dir_prod){
-    if (dir_prod > 0) /*Same-direction matches*/
-        return (a == b && a != 'N') ? 1 : 0;
-    else              /*Reverse-complement matches*/
-        return a == base_complement(b) && a != 'N' ? 1 : 0;
+bool bases_match(char a, char b, int dir_prod){
+    return a != 'N' && a == (dir_prod > 0 ? b : base_complement(b));
 }
 
 /*Takes in a pointer to the start of a k-mer in a DNA sequence and the length
@@ -62,11 +60,13 @@ char *kmer_revcomp(char *kmer, int k){
 char *string_revcomp(char *sequence, int length){
     char *revcomp;
     int i;
+
     /*Find the length of the sequence up to the null terminator if no length
-    is given*/
+      is given*/
     if (length < 0)
         for (length = 0; sequence[length] != '\0'; length++);
-    revcomp = malloc((length+1) * sizeof(*revcomp));
+
+    revcomp = malloc((length+1)*sizeof(*revcomp));
     assert(revcomp);
 
     for (i = 0; i < length; i++)
