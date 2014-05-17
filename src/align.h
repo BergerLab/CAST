@@ -25,10 +25,6 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
                    int32_t dir2, int32_t i2, bool *matches,
                    bool *matches_past_clump, int *matches_index);
 
-int32_t
-cb_align_identity(char *rseq, int32_t rstart, int32_t rend,
-                   char *oseq, int32_t ostart, int32_t oend);
-
 struct cb_align_nw_memory {
     int32_t *table;
     int32_t *zeroes;

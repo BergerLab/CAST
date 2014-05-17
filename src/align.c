@@ -9,11 +9,37 @@
 #include "DNAalphabet.h"
 #include "flags.h"
 
+/*@param rseq, oseq: The coarse and original sequences.
+ *@param rstart, rend, ostart, oend: The starting and ending indices of the
+ *  coarse and original sequences.
+ *@param dir1, dir2: The directions in the coarse and original sequences
+ *  in which we are checking for a match (1 = forward, -1 = reverse).
+ *@param i1, i2: The starting indices to align from in the coarse and original
+ *  sequences.
+ *@param matches: The array keeping track of whether or not previous pairs of
+ *  bases which were compared matched.  Used for detecting bad windows in which
+ *  less than 85% of the past 100 bases matched.
+ *@param matches_past_clump: An array used for keeping track of matches past the
+ *  last clump of matches.
+ *@param matches_index: The current index in the matches array, passed by
+ *  reference.
+ *
+ *@return: Returns an ungapped_alignment struct with the length of the
+ *  alignment and whether or not a bad window was found in the alignment.
+ *
+ *The function used for the ungapped phase of match extension.  The function
+ *iterates through the two sequences passed in, returning when one of the
+ *iterators reaches the end of its sequence, when a bad window is found
+ *between two match clumps (sequences of consec_match_clump_size
+ *(default 4) bases that match), or when more than btwn_match_min_dist_check
+ *(default 10) bases have been scanned since the last match clump with
+ *less than 50% identity in the section scanned since finding the last clump.
+ */
 struct ungapped_alignment
 cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
-                   int32_t i1, char *oseq, int32_t ostart, int32_t oend,
-                   int32_t dir2, int32_t i2, bool *matches,
-                   bool *matches_past_clump, int *matches_index)
+                  int32_t i1, char *oseq, int32_t ostart, int32_t oend,
+                  int32_t dir2, int32_t i2, bool *matches,
+                  bool *matches_past_clump, int *matches_index)
 {
     int32_t i;
     int32_t matches_since_last_consec = 0;
@@ -65,39 +91,18 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
             matches_past_clump[temp_index] = false;
             temp_index++;
             successive = 0;
-            if (scanned - length >= compress_flags.btwn_match_min_dist_check) {
+            if (scanned - length >= compress_flags.btwn_match_min_dist_check)
                 if ((double)matches_since_last_consec < (scanned-length)*0.5) {
                     ungapped.length = length;
                     return ungapped;
                 }
-            }
         }
     }
     ungapped.length = scanned;
     return ungapped;
 }
 
-int32_t
-cb_align_identity(char *rseq, int32_t rstart, int32_t rend,
-                   char *oseq, int32_t ostart, int32_t oend)
-{
-    int32_t rlen, olen, same, i;
-
-    rlen = rend - rstart;
-    olen = oend - ostart;
-    assert(rlen == olen);
-
-    if (rlen == 0 && olen == 0)
-        return 0;
-
-    same = 0;
-    for (i = 0; i < rlen; i++)
-        if (rseq[rstart + i] == oseq[ostart + i])
-            same++;
-
-    return (same * 100) / rlen;
-}
-
+/*Initialization function for creating a cb_align_nw_memory data structure*/
 struct cb_align_nw_memory *
 cb_align_nw_memory_init()
 {
@@ -122,6 +127,7 @@ cb_align_nw_memory_init()
     return mem;
 }
 
+/*Function for freeing a cb_align_nw_memory data structure*/
 void
 cb_align_nw_memory_free(struct cb_align_nw_memory *mem)
 {
@@ -434,16 +440,23 @@ attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
     return progress;
 }
 
-/*Takes in as input an array of bools representing data on whether or not
- *previous pairs of bases matched, an index into that array, the current number
- *of matches, an array of bools to add to the array of matches, and the number
- *of bools to add.  check_and_update adds bools from the temp array to the
- *matches array until it either has added all of the matches or a bad window
- *was found.  If a bad window was found, check_and_update returns false.
- *Otherwise, check_and_update returns true.
+/*@param matches: An array of bools representing data on whether or not
+ *  previous pairs of bases compared matches.
+ *@param matches_index: The current index for the "matches" array, passed
+ *  by reference.
+ *@param num_matches: The current number of matches in the 100 most recent
+ *  bools in the "matches" array.
+ *@param temp: The array of bools to add to the "matches" array.
+ *@param temp_index: The number of bools to add to the "matches" array.
+ *
+ *@return: The number of bools that were added to the "matches" array.
+ *
+ *check_and_update adds bools from the temp array to the matches array until
+ *either it has added all of the matches or a bad window (a window in the
+ *"matches" array where less than 85% of the bools are true) was found.
  */
 int check_and_update(bool *matches, int *matches_index, int *num_matches,
-                                             bool *temp, int temp_index){
+                     bool *temp, int temp_index){
     int i;
     for (i = 0; i < temp_index; i++) {
         int hundred_bases_ago = *matches_index - 100;
