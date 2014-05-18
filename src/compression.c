@@ -152,43 +152,29 @@ struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
              struct cb_align_nw_memory *mem)
 {
-    fprintf(stderr, "Starting compression      %d\n", org_seq->id);
+    /*fprintf(stderr, "Starting compression      %d\n", org_seq->id);*/
     struct extend_match_with_res mseqs_fwd, mseqs_rev;
     struct cb_coarse_seq *coarse_seq;
-    struct cb_compressed_seq *cseq;
+    struct cb_compressed_seq *cseq =
+               cb_compressed_seq_init(org_seq->id, org_seq->name);
     struct cb_seed_loc *seeds, *seeds_r, *seedLoc;
     struct cb_alignment alignment;
+    int32_t seed_size = coarse_db->seeds->seed_size,
+            ext_seed  = compress_flags.ext_seed_size,
+            resind = -1, last_match = 0, current = 0, i = 0,
+            new_coarse_seq_id = -1,
+            min_progress = compress_flags.min_progress,
+            fwd_rlen, rev_rlen, fwd_olen, rev_olen, index,
+            chunks           = 0,
+            max_chunk_size   = compress_flags.max_chunk_size,
+            max_section_size = max_chunk_size * 2,
+            overlap          = compress_flags.overlap,
+            start_of_section = 0,
+            end_of_chunk     = start_of_section + max_chunk_size,
+            end_of_section   = start_of_section + max_section_size;
     char *kmer, *revcomp;
-    int32_t seed_size, ext_seed, resind, mext, new_coarse_seq_id, min_progress;
-    int32_t last_match, current;
-    int32_t fwd_rlen, rev_rlen, fwd_olen, rev_olen;
-    int32_t i;
-    int chunks;
-
-    int32_t max_chunk_size, max_section_size;
-    int32_t overlap;
-
-    int32_t start_of_section, end_of_chunk, end_of_section;
-
-    bool *matches, *matches_temp;
-    bool found_match;
-
-    cseq = cb_compressed_seq_init(org_seq->id, org_seq->name);
-    seed_size = coarse_db->seeds->seed_size;
-    mext = compress_flags.match_extend;
-    ext_seed = compress_flags.ext_seed_size;
-    min_progress = compress_flags.min_progress;
-
-    max_chunk_size = compress_flags.max_chunk_size;
-    max_section_size = 2 * max_chunk_size;
-    overlap = compress_flags.overlap;
-
-    last_match = 0;
-    current = 0;
-    start_of_section = 0;
-    end_of_chunk = start_of_section + max_chunk_size;
-    end_of_section = start_of_section + max_section_size;
-    chunks = 0;
+    bool *matches, *matches_temp,
+         found_match;
 
     /*Initialize the matches and matches_temp arrays*/
     matches = malloc(max_section_size*sizeof(*matches));
@@ -257,12 +243,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                             start_of_section, resind, -1,
                             coarse_seq->seq->residues,
                             coarse_seq->seq->length, 0) +
-                  attempt_ext(current+seed_size-1, 1, org_seq->residues,
-                              end_of_section - start_of_section,
-                              start_of_section, resind+seed_size-1, 1,
-                              coarse_seq->seq->residues,
-                              coarse_seq->seq->length, 0)) >
-                  compress_flags.attempt_ext_len) {
+                 attempt_ext(current+seed_size-1, 1, org_seq->residues,
+                             end_of_section - start_of_section,
+                             start_of_section, resind+seed_size-1, 1,
+                             coarse_seq->seq->residues,
+                             coarse_seq->seq->length, 0)) >
+                 compress_flags.attempt_ext_len) {
                 mseqs_rev = extend_match_with_res(mem,
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length, resind, -1,
@@ -281,6 +267,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 rev_rlen = cb_align_length_nogaps(mseqs_rev.rseq);
                 fwd_olen = cb_align_length_nogaps(mseqs_fwd.oseq);
                 rev_olen = cb_align_length_nogaps(mseqs_rev.oseq);
+
                 /*If the match was too short, try the next seed*/                
                 if (rev_olen+seed_size+fwd_olen-1 < compress_flags.min_match_len) {
                     free(mseqs_fwd.rseq);
@@ -294,7 +281,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
 
                 /*Concatenate the extensions and the k-mer for the coarse
                   sequence*/
-                int index = 0;
+                index = 0;
 
                 alignment.ref = malloc((strlen(mseqs_rev.rseq) + seed_size +
                                         strlen(mseqs_fwd.rseq) + 1) *
@@ -413,12 +400,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                             start_of_section, resind + seed_size - 1, 1,
                             coarse_seq->seq->residues,
                             coarse_seq->seq->length, 0) +
-                  attempt_ext(current+seed_size-1, 1, org_seq->residues, 
-                              end_of_section - start_of_section,
-                              start_of_section, resind, -1,
-                              coarse_seq->seq->residues,
-                              coarse_seq->seq->length, 0)) >
-                  compress_flags.attempt_ext_len) {
+                 attempt_ext(current+seed_size-1, 1, org_seq->residues, 
+                             end_of_section - start_of_section,
+                             start_of_section, resind, -1,
+                             coarse_seq->seq->residues,
+                             coarse_seq->seq->length, 0)) >
+                 compress_flags.attempt_ext_len) {
                 mseqs_rev = extend_match_with_res(mem,
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length, resind, -1,
@@ -451,7 +438,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
 
                 /*Concatenate the extensions and the k-mer's reverse complement
                   for the coarse sequence*/
-                int index = 0;
+                index = 0;
 
                 alignment.ref = malloc((strlen(mseqs_rev.rseq) + seed_size +
                                         strlen(mseqs_fwd.rseq) + 1) *
@@ -593,22 +580,17 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
                 int32_t dir1, char *oseq, int32_t ostart, int32_t oend,
                 int32_t current, int32_t dir2)
 {
+    struct DSVector *rseq_segments = ds_vector_create(),
+                    *oseq_segments = ds_vector_create();
     struct cb_alignment alignment;
     struct extend_match_with_res mseqs;
-    int32_t rlen, olen;
     struct ungapped_alignment ungapped;
-    int32_t m;
-    bool *matches;
-    bool *matches_past_clump;
-    int matches_count;
-    int matches_index;
-    int max_section_size;
-    int i, j;
-    int rseq_len = 0, oseq_len = 0;
+    int32_t rlen, olen, i, j, m,
+            matches_count, matches_index, max_section_size,
+            rseq_len = 0, oseq_len = 0,
+            dir_prod = dir1 * dir2;
+    bool *matches, *matches_past_clump;
     bool found_bad_window;
-    struct DSVector *rseq_segments = ds_vector_create();
-    struct DSVector *oseq_segments = ds_vector_create();
-    int dir_prod = dir1 * dir2;
 
     max_section_size = 2 * compress_flags.max_chunk_size;
 
@@ -636,6 +618,7 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
     mseqs.olen = 0;
     mseqs.rseq = "";
     mseqs.oseq = "";
+
     while (true) {
         int dp_len1, dp_len2, i, r_align_len, o_align_len;
         char *r_segment, *o_segment;
@@ -725,8 +708,8 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
 
     /*Copy each segment into the overall extension.*/
     for (i = 0; i < rseq_segments->size; i++) {
-        char *r_segment = (char *)ds_vector_get(rseq_segments, i);
-        char *o_segment = (char *)ds_vector_get(oseq_segments, i);
+        char *r_segment = (char *)ds_vector_get(rseq_segments, i),
+             *o_segment = (char *)ds_vector_get(oseq_segments, i);
         for (j = 0; r_segment[j] != '\0'; j++)
             mseqs.rseq[rseq_len++] = r_segment[j];
         for (j = 0; o_segment[j] != '\0'; j++)
@@ -765,7 +748,7 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
     return mseqs;
 }
 
-struct extend_match
+/*struct extend_match
 extend_match(struct cb_align_nw_memory *mem,
              char *rseq, int32_t rstart, int32_t rend, int32_t resind,
              int32_t dir1, char *oseq, int32_t ostart, int32_t oend,
@@ -786,7 +769,7 @@ extend_match(struct cb_align_nw_memory *mem,
 
     max_section_size = 2 * compress_flags.max_chunk_size;
 
-    /*Initialize the matches and matches_past_clump arrays.*/
+    /*Initialize the matches and matches_past_clump arrays.*//*
     matches = malloc(2*compress_flags.max_chunk_size*sizeof(*matches));
     assert(matches);
 
@@ -815,7 +798,7 @@ extend_match(struct cb_align_nw_memory *mem,
             break;
 
         /*Get the maximum length for ungapped alignment and extend the match
-          by that distance.*/
+          by that distance.*//*
         ungapped = cb_align_ungapped(rseq, rstart, rend, dir1, resind,
                                oseq, ostart, oend, dir2, current,
                                matches, matches_past_clump, &matches_index);
@@ -826,12 +809,12 @@ extend_match(struct cb_align_nw_memory *mem,
         resind += m * dir1;
         current += m * dir2;
 
-        /*End the extension if we found a bad window in ungapped alignment.*/
+        /*End the extension if we found a bad window in ungapped alignment.*//*
         if (found_bad_window)
             break;
 
         /*Carry out Needleman-Wunsch alignment and end the extension if we
-          found a bad window or couldn't find a 4-mer match in the alignment.*/
+          found a bad window or couldn't find a 4-mer match in the alignment.*//*
         dp_len1 = max_dp_len(resind-rstart, dir1, rend-rstart);
         dp_len2 = max_dp_len(current-ostart, dir2, oend-ostart);
 
@@ -845,7 +828,7 @@ extend_match(struct cb_align_nw_memory *mem,
         matches_count = 0;
 
         /*Check for a bad window manually and end the extension if a bad
-          window is found.*/
+          window is found.*//*
         for (i = matches_index - 100; i < matches_index; i++)
             if (matches[i])
                 matches_count++;
@@ -856,7 +839,7 @@ extend_match(struct cb_align_nw_memory *mem,
         o_align_len = cb_align_length_nogaps(alignment.org);
 
         /*Update the lengths of the alignments and the indices of the
-          sequences.*/
+          sequences.*//*
         mlens.rlen += r_align_len;
         mlens.olen += o_align_len;
         resind += r_align_len * dir1;
@@ -867,14 +850,14 @@ extend_match(struct cb_align_nw_memory *mem,
     free(matches);
     free(matches_past_clump);
     return mlens;
-}
+}*/
 
 /*Creates a new coarse sequence for a section of the original DNA sequence that
  *does not have a match, such as if the maximum chunk length was traversed in
  *the sequence without finding a match or if there is any DNA in the sequence
  *before the latest match that isn't part of the match.
  *
- *In addition to creating a new coarse sequence, add_without_match also adda a
+ *In addition to creating a new coarse sequence, add_without_match also adds a
  *a link to the sequence being compressed to the new coarse sequence.
  */
 static int32_t
