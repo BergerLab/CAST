@@ -21,9 +21,9 @@ cb_seq_init_range(int32_t id, char *name, char *residues,
     seq = malloc(sizeof(*seq));
     assert(seq);
 
-    seq->id = id;
-    seq->length = end - start;
-    seq->name = NULL;
+    seq->id       = id;
+    seq->length   = end - start;
+    seq->name     = NULL;
     seq->residues = NULL;
 
     assert(seq->length > 0);

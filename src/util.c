@@ -16,11 +16,11 @@ trim_space(char *s)
 char *
 trim(char *s, const char *totrim)
 {
-    int32_t i, j;
-    int32_t start, end;
-    int32_t slen, totrimlen, newlen;
-    bool trimmed;
+    int32_t i, j,
+             start, end,
+             slen, totrimlen, newlen;
     char *news;
+    bool trimmed;
 
     slen = strlen(s);
     totrimlen = strlen(totrim);
@@ -65,8 +65,8 @@ trim(char *s, const char *totrim)
 int32_t
 readline(FILE *f, char **line)
 {
-    char buf[1024];
     int32_t allocated;
+    char buf[1024];
 
     allocated = 1; /* for \0 */
 
@@ -103,8 +103,8 @@ num_cpus()
 char *
 str_slice(char *str, int32_t start, int32_t end)
 {
-    char *ret;
     int32_t len;
+    char *ret;
 
     len = strlen(str);
 
