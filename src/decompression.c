@@ -18,23 +18,18 @@
   a struct cb_seq.*/
 struct cb_seq *cb_decompress_seq(struct cb_compressed_seq *cseq,
                                    struct cb_coarse *coarsedb){
-    uint64_t last_end = 0;
-    int overlap;
+    struct DSVector *decompressed_chunks = ds_vector_create();
     struct cb_link_to_coarse *link = NULL;
     struct cb_seq *seq = NULL;
-    int decompressed_length = 0;
-    int i = 0;
-    int j = 0;
-    int copied = 0;
-    struct DSVector *decompressed_chunks = ds_vector_create();
+    uint64_t last_end = 0;
+    int32_t overlap, decompressed_length = 0, i = 0, j = 0, copied = 0;
     char *residues = NULL;
+
     for (link = cseq->links; link != NULL; link = link->next) {
-        int length;
-        char *dec_chunk;
         struct fasta_seq *chunk = cb_coarse_read_fasta_seq(coarsedb,
                                                            link->coarse_seq_id);
-
-        int coarse_len = link->coarse_end - link->coarse_start;
+        int length, coarse_len = link->coarse_end - link->coarse_start;
+        char *dec_chunk;
 
         char *coarse_sub = malloc((coarse_len+1)*sizeof(*coarse_sub));
         assert(coarse_sub);
@@ -105,24 +100,21 @@ struct DSVector *
 cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
                   int32_t id, int32_t hit_from, int32_t hit_to,
                   int32_t hit_pad_length){
-    FILE *links = coarsedb->file_links;
-    FILE *coarse_links_index = coarsedb->file_links_index;
-    FILE *fasta = coarsedb->file_fasta;
-    FILE *compressed = comdb->file_compressed;
-
-    struct DSVector *oseqs = ds_vector_create();
+    FILE *links = coarsedb->file_links,
+         *coarse_links_index = coarsedb->file_links_index,
+         *fasta = coarsedb->file_fasta,
+         *compressed = comdb->file_compressed;
+    struct DSVector *oseqs = ds_vector_create(), *coarse_seq_links;
+    struct fasta_seq *residues = cb_coarse_read_fasta_seq(coarsedb, id);
+    int64_t *seq_lengths = cb_compressed_get_lengths(comdb);
+    int32_t fasta_length = strlen(residues->seq), i = 0, j = 0;
 
     /*Get all links_to_compressed for the coarse sequence we are expanding.*/
-    struct DSVector *coarse_seq_links =
+    coarse_seq_links =
         get_coarse_sequence_links_at(links, coarse_links_index, id);
 
     /*Get the residues of the coarse sequence we are expanding.*/
-    struct fasta_seq *residues = cb_coarse_read_fasta_seq(coarsedb, id);
 
-    int fasta_length = strlen(residues->seq);
-    int64_t *seq_lengths = cb_compressed_get_lengths(comdb);
-
-    int i = 0, j = 0;
     for (i = 0; i < coarse_seq_links->size; i++) {
         struct cb_link_to_compressed *link =
             (struct cb_link_to_compressed *)ds_vector_get(coarse_seq_links, i);
@@ -131,11 +123,15 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
           are expanding from.*/
         if (link->coarse_start <= hit_to && link->coarse_end >= hit_from) {
             struct cb_link_to_coarse *current = NULL;
+            struct cb_compressed_seq *seq;
+            struct cb_hit_expansion *expansion;
+            uint64_t original_start, original_end;
+            char *orig_str;
             bool dir = link->dir;
 
             /*Calculate the range in the original sequence for the section of
               the original sequence we want to re-create with this expansion.*/
-            uint64_t original_start =
+            original_start =
                 get_max(0, (dir ?
                             get_min(hit_from + (link->original_start -
                                                 link->coarse_start),
@@ -146,22 +142,21 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
                                     link->original_end -
                                     (hit_to-link->coarse_start)))
                              - hit_pad_length);
-            uint64_t original_end =
+            original_end =
                 get_min((dir ? get_max(hit_to + (link->original_start -
-                                              link->coarse_start),
+                                                 link->coarse_start),
                                        hit_to + (link->original_end -
-                                              link->coarse_end)) :
+                                                 link->coarse_end)) :
                                get_max(link->original_end -
                                        (hit_from-link->coarse_start),
                                        link->original_start +
                                        link->coarse_end-hit_from))
-                        + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
+                         + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
 
-            struct cb_compressed_seq *seq =
-                       cb_compressed_read_seq_at(comdb, link->org_seq_id);
+            seq = cb_compressed_read_seq_at(comdb, link->org_seq_id);
 
-            char *orig_str = malloc((original_end-original_start+2) *
-                                    sizeof(*orig_str));
+            orig_str = malloc((original_end-original_start+2) *
+                              sizeof(*orig_str));
             assert(orig_str);
 
             for (j = 0; j < original_end-original_start+1; orig_str[j++]='?');
@@ -174,8 +169,8 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
                                     original_start, coarsedb, current);
             orig_str[original_end-original_start+1] = '\0';
 
-printf("%s\n", orig_str);
-            struct cb_hit_expansion *expansion = malloc(sizeof(*expansion));
+/*printf("%s\n", orig_str);*/
+            expansion = malloc(sizeof(*expansion));
             assert(expansion);
 
             expansion->offset = (int64_t)original_start;
