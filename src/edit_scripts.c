@@ -70,10 +70,9 @@ char half_byte_to_char(char h){
 
 /*Converts the ASCII string for an edit script to half-byte format*/
 char *edit_script_to_half_bytes(char *edit_script){
-    int i = 0;
-    int length = 0;
-    int odd;
+    int i = 0, length = 0, odd;
     char *half_bytes;
+
     while (edit_script[length] != '\0')
         length++;
     odd = length % 2;
@@ -141,13 +140,10 @@ char *half_bytes_to_ASCII(char *half_bytes, int length){
 char *make_edit_script(char *str, char *ref, bool dir, int length){
     /*direction has its first bit set to 1 to indicate that the edit script
       was made from a match*/
+    int last_edit = 0, current = 1, i, j;
+    char *edit_script, *octal,
+         direction = (dir ? '0' : '1');
     bool insert_open = false, subdel_open = false;
-    int last_edit = 0;
-    char *edit_script;
-    int current = 1;
-    int i, j;
-    char *octal;
-    char direction = (dir ? '0' : '1');
 
     edit_script = malloc(3*length*sizeof(*edit_script));
     assert(edit_script);
@@ -205,8 +201,8 @@ char *make_edit_script(char *str, char *ref, bool dir, int length){
  *the edit and returns true.  Otherwise, next_edit returns false.
  */
 bool next_edit(char *edit_script, int *pos, struct edit_info *edit){
-    int edit_length = 0;
-    int i = 0;
+    int edit_length = 0, i = 0;
+
     if (isdigit(edit_script[(*pos)]) || edit_script[(*pos)] == '\0')
         return false;
     edit->is_subdel = edit_script[(*pos)++] == 's';
@@ -235,14 +231,10 @@ bool next_edit(char *edit_script, int *pos, struct edit_info *edit){
  *produce a new sequence.
  */
 char *read_edit_script(char *edit_script, char *orig, int length){
-    char *str;
-    int i;
     struct edit_info edit;
-    int orig_pos = 0, last_edit_str_len = 0; /*length of last edit str*/
-    int current = 0;
-    int script_pos = 1;
+    int i, orig_pos = 0, last_edit_str_len = 0, current = 0, script_pos = 1;
 
-    str = malloc((2*length+1)*sizeof(*str));
+    char *str = malloc((2*length+1)*sizeof(*str));
     assert(str);
 
     while (next_edit(edit_script, &script_pos, &edit)) {
@@ -290,22 +282,17 @@ char *read_edit_script(char *edit_script, char *orig, int length){
 void decode_edit_script(char *orig, int dest_len, int dest0_coord,
                         struct cb_coarse *coarsedb,
                         struct cb_link_to_coarse *link){
-    int i = 0, i0 = 0, i1 = 0;
-    char *diff = link->diff;
     struct fasta_seq *sequence = cb_coarse_read_fasta_seq(coarsedb,
                                           link->coarse_seq_id);
-    int coarse_pos;
-    int last_edit_str_len;
     struct edit_info *edit = NULL;
-    int script_pos;
-
-    char *residues = sequence->seq;
-
+    int i = 0, i0 = 0, i1 = 0, coarse_pos, last_edit_str_len, script_pos;
+    char *diff = link->diff, *residues = sequence->seq;
     bool fwd = (diff[0] & ((char)0x7f)) == '0';
+
     /*The link represents an exact match so there are no edits to make*/
     if (diff[1] == '\0' && fwd) {
-        int starting_i0 = -1;
-        int last_i0 = -1;
+        int starting_i0 = -1, last_i0 = -1;
+
         i0 = link->original_start-dest0_coord;
         for (i1 = link->coarse_start; i1 < link->coarse_end; i0++, i1++)
             if (0 <= i0 && i0 < dest_len) {
@@ -331,9 +318,8 @@ void decode_edit_script(char *orig, int dest_len, int dest0_coord,
     if (fwd) {
         i0 = link->original_start - dest0_coord;
         while (next_edit(diff, &script_pos, edit)) {
-            int x = 0;
-            int xmin = -i0;
-            int xmax = dest_len - i0;
+            int x = 0, xmin = -i0, xmax = dest_len - i0;
+
             for (x = maximum(0, xmin);
                  x < minimum(edit->last_dist-last_edit_str_len, xmax); x++)
                 orig[i0+x] = residues[x+coarse_pos];
@@ -360,9 +346,8 @@ void decode_edit_script(char *orig, int dest_len, int dest0_coord,
     else {
         i0 = link->original_end - dest0_coord;
         while (next_edit(diff, &script_pos, edit)) {
-            int x = 0;
-            int xmin = i0 - dest_len + 1;
-            int xmax = i0 + 1;
+            int x = 0, xmin = i0 - dest_len + 1, xmax = i0 + 1;
+
             for (x = maximum(0, xmin);
                  x < minimum(edit->last_dist-last_edit_str_len, xmax); x++)
                 orig[i0-x] = base_complement(residues[x+coarse_pos]);
@@ -404,10 +389,9 @@ void decode_edit_script(char *orig, int dest_len, int dest0_coord,
 /*Takes in as input a string and returns a copy of the string with the '-'
   characters removed*/
 char *no_dashes(char *sequence){
-    int length;
-    int bases = 0;
-    int i = 0, j = 0;
+    int length, bases = 0, i = 0, j = 0;
     char *n;
+
     /*Get the length of the final string*/
     for (length = 0; sequence[length] != '\0'; length++)
         if (sequence[length] != '-')
