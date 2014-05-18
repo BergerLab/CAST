@@ -4,11 +4,9 @@
 #include "progress-bar.h"
 
 char *progress_bar(int current, int full){
-    char *bar;
-    int bars = (int)(((float)(current+1)/full)*50);
-    int b = 0;
+    int bars = (int)(((float)(current+1)/full)*50), b = 0;
 
-    bar = malloc(53*sizeof(*bar));
+    char *bar = malloc(53*sizeof(*bar));
     assert(bar);
 
     bar[0] = '[';

@@ -41,8 +41,7 @@ struct cb_seeds *
 cb_seeds_init(int32_t seed_size)
 {
     struct cb_seeds *seeds;
-    int32_t errno;
-    int32_t i, p;
+    int32_t errno, i, p;
 
     seeds = malloc(sizeof(*seeds));
     assert(seeds);
@@ -77,8 +76,7 @@ cb_seeds_init(int32_t seed_size)
 
 void
 cb_seeds_free(struct cb_seeds *seeds) {
-    int32_t errno;
-    int32_t i;
+    int32_t errno, i;
 
     if (0 != (errno = pthread_rwlock_destroy(&seeds->lock))) {
         fprintf(stderr, "Could not destroy rwlock. Errno: %d\n", errno);
@@ -94,9 +92,9 @@ cb_seeds_free(struct cb_seeds *seeds) {
 void
 cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq)
 {
-    char *kmer;
-    int32_t hash, i;
     struct cb_seed_loc *sl1, *sl2;
+    int32_t hash, i;
+    char *kmer;
 
     pthread_rwlock_wrlock(&seeds->lock);
 
@@ -195,11 +193,10 @@ static int32_t hash_kmer(struct cb_seeds *seeds, char *kmer)
 /*Convert an integer to the k-mer that it represents.  Currently only works for
   size k = 10*/
 char *unhash_kmer(struct cb_seeds *seeds, int hash){
-    char *kmer;
     int i;
     char nucleotides[4] = {'A','C','G','T'};
 
-    kmer = malloc(11*sizeof(*kmer));
+    char *kmer = malloc(11*sizeof(*kmer));
     assert(kmer);
 
     kmer[10] = '\0';
@@ -218,16 +215,16 @@ void print_seeds(struct cb_seeds *seeds){
     assert(kmer);
 
     for (i = 0; i < seeds->locs_length; i++) {
-        printf("%s\n", kmer);
+        struct cb_seed_loc *s = seeds->locs[i];
         uint32_t new_kmer = (uint32_t)0;
+        char *kmer = unhash_kmer(seeds, i);
+        printf("%s\n", kmer);
         for (j = 0; j < seeds->seed_size; j++) {
             new_kmer <<= 2;
             new_kmer |= ((i >> (2*j)) & ((uint32_t)3));
         }
-        char *kmer = unhash_kmer(seeds, i);
         printf("%s\n", kmer);
         free(kmer);
-        struct cb_seed_loc *s = seeds->locs[i];
         while (s) {
             printf("(%d %d) > ", s->coarse_seq_id, s->residue_index);
             s = s->next;
