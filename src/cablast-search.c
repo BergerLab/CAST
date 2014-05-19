@@ -388,8 +388,7 @@ main(int argc, char **argv)
                                 current_hsp->hit_from + offset - 1;
                             int32_t hit_to =
                                 current_hsp->hit_to + offset - 1;
-                            fprintf(test_hits_file, "hit: %d-%d\n", hit_from,
-                                                                     hit_to);
+                            fprintf(test_hits_file, "hit from query %d: %d-%d\n", i, hit_from, hit_to);
                         }
                     }
                 }
