@@ -51,7 +51,7 @@ void blast_coarse(struct opt_args *args, uint64_t dbsize){
 
     sprintf(blastn,"blastn -db %s -outfmt 5 -query %s -dbsize %lu -task blastn"
                    " -evalue %s > CaBLAST_temp_blast_results.xml",
-           input_path, args->args[1], dbsize, search_flags.coarse_evalue);
+            input_path, args->args[1], dbsize, search_flags.coarse_evalue);
     fprintf(stderr, "%s\n", blastn);
     system(blastn);
 
@@ -84,7 +84,7 @@ void blast_fine(char *subject, uint64_t dbsize, struct fasta_seq *query){
             "blastn -subject %s -query CaBLAST_fine_query.fasta -dbsize %lu "
             "-task blastn -outfmt 5 -evalue 1e-30 > CaBLAST_results.xml",
             subject, dbsize);
-    fprintf(stderr, "%s\n", blastn);
+    /*fprintf(stderr, "%s\n", blastn);*/
     system(blastn); /*Run fine BLAST*/
 
     free(blastn);
@@ -209,7 +209,6 @@ struct DSVector *get_blast_iterations(xmlNode *node){
 void write_fine_fasta(struct DSVector *oseqs){
     FILE *temp = fopen("CaBLAST_fine.fasta", "w");
     int i;
-
     if (!temp) {
         fprintf(stderr, "Could not open CaBLAST_fine.fasta for writing\n");
         return;
@@ -262,11 +261,10 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
                     *hits = get_blast_hits((xmlNode *)
                                 ds_vector_get(iterations, index));
     int i = 0, j = 0, k = 0;
-    fprintf(stderr, "iteration: %d/%d\n", index+1, iterations->size);
+
     for (i = 0; i < hits->size; i++) {
         struct hit *current_hit = (struct hit *)ds_vector_get(hits, i);
         struct DSVector *hsps = current_hit->hsps;
-        fprintf(stderr, "    hit: %d/%d\n", i+1, hits->size);
         for (j = 0; j < hsps->size; j++) {
             struct DSVector *oseqs;
             struct hsp *h = (struct hsp *)ds_vector_get(hsps, j);
@@ -276,7 +274,6 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
 
             oseqs = cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
                                      coarse_start, coarse_end, 50);
-            fprintf(stderr, "        Hsp: %d/%d\n", j+1, hsps->size);
             for (k = 0; k < oseqs->size; k++)
                 ds_vector_append(expanded_hits, ds_vector_get(oseqs, k));
             ds_vector_free_no_data(oseqs);
@@ -293,7 +290,6 @@ int
 main(int argc, char **argv)
 {
     FILE *query_file = NULL, *test_hits_file = NULL;
-    uint64_t dbsize = 0;
     struct cb_database *db = NULL;
     struct opt_config *conf;
     struct opt_args *args;
@@ -301,6 +297,7 @@ main(int argc, char **argv)
     struct fasta_seq *query = NULL;
     xmlDoc *doc = NULL;
     xmlNode *root = NULL;
+    uint64_t dbsize = 0;
     int i = 0, j = 0, k = 0, l = 0;
 
     conf = load_search_args();
@@ -317,7 +314,17 @@ main(int argc, char **argv)
 
     db = cb_database_read(args->args[0], search_flags.map_seed_size);
     dbsize = read_int_from_file(8, db->coarse_db->file_params);
+/***************************************************************/
+/***************************************************************/
+/***************************************************************/
+/***************************************************************/
+/***************************************************************/
     blast_coarse(args, dbsize);
+/***************************************************************/
+/***************************************************************/
+/***************************************************************/
+/***************************************************************/
+/***************************************************************/
     query_file = fopen(args->args[1], "r");
 
     queries = ds_vector_create();

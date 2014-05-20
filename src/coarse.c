@@ -135,7 +135,7 @@ cb_coarse_save_binary(struct cb_coarse *coarse_db)
         output_int_to_file(coarse_fasta_loc, 8, coarse_db->file_fasta_index);
 
         /*Output the FASTA sequence to the coarse FASTA file*/
-        sprintf(fasta_output, "> %ld\n%s\n", i, seq->seq->residues);
+        sprintf(fasta_output, ">%ld\n%s\n", i, seq->seq->residues);
         for(j = 0; fasta_output[j] != '\0'; j++)
             putc(fasta_output[j], coarse_db->file_fasta);
 

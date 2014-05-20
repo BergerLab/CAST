@@ -114,7 +114,6 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
         get_coarse_sequence_links_at(links, coarse_links_index, id);
 
     /*Get the residues of the coarse sequence we are expanding.*/
-
     for (i = 0; i < coarse_seq_links->size; i++) {
         struct cb_link_to_compressed *link =
             (struct cb_link_to_compressed *)ds_vector_get(coarse_seq_links, i);
@@ -125,7 +124,7 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
             struct cb_link_to_coarse *current = NULL;
             struct cb_compressed_seq *seq;
             struct cb_hit_expansion *expansion;
-            uint64_t original_start, original_end;
+            uint64_t original_start, original_end, original_range;
             char *orig_str;
             bool dir = link->dir;
 
@@ -152,6 +151,7 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
                                        link->original_start +
                                        link->coarse_end-hit_from))
                          + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
+            original_range = original_end - original_start + 1;
 
             seq = cb_compressed_read_seq_at(comdb, link->org_seq_id);
 
@@ -164,9 +164,15 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
             /*Run decode_edit_script for each link_to_coarse in the compressed
               sequence to re-create the section of the original string.*/ 
             current = seq->links;
-            for (; current; current = current->next)
-                decode_edit_script(orig_str, original_end-original_start+1,
-                                    original_start, coarsedb, current);
+            for (; current; current = current->next) {
+                int coarse_range = current->coarse_end - current->coarse_start,
+                    init_i0 = current->original_start-(int32_t)original_start,
+                    last_i0 = init_i0 + coarse_range;
+
+                if (0 < last_i0 && (int32_t)original_range > init_i0)
+                    decode_edit_script(orig_str, original_end-original_start+1,
+                                        original_start, coarsedb, current);
+            }
             orig_str[original_end-original_start+1] = '\0';
 
 /*printf("%s\n", orig_str);*/
