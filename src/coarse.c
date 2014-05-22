@@ -6,6 +6,7 @@
 #include "bitpack.h"
 #include "coarse.h"
 #include "DNAutils.h"
+#include "fasta.h"
 #include "seeds.h"
 #include "seq.h"
 
@@ -26,14 +27,15 @@ cb_coarse_init(int32_t seed_size,
     coarse_db->seqs = ds_vector_create_capacity(10000000);
     coarse_db->seeds = cb_seeds_init(seed_size);
     coarse_db->dbsize = (uint64_t)0;
+    coarse_db->all_residues = NULL;
 
     /*Initialize the file pointers*/
-    coarse_db->file_fasta = file_fasta;
-    coarse_db->file_seeds = file_seeds;
-    coarse_db->file_links = file_links;
+    coarse_db->file_fasta       = file_fasta;
+    coarse_db->file_seeds       = file_seeds;
+    coarse_db->file_links       = file_links;
     coarse_db->file_fasta_index = file_fasta_index;
     coarse_db->file_links_index = file_links_index;
-    coarse_db->file_params = file_params;
+    coarse_db->file_params      = file_params;
 
     if (0 != (errno = pthread_rwlock_init(&coarse_db->lock_seq, NULL))) {
         fprintf(stderr, "Could not create rwlock. Errno: %d\n", errno);
@@ -68,6 +70,10 @@ cb_coarse_free(struct cb_coarse *coarse_db)
 
     ds_vector_free_no_data(coarse_db->seqs);
     cb_seeds_free(coarse_db->seeds);
+
+    /*if (coarse_db->all_residues != NULL)
+        free(coarse_db->all_residues);*/
+
     free(coarse_db);
 }
 
@@ -113,7 +119,7 @@ cb_coarse_save_binary(struct cb_coarse *coarse_db)
     int64_t i;
     /*Keeps track of the index to be printed to coarse.links.index*/
     uint64_t index = (uint64_t)0;
-    int16_t mask = (((int16_t)1)<<8)-1;
+    int16_t mask = (int16_t)0xff;
     int j;
 
     for (i = 0; i < coarse_db->seqs->size; i++) {
@@ -158,7 +164,7 @@ cb_coarse_save_binary(struct cb_coarse *coarse_db)
               characters.*/
             int16_t coarse_start = (int16_t)link->coarse_start,
                     coarse_end   = (int16_t)link->coarse_end;
-            char *id_bytes = read_int_to_bytes(link->org_seq_id, 8),
+            char *id_bytes          = read_int_to_bytes(link->org_seq_id, 8),
                  coarse_start_left  = (coarse_start >> 8) & mask,
                  coarse_start_right = coarse_start & mask,
                  coarse_end_left    = (coarse_end >> 8) & mask,
@@ -285,6 +291,45 @@ cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db)
     }
 }
 
+/*Loads all of the residues in the coarse database's FASTA file into the coarse
+  database's all_residues string*/
+void cb_coarse_get_all_residues(struct cb_coarse *coarse_db){
+    struct DSVector *fasta_seqs = ds_vector_create();
+    int32_t num_fasta_entries = 0, num_bases = 0,
+            i = 0, j = 0, bases_copied = 0;
+
+    bool fseek_success = fseek(coarse_db->file_fasta_index, 0, SEEK_END) == 0;
+    if (!fseek_success)
+        fprintf(stderr, "Error in seeking to end of FASTA index file\n");
+
+    num_fasta_entries = (ftell(coarse_db->file_fasta_index)-1)/8;
+
+    for (i = 0; i < num_fasta_entries; i++) {
+        struct fasta_seq *current_seq = cb_coarse_read_fasta_seq(coarse_db, i);
+        if (!current_seq)
+            fprintf(stderr, "Error getting FASTA sequence #%d in "
+                            "cb_coarse_get_all_residues\n", i);
+        ds_vector_append(fasta_seqs, (void *)current_seq);
+        num_bases += strlen(current_seq->seq);
+    }
+
+    coarse_db->all_residues =
+        malloc(num_bases*sizeof(*(coarse_db->all_residues)));
+    assert(coarse_db->all_residues);
+
+    for (i = 0; i < num_fasta_entries; i++) {
+        struct fasta_seq *sequence =
+            (struct fasta_seq *)ds_vector_get(fasta_seqs, i);
+        for (j = 0; j < strlen(sequence->seq); j++) {
+            coarse_db->all_residues[bases_copied++] = sequence->seq[j];
+        }
+        fasta_free_seq(sequence);
+    }
+    coarse_db->all_residues[num_bases] = '\0';
+    ds_vector_free_no_data(fasta_seqs);
+}
+
+
 struct cb_coarse_seq *
 cb_coarse_seq_init(int32_t id, char *residues, int32_t start, int32_t end)
 {
@@ -347,8 +392,8 @@ cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
 
 struct cb_link_to_compressed *
 cb_link_to_compressed_init(int32_t org_seq_id, int16_t coarse_start,
-                            int16_t coarse_end, uint64_t original_start,
-                            uint64_t original_end, bool dir)
+                           int16_t coarse_end, uint64_t original_start,
+                           uint64_t original_end, bool dir)
 {
     struct cb_link_to_compressed *link;
 

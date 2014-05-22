@@ -44,6 +44,7 @@ struct cb_coarse {
     struct DSVector *seqs;
     struct cb_seeds *seeds;
     uint64_t dbsize;
+    char *all_residues;
     FILE *file_fasta;
     FILE *file_seeds;
     FILE *file_links;
@@ -81,6 +82,7 @@ cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db);
 void
 cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db);
 
+void cb_coarse_get_all_residues(struct cb_coarse *coarse_db);
 
 char *get_coarse_header(FILE *f);
 struct cb_link_to_compressed *read_coarse_link(FILE *f);

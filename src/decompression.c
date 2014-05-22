@@ -140,7 +140,7 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
                                     link->coarse_end - hit_to,
                                     link->original_end -
                                     (hit_to-link->coarse_start)))
-                             - hit_pad_length);
+                            - hit_pad_length);
             original_end =
                 get_min((dir ? get_max(hit_to + (link->original_start -
                                                  link->coarse_start),
