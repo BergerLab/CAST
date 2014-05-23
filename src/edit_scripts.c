@@ -279,7 +279,7 @@ char *read_edit_script(char *edit_script, char *orig, int length){
  *link_to_coarse we want to apply and applies the link to re-create part of or
  *all of the section of the original sequence.
  */
-void decode_edit_script(char *orig, int dest_len, int dest0_coord,
+void decode_edit_script(char *orig, int dest_len, int original_start,
                         struct cb_coarse *coarsedb,
                         struct cb_link_to_coarse *link){
     struct fasta_seq *sequence = cb_coarse_read_fasta_seq(coarsedb,
@@ -293,7 +293,7 @@ void decode_edit_script(char *orig, int dest_len, int dest0_coord,
     if (diff[1] == '\0' && fwd) {
         int starting_i0 = -1, last_i0 = -1;
 
-        i0 = link->original_start-dest0_coord;
+        i0 = link->original_start - original_start;
         for (i1 = link->coarse_start; i1 < link->coarse_end; i0++, i1++)
             if (0 <= i0 && i0 < dest_len) {
                 starting_i0 = (starting_i0 == -1 ? i0 : starting_i0);
@@ -316,7 +316,7 @@ void decode_edit_script(char *orig, int dest_len, int dest0_coord,
 
     /*We are decompressing a link from a forward match*/
     if (fwd) {
-        i0 = link->original_start - dest0_coord;
+        i0 = link->original_start - original_start;
         while (next_edit(diff, &script_pos, edit)) {
             int x = 0, xmin = -i0, xmax = dest_len - i0;
 
@@ -344,7 +344,7 @@ void decode_edit_script(char *orig, int dest_len, int dest0_coord,
         }
     }
     else {
-        i0 = link->original_end - dest0_coord;
+        i0 = link->original_end - original_start;
         while (next_edit(diff, &script_pos, edit)) {
             int x = 0, xmin = i0 - dest_len + 1, xmax = i0 + 1;
 
@@ -378,7 +378,7 @@ void decode_edit_script(char *orig, int dest_len, int dest0_coord,
         int dir = fwd ? 1 : -1;
         for (i1 = coarse_pos; i1 <= link->coarse_end; i1++) {
             if (0 <= i0 && i0 < dest_len)
-                orig[i0] = fwd ? residues[i1]:base_complement(residues[i1]);
+                orig[i0] = fwd ? residues[i1] : base_complement(residues[i1]);
             i0 += dir;
         }
     }

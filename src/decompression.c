@@ -171,7 +171,7 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
 
                 if (0 < last_i0 && (int32_t)original_range > init_i0)
                     decode_edit_script(orig_str, original_end-original_start+1,
-                                        original_start, coarsedb, current);
+                                       original_start, coarsedb, current);
             }
             orig_str[original_end-original_start+1] = '\0';
 
