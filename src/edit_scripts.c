@@ -4,10 +4,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "coarse.h"
 #include "DNAutils.h"
 #include "edit_scripts.h"
-#include "fasta.h"
 
 int minimum(int a, int b){return a<b?a:b;}
 int maximum(int a, int b){return a>b?a:b;}

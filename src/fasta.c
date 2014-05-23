@@ -57,6 +57,17 @@ fasta_read_all(const char *file_name, const char *exclude)
     return ff;
 }
 
+void
+fasta_free_all(struct fasta_file *ff)
+{
+    int i;
+
+    for (i = 0; i < ff->length; i++)
+        fasta_free_seq(ff->seqs[i]);
+    free(ff->seqs);
+    free(ff);
+}
+
 struct fasta_seq *
 fasta_read_next(FILE *f, const char *exclude)
 {
@@ -108,17 +119,6 @@ fasta_read_next(FILE *f, const char *exclude)
     }
 
     return fs;
-}
-
-void
-fasta_free_all(struct fasta_file *ff)
-{
-    int i;
-
-    for (i = 0; i < ff->length; i++)
-        fasta_free_seq(ff->seqs[i]);
-    free(ff->seqs);
-    free(ff);
 }
 
 void

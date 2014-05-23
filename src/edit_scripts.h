@@ -1,8 +1,6 @@
 #ifndef __CABLAST_EDITSCRIPTS_H__
 #define __CABLAST_EDITSCRIPTS_H__
 
-#include "coarse.h"
-
 struct edit_info {
     bool is_subdel;
     int last_dist;

@@ -17,10 +17,24 @@ struct fasta_file {
     int32_t length;
 };
 
+struct fasta_file *
+fasta_read_all(const char *file_name, const char *exclude);
+
+void
+fasta_free_all(struct fasta_file *ff);
+
+
 struct fasta_seq {
     char *name;
     char *seq;
 };
+
+struct fasta_seq *
+fasta_read_next(FILE *f, const char *exclude);
+
+void
+fasta_free_seq(struct fasta_seq *seq);
+
 
 struct fasta_seq_gen {
     pthread_t thread;
@@ -28,18 +42,6 @@ struct fasta_seq_gen {
     struct DSQueue *seqs;
     const char *exclude;
 };
-
-struct fasta_file *
-fasta_read_all(const char *file_name, const char *exclude);
-
-struct fasta_seq *
-fasta_read_next(FILE *f, const char *exclude);
-
-void
-fasta_free_all(struct fasta_file *ff);
-
-void
-fasta_free_seq(struct fasta_seq *seq);
 
 struct fasta_seq_gen *
 fasta_generator_start(const char *file_name, const char *exclude,
