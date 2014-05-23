@@ -56,9 +56,9 @@ struct cb_coarse {
 
 struct cb_coarse *
 cb_coarse_init(int32_t seed_size,
-                FILE *file_fasta, FILE *file_seeds, FILE *file_links,
-                FILE *file_links_index, FILE *file_fasta_index,
-                FILE *file_params);
+               FILE *file_fasta, FILE *file_seeds, FILE *file_links,
+               FILE *file_links_index, FILE *file_fasta_index,
+               FILE *file_params);
 
 void
 cb_coarse_free(struct cb_coarse *coarse_db);

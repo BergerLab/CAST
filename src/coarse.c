@@ -302,7 +302,7 @@ void cb_coarse_get_all_residues(struct cb_coarse *coarse_db){
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA index file\n");
 
-    num_fasta_entries = (ftell(coarse_db->file_fasta_index)-1)/8;
+    num_fasta_entries = ftell(coarse_db->file_fasta_index)/8;
 
     for (i = 0; i < num_fasta_entries; i++) {
         struct fasta_seq *current_seq = cb_coarse_read_fasta_seq(coarse_db, i);
