@@ -108,11 +108,15 @@ load_search_args()
         "arguments to pass into BLAST during fine search.");
     opt_flag_bool(conf,
         &search_flags.no_cleanup, "no-cleanup",
-        "Set to true to keep the coarse search results XML file, the fine "
+        "Pass this flag to keep the coarse search results XML file, the fine "
         "database FASTA file, and the last fine query FASTA file.");
     opt_flag_bool(conf,
         &search_flags.show_hit_info, "show-hit-info",
-        "Set to true to output information on each fine BLAST hit.");
+        "Pass this flag to output information on each fine BLAST hit.");
+    opt_flag_bool(conf,
+        &search_flags.load_coarse_residues, "load-coarse-residues",
+        "Pass this flag to load all residues from the coarse FASTA file into "
+        "memory.  Not recommended for machines with limited memory.");
 
     return conf;
 }

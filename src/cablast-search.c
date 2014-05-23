@@ -314,13 +314,18 @@ main(int argc, char **argv)
         exit(1);
     }
 
+    system("rm CaBLAST_results.xml");
+
+    fprintf(stderr, "Loading database data\n\n");
     db = cb_database_read(args->args[0], search_flags.map_seed_size);
     cb_coarse_get_all_residues(db->coarse_db);
 
     dbsize = read_int_from_file(8, db->coarse_db->file_params);
-    blast_coarse(args, dbsize);
-    query_file = fopen(args->args[1], "r");
 
+    fprintf(stderr, "Running coarse BLAST\n\n");
+    blast_coarse(args, dbsize);
+
+    query_file = fopen(args->args[1], "r");
     queries = ds_vector_create();
     query = fasta_read_next(query_file, "");
     while (query) {
@@ -330,10 +335,10 @@ main(int argc, char **argv)
 
     fclose(query_file);
 
-    system("rm CaBLAST_results.xml");
-
+    fprintf(stderr, "Processing coarse BLAST hits for fine BLAST\n\n");
     if (search_flags.show_hit_info)
         test_hits_file = fopen("CaBLAST_hits.txt", "w");
+
     /*Parse the XML file generated from coarse BLAST and get its iterations.*/
     doc = xmlReadFile("CaBLAST_temp_blast_results.xml", NULL, 0);
     if (doc == NULL) {
@@ -393,13 +398,11 @@ main(int argc, char **argv)
                             (struct hit *)ds_vector_get(test_hits, k);
                         struct DSVector *test_hsps = current_hit->hsps;
                         for (l = 0; l < test_hsps->size; l++) {
-                            int64_t offset = expansion->offset;
                             struct hsp *current_hsp =
                                 (struct hsp *)ds_vector_get(test_hsps, l);
-                            int32_t hit_from =
-                                current_hsp->hit_from + offset - 1;
-                            int32_t hit_to =
-                                current_hsp->hit_to + offset - 1;
+                            int64_t offset = expansion->offset;
+                            int32_t hit_from = current_hsp->hit_from+offset-1,
+                                    hit_to   = current_hsp->hit_to+offset-1;
                             fprintf(test_hits_file, "hit from query %d: %d-%d\n", i, hit_from, hit_to);
                         }
                     }

@@ -71,8 +71,8 @@ cb_coarse_free(struct cb_coarse *coarse_db)
     ds_vector_free_no_data(coarse_db->seqs);
     cb_seeds_free(coarse_db->seeds);
 
-    /*if (coarse_db->all_residues != NULL)
-        free(coarse_db->all_residues);*/
+    if (coarse_db->all_residues != NULL)
+        free(coarse_db->all_residues);
 
     free(coarse_db);
 }

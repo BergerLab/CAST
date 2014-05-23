@@ -34,6 +34,7 @@ struct search_flags {
     char    *coarse_evalue;
     bool    no_cleanup;
     bool    show_hit_info;
+    bool    load_coarse_residues;
 } search_flags;
 
 
