@@ -175,7 +175,6 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
             }
             orig_str[original_end-original_start+1] = '\0';
 
-/*printf("%s\n", orig_str);*/
             expansion = malloc(sizeof(*expansion));
             assert(expansion);
 

@@ -20,6 +20,7 @@
 #include "DNAalphabet.h"
 #include "fasta.h"
 #include "flags.h"
+#include "progress-bar.h"
 #include "seq.h"
 #include "util.h"
 #include "xml.h"
@@ -313,18 +314,10 @@ main(int argc, char **argv)
     }
 
     db = cb_database_read(args->args[0], search_flags.map_seed_size);
+    cb_coarse_get_all_residues(db->coarse_db);
+
     dbsize = read_int_from_file(8, db->coarse_db->file_params);
-/***************************************************************/
-/***************************************************************/
-/***************************************************************/
-/***************************************************************/
-/***************************************************************/
     blast_coarse(args, dbsize);
-/***************************************************************/
-/***************************************************************/
-/***************************************************************/
-/***************************************************************/
-/***************************************************************/
     query_file = fopen(args->args[1], "r");
 
     queries = ds_vector_create();
@@ -350,6 +343,12 @@ main(int argc, char **argv)
     iterations = get_blast_iterations(root);
 
     for (i = 0; i < iterations->size; i++) {
+        char *bar = progress_bar(i, iterations->size);
+        fprintf(stderr, "\r");
+        fprintf(stderr, "iteration: %d/%d", i+1, iterations->size);
+        fprintf(stderr, " %s", bar);
+        free(bar);
+
         /*Expand any BLAST hits we got from the current query sequence during
           coarse BLAST.*/
         expanded_hits = expand_blast_hits(iterations, i, db);
@@ -418,6 +417,7 @@ main(int argc, char **argv)
         ds_vector_free_no_data(expanded_hits);
         fasta_free_seq(query);
     }
+    fprintf(stderr, "\n"); /*Make a newline after the progress bar*/
     ds_vector_free_no_data(queries);
     if (search_flags.show_hit_info)
         fclose(test_hits_file);
