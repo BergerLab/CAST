@@ -14,23 +14,12 @@ struct worker_args {
     struct DSQueue *jobs;
 };
 
-struct extend_match {
-    int32_t rlen;
-    int32_t olen;
-};
-
 struct extend_match_with_res {
     char *rseq;
     char *oseq;
     int32_t rlen;
     int32_t olen;
 };
-
-struct extend_match
-extend_match(struct cb_align_nw_memory *mem,
-             char *rseq, int32_t rstart, int32_t rend, int32_t resind,
-             int32_t dir1, char *oseq, int32_t ostart, int32_t oend,
-             int32_t current, int32_t dir2);
 
 struct extend_match_with_res
 extend_match_with_res(struct cb_align_nw_memory *mem,
@@ -747,110 +736,6 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
     free(matches_past_clump);
     return mseqs;
 }
-
-/*struct extend_match
-extend_match(struct cb_align_nw_memory *mem,
-             char *rseq, int32_t rstart, int32_t rend, int32_t resind,
-             int32_t dir1, char *oseq, int32_t ostart, int32_t oend,
-             int32_t current, int32_t dir2)
-{
-    struct cb_alignment alignment;
-    struct extend_match mlens;
-    int32_t rlen, olen;
-    struct ungapped_alignment ungapped;
-    int32_t m;
-    bool *matches;
-    bool *matches_past_clump;
-    int matches_count;
-    int matches_index;
-    int max_section_size;
-    int i;
-    bool found_bad_window;
-
-    max_section_size = 2 * compress_flags.max_chunk_size;
-
-    /*Initialize the matches and matches_past_clump arrays.*//*
-    matches = malloc(2*compress_flags.max_chunk_size*sizeof(*matches));
-    assert(matches);
-
-    matches_past_clump = malloc(2*compress_flags.max_chunk_size
-                                 *sizeof(*matches_past_clump));
-    assert(matches_past_clump);
-
-
-    matches_index = compress_flags.gapped_window_size;
-    for (i = 0; i < max_section_size; i++) {
-        matches[i] = true;
-        matches_past_clump[i] = true;
-    }
-
-    resind += dir1;
-    current += dir2;
-
-    rlen = rend - rstart;
-    olen = oend - ostart;
-
-    mlens.rlen = 0;
-    mlens.olen = 0;
-    while (true) {
-        int dp_len1, dp_len2, i, r_align_len, o_align_len;
-        if (mlens.rlen == rlen || mlens.olen == olen)
-            break;
-
-        /*Get the maximum length for ungapped alignment and extend the match
-          by that distance.*//*
-        ungapped = cb_align_ungapped(rseq, rstart, rend, dir1, resind,
-                               oseq, ostart, oend, dir2, current,
-                               matches, matches_past_clump, &matches_index);
-        m = ungapped.length;
-        found_bad_window = ungapped.found_bad_window;
-        mlens.rlen += m;
-        mlens.olen += m;
-        resind += m * dir1;
-        current += m * dir2;
-
-        /*End the extension if we found a bad window in ungapped alignment.*//*
-        if (found_bad_window)
-            break;
-
-        /*Carry out Needleman-Wunsch alignment and end the extension if we
-          found a bad window or couldn't find a 4-mer match in the alignment.*//*
-        dp_len1 = max_dp_len(resind-rstart, dir1, rend-rstart);
-        dp_len2 = max_dp_len(current-ostart, dir2, oend-ostart);
-
-        alignment = cb_align_nw(mem, rseq, dp_len1, resind, dir1,
-                                      oseq, dp_len2, current, dir2,
-                                 matches, &matches_index);
-
-        if (alignment.length == -1)
-            break;
-
-        matches_count = 0;
-
-        /*Check for a bad window manually and end the extension if a bad
-          window is found.*//*
-        for (i = matches_index - 100; i < matches_index; i++)
-            if (matches[i])
-                matches_count++;
-        if (matches_count < compress_flags.window_ident_thresh)
-            break;
-
-        r_align_len = cb_align_length_nogaps(alignment.ref);
-        o_align_len = cb_align_length_nogaps(alignment.org);
-
-        /*Update the lengths of the alignments and the indices of the
-          sequences.*//*
-        mlens.rlen += r_align_len;
-        mlens.olen += o_align_len;
-        resind += r_align_len * dir1;
-        current += o_align_len * dir2;
-        free(alignment.org);
-        free(alignment.ref);
-    }
-    free(matches);
-    free(matches_past_clump);
-    return mlens;
-}*/
 
 /*Creates a new coarse sequence for a section of the original DNA sequence that
  *does not have a match, such as if the maximum chunk length was traversed in
