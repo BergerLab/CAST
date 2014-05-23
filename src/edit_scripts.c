@@ -8,7 +8,6 @@
 #include "DNAutils.h"
 #include "edit_scripts.h"
 #include "fasta.h"
-#include "link_to_coarse.h"
 
 int minimum(int a, int b){return a<b?a:b;}
 int maximum(int a, int b){return a>b?a:b;}
@@ -268,122 +267,6 @@ char *read_edit_script(char *edit_script, char *orig, int length){
         free(str_fwd);
     }
     return str;
-}
-
-/*An implementation of decode_edit_script that is used in Po-Ru's C++ version
- *used in search for expanding coarse BLAST hits.
- *
- *Takes in a string orig, which is the section of the original sequence we want
- *to re-create, the length of this section of the string, the index in the
- *original sequence of the start of the section, the coarse database, and a
- *link_to_coarse we want to apply and applies the link to re-create part of or
- *all of the section of the original sequence.
- */
-void decode_edit_script(char *orig, int dest_len, int original_start,
-                        struct cb_coarse *coarsedb,
-                        struct cb_link_to_coarse *link){
-    struct fasta_seq *sequence = cb_coarse_read_fasta_seq(coarsedb,
-                                          link->coarse_seq_id);
-    struct edit_info *edit = NULL;
-    int i = 0, i0 = 0, i1 = 0, coarse_pos, last_edit_str_len, script_pos;
-    char *diff = link->diff, *residues = sequence->seq;
-    bool fwd = (diff[0] & ((char)0x7f)) == '0';
-
-    /*The link represents an exact match so there are no edits to make*/
-    if (diff[1] == '\0' && fwd) {
-        int starting_i0 = -1, last_i0 = -1;
-
-        i0 = link->original_start - original_start;
-        for (i1 = link->coarse_start; i1 < link->coarse_end; i0++, i1++)
-            if (0 <= i0 && i0 < dest_len) {
-                starting_i0 = (starting_i0 == -1 ? i0 : starting_i0);
-                last_i0 = i0;
-                orig[i0] = residues[i1];
-            }
-        /*If the link is from a reverse-complement match, convert the original
-          string to its reverse complement.*/
-        fasta_free_seq(sequence);
-        return;
-    }
-
-    coarse_pos = link->coarse_start;
-    last_edit_str_len = 0;
-
-    edit = malloc(sizeof(*edit));
-    assert(edit);
-
-    script_pos = 1;
-
-    /*We are decompressing a link from a forward match*/
-    if (fwd) {
-        i0 = link->original_start - original_start;
-        while (next_edit(diff, &script_pos, edit)) {
-            int x = 0, xmin = -i0, xmax = dest_len - i0;
-
-            for (x = maximum(0, xmin);
-                 x < minimum(edit->last_dist-last_edit_str_len, xmax); x++)
-                orig[i0+x] = residues[x+coarse_pos];
-
-            i0 += edit->last_dist - last_edit_str_len;
-            coarse_pos += edit->last_dist - last_edit_str_len;
-            for (i = 0; i < edit->str_length; i++)
-                if (edit->str[i] != '-') {
-                    if (0 <= i0 && i0 < dest_len)
-                        orig[i0] = edit->str[i];
-                    i0++;
-                }
-            if (edit->is_subdel) coarse_pos += edit->str_length;
-
-            last_edit_str_len = edit->str_length;
-
-            if (i0 >= dest_len) {
-                free(edit);
-                fasta_free_seq(sequence);
-                return;
-            }
-        }
-    }
-    else {
-        i0 = link->original_end - original_start;
-        while (next_edit(diff, &script_pos, edit)) {
-            int x = 0, xmin = i0 - dest_len + 1, xmax = i0 + 1;
-
-            for (x = maximum(0, xmin);
-                 x < minimum(edit->last_dist-last_edit_str_len, xmax); x++)
-                orig[i0-x] = base_complement(residues[x+coarse_pos]);
-
-            i0 -= edit->last_dist - last_edit_str_len;
-            coarse_pos += edit->last_dist - last_edit_str_len;
-            for (i = 0; i < edit->str_length; i++) {
-                if (edit->str[i] != '-') {
-                    if (0 <= i0 && i0 < dest_len)
-                        orig[i0] = base_complement(edit->str[i]);
-                    i0--;
-                }
-            }
-
-            if (edit->is_subdel) coarse_pos += edit->str_length;
-
-            last_edit_str_len = edit->str_length;
-
-            if (i0 < 0) {
-                free(edit->str);
-                free(edit);
-                fasta_free_seq(sequence);
-                return;
-            }
-        }
-    }
-    if ((fwd && i0 < dest_len) || (!fwd && i0 >= 0)) {
-        int dir = fwd ? 1 : -1;
-        for (i1 = coarse_pos; i1 <= link->coarse_end; i1++) {
-            if (0 <= i0 && i0 < dest_len)
-                orig[i0] = fwd ? residues[i1] : base_complement(residues[i1]);
-            i0 += dir;
-        }
-    }
-    free(edit);
-    fasta_free_seq(sequence);
 }
 
 /*Takes in as input a string and returns a copy of the string with the '-'
