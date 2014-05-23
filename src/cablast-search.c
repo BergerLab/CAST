@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -343,10 +344,15 @@ main(int argc, char **argv)
     iterations = get_blast_iterations(root);
 
     for (i = 0; i < iterations->size; i++) {
+        int32_t digits_full = floor(log10((double)iterations->size)),
+                digits_i = floor(log10((double)i)), spaces;
         char *bar = progress_bar(i, iterations->size);
+        spaces = digits_full - digits_i;
         fprintf(stderr, "\r");
         fprintf(stderr, "iteration: %d/%d", i+1, iterations->size);
-        fprintf(stderr, " %s", bar);
+        for (j = 0; j < spaces; j++)
+            putc(' ', stderr);
+        fprintf(stderr, " %s ", bar);
         free(bar);
 
         /*Expand any BLAST hits we got from the current query sequence during
