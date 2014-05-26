@@ -329,7 +329,6 @@ void cb_coarse_get_all_residues(struct cb_coarse *coarse_db){
     ds_vector_free_no_data(fasta_seqs);
 }
 
-
 struct cb_coarse_seq *
 cb_coarse_seq_init(int32_t id, char *residues, int32_t start, int32_t end)
 {
@@ -388,33 +387,6 @@ cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
     for (link = seq->links; link->next != NULL; link = link->next);
     link->next = newlink;
     pthread_rwlock_unlock(&seq->lock_links);
-}
-
-struct cb_link_to_compressed *
-cb_link_to_compressed_init(int32_t org_seq_id, int16_t coarse_start,
-                           int16_t coarse_end, uint64_t original_start,
-                           uint64_t original_end, bool dir)
-{
-    struct cb_link_to_compressed *link;
-
-    link = malloc(sizeof(*link));
-    assert(link);
-
-    link->org_seq_id     = org_seq_id;
-    link->coarse_start   = coarse_start;
-    link->coarse_end     = coarse_end;
-    link->original_start = original_start;
-    link->original_end   = original_end;
-    link->dir            = dir;
-    link->next           = NULL;
-
-    return link;
-}
-
-void
-cb_link_to_compressed_free(struct cb_link_to_compressed *link)
-{
-    free(link);
 }
 
 /*A function for getting the header for an entry in the coarse links file.

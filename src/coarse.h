@@ -5,6 +5,7 @@
 #define __USE_UNIX98
 
 #include <pthread.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -13,15 +14,6 @@
 #include "link_to_compressed.h"
 #include "seeds.h"
 #include "seq.h"
-#include "stdbool.h"
-
-struct cb_link_to_compressed *
-cb_link_to_compressed_init(int32_t org_seq_id, int16_t coarse_start,
-                            int16_t coarse_end, uint64_t original_start,
-                            uint64_t original_end, bool dir);
-
-void
-cb_link_to_compressed_free(struct cb_link_to_compressed *link);
 
 struct cb_coarse_seq {
     int32_t id;
