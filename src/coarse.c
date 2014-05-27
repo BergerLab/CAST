@@ -304,6 +304,30 @@ cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db)
     }
 }
 
+/*Loads all of the residues in the coarse database's links file into the coarse
+  database's links vector.*/
+void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db){
+    struct DSVector *link_vectors = ds_vector_create();
+    int32_t num_link_vectors = 0, i = 0, j = 0;
+
+    bool fseek_success =
+      fseek(coarse_db->coarsedb->file_links_index, 0, SEEK_END) == 0;
+    if (!fseek_success)
+        fprintf(stderr, "Error in seeking to end of FASTA index file\n");
+    fseek(coarse_db->coarsedb->file_links_index, 0, SEEK_SET) == 0;
+
+    coarse_db->links = ds_vector_create();
+
+    num_link_vectors = ftell(coarse_db->coarsedb->file_fasta_index)/8;
+    for (i = 0; i < num_link_vectors; i++) {
+        struct DSVector *links =
+          get_coarse_sequence_links_at(coarse_db->coarsedb->file_links,
+                                       coarse_db->coarsedb->file_links_index,i);
+        for (j = 0; j < links->size; j++)
+            ds_vector_append(coarse_db->links, ds_vector_get(links, j));
+    }
+}
+
 /*Loads all of the residues in the coarse database's FASTA file into the coarse
   database's all_residues string*/
 void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
@@ -317,6 +341,7 @@ void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
         fprintf(stderr, "Error in seeking to end of FASTA index file\n");
 
     num_fasta_entries = ftell(coarse_db->coarsedb->file_fasta_index)/8;
+    fseek(coarse_db->coarsedb->file_fasta_index, 0, SEEK_SET) == 0;
 
     for (i = 0; i < num_fasta_entries; i++) {
         struct fasta_seq *current_seq = cb_coarse_read_fasta_seq_r(coarse_db, i);
@@ -608,17 +633,22 @@ cb_coarse_read_init(int32_t seed_size,
 /*Frees a cb_coarse_db_read struct.*/
 void
 cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
+    int i;
+
     cb_coarse_free(coarsedb->coarsedb);
     if (coarsedb->all_residues)
         free(coarsedb->all_residues);
-    if (coarsedb->links)
-        free(coarsedb->links);
+    if (coarsedb->links) {
+        for (i = 0; i < coarsedb->links->size; i++)
+            cb_link_to_compressed_free(ds_vector_get(coarsedb->links, i));
+        ds_vector_free(coarsedb->links);
+    }
     ds_vector_free(coarsedb->link_inds_by_block);
     free(coarsedb);
 }
 
-struct cb_coarse_seq *
-cb_coarse_get_r(struct cb_coarse_db_read *coarse_db, int32_t i){
+struct cb_coarse_seq * cb_coarse_get_r(struct cb_coarse_db_read *coarse_db,
+                                       int32_t i){
     return cb_coarse_get(coarse_db->coarsedb, i);
 }
 

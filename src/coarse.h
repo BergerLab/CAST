@@ -96,10 +96,11 @@ cb_coarse_read_init(int32_t seed_size,
                     FILE *file_params, bool load_coarse_residues,
                     bool load_coarse_links);
 
-void
-cb_coarse_db_read_free(struct cb_coarse_db_read *coarse_db);
+void cb_coarse_db_read_free(struct cb_coarse_db_read *coarse_db);
 
 void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db);
+
+void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db);
 
 /*Coarse database functions ending in _r are used on cb_coarse_db_read structs
  *and are used as wrapper functions for the regular coarse database functions
