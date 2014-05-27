@@ -100,7 +100,8 @@ cb_database_init(char *dir, int32_t seed_size, bool add)
 }
 
 struct cb_database_r *
-cb_database_read_init(char *dir, int32_t seed_size, bool load_coarse_residues)
+cb_database_read_init(char *dir, int32_t seed_size,
+                      bool load_coarse_residues, bool load_coarse_links)
 {
     struct cb_database_r *db;
     struct stat buf;
@@ -138,7 +139,8 @@ cb_database_read_init(char *dir, int32_t seed_size, bool load_coarse_residues)
     db->coarse_db = cb_coarse_read_init(seed_size, ffasta, fseeds, flinks,
                                         findex_coarse_links,
                                         findex_coarse_fasta, findex_params,
-                                        load_coarse_residues);
+                                        load_coarse_residues,
+                                        load_coarse_links);
     db->com_db = cb_compressed_init(fcompressed, findex_compressed);
     /*cb_database_populate(db, pfasta, plinks);*/
 

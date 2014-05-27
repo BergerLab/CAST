@@ -35,6 +35,7 @@ struct search_flags {
     bool    no_cleanup;
     bool    show_hit_info;
     bool    load_coarse_residues;
+    bool    load_coarse_links;
 } search_flags;
 
 

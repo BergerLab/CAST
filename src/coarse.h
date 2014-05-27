@@ -84,6 +84,8 @@ struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
 
 struct cb_coarse_db_read {
     struct cb_coarse *coarsedb;
+    struct DSVector *links;
+    struct DSVector *link_inds_by_block;
     char *all_residues;
 };
 
@@ -91,7 +93,8 @@ struct cb_coarse_db_read *
 cb_coarse_read_init(int32_t seed_size,
                     FILE *file_fasta, FILE *file_seeds, FILE *file_links,
                     FILE *file_links_index, FILE *file_fasta_index,
-                    FILE *file_params, bool load_coarse_residues);
+                    FILE *file_params, bool load_coarse_residues,
+                    bool load_coarse_links);
 
 void
 cb_coarse_db_read_free(struct cb_coarse_db_read *coarse_db);

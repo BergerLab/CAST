@@ -117,6 +117,10 @@ load_search_args()
         &search_flags.load_coarse_residues, "load-coarse-residues",
         "Pass this flag to load all residues from the coarse FASTA file into "
         "memory.  Not recommended for machines with limited memory.");
+    opt_flag_bool(conf,
+        &search_flags.load_coarse_links, "load-coarse-links",
+        "Pass this flag to load all links from the coarse FASTA file into "
+        "memory.  Not recommended for machines with limited memory.");
 
     return conf;
 }
