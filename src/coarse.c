@@ -16,7 +16,7 @@ struct cb_coarse *
 cb_coarse_init(int32_t seed_size,
                 FILE *file_fasta, FILE *file_seeds, FILE *file_links,
                 FILE *file_links_index, FILE *file_fasta_index,
-                FILE *file_params)
+                FILE *file_params, bool load_coarse_residues)
 {
     struct cb_coarse *coarse_db;
     int32_t errno;
@@ -24,9 +24,9 @@ cb_coarse_init(int32_t seed_size,
     coarse_db = malloc(sizeof(*coarse_db));
     assert(coarse_db);
 
-    coarse_db->seqs = ds_vector_create_capacity(10000000);
-    coarse_db->seeds = cb_seeds_init(seed_size);
-    coarse_db->dbsize = (uint64_t)0;
+    coarse_db->seqs         = ds_vector_create_capacity(10000000);
+    coarse_db->seeds        = cb_seeds_init(seed_size);
+    coarse_db->dbsize       = (uint64_t)0;
     coarse_db->all_residues = NULL;
 
     /*Initialize the file pointers*/
@@ -41,6 +41,9 @@ cb_coarse_init(int32_t seed_size,
         fprintf(stderr, "Could not create rwlock. Errno: %d\n", errno);
         exit(1);
     }
+
+    if (load_coarse_residues)
+        cb_coarse_get_all_residues(coarse_db);
 
     return coarse_db;
 }
