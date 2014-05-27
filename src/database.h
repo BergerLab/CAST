@@ -25,7 +25,7 @@ struct cb_database *
 cb_database_init(char *dir, int32_t seed_size, bool add);
 
 struct cb_database *
-cb_database_read(char *dir, int32_t seed_size);
+cb_database_read(char *dir, int32_t seed_size, bool load_coarse_residues);
 
 void cb_database_populate(struct cb_database *db, const char *pfasta,
                            const char *plinks);

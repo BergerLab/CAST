@@ -317,8 +317,8 @@ main(int argc, char **argv)
     system("rm CaBLAST_results.xml");
 
     fprintf(stderr, "Loading database data\n\n");
-    db = cb_database_read(args->args[0], search_flags.map_seed_size);
-    cb_coarse_get_all_residues(db->coarse_db);
+    db = cb_database_read(args->args[0], search_flags.map_seed_size,
+                          search_flags.load_coarse_residues);
 
     dbsize = read_int_from_file(8, db->coarse_db->file_params);
 
