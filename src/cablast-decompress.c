@@ -30,7 +30,7 @@ static char *path_join(char *a, char *b)
 int
 main(int argc, char **argv)
 { 
-    struct cb_database *db;
+    struct cb_database_r *db;
     struct fasta_seq_gen *fsg;
     struct fasta_seq *seq;
     int i, org_seq_id;
@@ -55,7 +55,8 @@ main(int argc, char **argv)
         exit(1);
     }
 
-    db = cb_database_read(args->args[0], compress_flags.map_seed_size, false);
+    db = cb_database_read_init(args->args[0],
+                               compress_flags.map_seed_size, false);
 
     org_seq_id = 0;
     gettimeofday(&start, NULL);
@@ -117,7 +118,7 @@ main(int argc, char **argv)
         free(coarse_sequences[i]);
     free(coarse_sequences);
 
-    cb_database_free(db);
+    cb_database_read_free(db);
     opt_config_free(conf);
     opt_args_free(args);
 

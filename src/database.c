@@ -99,10 +99,10 @@ cb_database_init(char *dir, int32_t seed_size, bool add)
     return db;
 }
 
-struct cb_database *
-cb_database_read(char *dir, int32_t seed_size, bool load_coarse_residues)
+struct cb_database_r *
+cb_database_read_init(char *dir, int32_t seed_size, bool load_coarse_residues)
 {
-    struct cb_database *db;
+    struct cb_database_r *db;
     struct stat buf;
     FILE *ffasta, *fseeds, *flinks, *fcompressed, *findex_coarse_links,
          *findex_coarse_fasta, *findex_compressed, *findex_params;
@@ -135,9 +135,10 @@ cb_database_read(char *dir, int32_t seed_size, bool load_coarse_residues)
     findex_compressed   = open_db_file(pindex_compressed, "r");
     findex_params       = open_db_file(pindex_params, "r");
 
-    db->coarse_db = cb_coarse_init(seed_size, ffasta, fseeds, flinks,
-                                   findex_coarse_links, findex_coarse_fasta,
-                                   findex_params);
+    db->coarse_db = cb_coarse_read_init(seed_size, ffasta, fseeds, flinks,
+                                        findex_coarse_links,
+                                        findex_coarse_fasta, findex_params,
+                                        load_coarse_residues);
     db->com_db = cb_compressed_init(fcompressed, findex_compressed);
     /*cb_database_populate(db, pfasta, plinks);*/
 
@@ -157,6 +158,16 @@ cb_database_free(struct cb_database *db)
 {
     /* All files opened in cb_database_init are close in subsequent frees. */
     cb_coarse_free(db->coarse_db);
+    cb_compressed_free(db->com_db);
+    free(db->name);
+    free(db);
+}
+
+void
+cb_database_read_free(struct cb_database_r *db)
+{
+    /* All files opened in cb_database_init are close in subsequent frees. */
+    cb_coarse_db_read_free(db->coarse_db);
     cb_compressed_free(db->com_db);
     free(db->name);
     free(db);

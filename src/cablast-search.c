@@ -258,7 +258,7 @@ char *get_blast_args(struct opt_args *args){
  *cb_coarse_expand for the hits in the iteration we are expanding.
  */
 struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
-                                   struct cb_database *db){
+                                   struct cb_database_r *db){
     struct DSVector *expanded_hits = ds_vector_create(),
                     *hits = get_blast_hits((xmlNode *)
                                 ds_vector_get(iterations, index));
@@ -273,8 +273,9 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
             int32_t coarse_start  = h->hit_from-1,
                     coarse_end    = h->hit_to-1,
                     coarse_seq_id = current_hit->accession;
-            oseqs = cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
-                                     coarse_start, coarse_end, 50);
+            oseqs = cb_coarse_expand(db->coarse_db->coarsedb, db->com_db,
+                                     coarse_seq_id, coarse_start, coarse_end,
+                                     50);
             for (k = 0; k < oseqs->size; k++)
                 ds_vector_append(expanded_hits, ds_vector_get(oseqs, k));
             ds_vector_free_no_data(oseqs);
@@ -291,7 +292,7 @@ int
 main(int argc, char **argv)
 {
     FILE *query_file = NULL, *test_hits_file = NULL;
-    struct cb_database *db = NULL;
+    struct cb_database_r *db = NULL;
     struct opt_config *conf;
     struct opt_args *args;
     struct DSVector *iterations = NULL, *expanded_hits = NULL, *queries = NULL;
@@ -316,9 +317,9 @@ main(int argc, char **argv)
     system("rm CaBLAST_results.xml");
 
     fprintf(stderr, "Loading database data\n\n");
-    db = cb_database_read(args->args[0], search_flags.map_seed_size,
-                          search_flags.load_coarse_residues);
-    dbsize = read_int_from_file(8, db->coarse_db->file_params);
+    db = cb_database_read_init(args->args[0], search_flags.map_seed_size,
+                               search_flags.load_coarse_residues);
+    dbsize = read_int_from_file(8, db->coarse_db->coarsedb->file_params);
 
     fprintf(stderr, "Running coarse BLAST\n\n");
     blast_coarse(args, dbsize);
@@ -440,7 +441,7 @@ main(int argc, char **argv)
         }
     }
 
-    cb_database_free(db);
+    cb_database_read_free(db);
     xmlFreeDoc(doc);
 
     /*Free the coarse BLAST results file if the --no-cleanup flag is not being

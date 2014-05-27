@@ -21,16 +21,25 @@ struct cb_database {
     struct cb_compressed *com_db;
 };
 
+struct cb_database_r {
+    char *name;
+    struct cb_coarse_db_read *coarse_db;
+    struct cb_compressed *com_db;
+};
+
 struct cb_database *
 cb_database_init(char *dir, int32_t seed_size, bool add);
 
-struct cb_database *
-cb_database_read(char *dir, int32_t seed_size, bool load_coarse_residues);
+struct cb_database_r *
+cb_database_read_init(char *dir, int32_t seed_size, bool load_coarse_residues);
 
 void cb_database_populate(struct cb_database *db, const char *pfasta,
                            const char *plinks);
 
 void
 cb_database_free(struct cb_database *db);
+
+void
+cb_database_read_free(struct cb_database_r *db);
 
 #endif

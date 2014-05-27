@@ -9,6 +9,7 @@
 #include "coarse.h"
 #include "compressed.h"
 #include "decompression.h"
+#include "DNAutils.h"
 #include "fasta.h"
 #include "seq.h"
 #include "util.h"
