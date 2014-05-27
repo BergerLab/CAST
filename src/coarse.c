@@ -44,11 +44,6 @@ cb_coarse_init(int32_t seed_size,
         exit(1);
     }
 
-    /*If the --load-coarse-residues search flag was passed in, load the coarse
-      residues into coarse_db->all_residues.*//*
-    if (load_coarse_residues)
-        cb_coarse_get_all_residues(coarse_db);*/
-
     return coarse_db;
 }
 
@@ -311,19 +306,20 @@ cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db)
 
 /*Loads all of the residues in the coarse database's FASTA file into the coarse
   database's all_residues string*/
-/*void cb_coarse_get_all_residues(struct cb_coarse *coarse_db){
+void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
     struct DSVector *fasta_seqs = ds_vector_create();
     int32_t num_fasta_entries = 0, num_bases = 0,
             i = 0, j = 0, bases_copied = 0;
 
-    bool fseek_success = fseek(coarse_db->file_fasta_index, 0, SEEK_END) == 0;
+    bool fseek_success =
+      fseek(coarse_db->coarsedb->file_fasta_index, 0, SEEK_END) == 0;
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA index file\n");
 
-    num_fasta_entries = ftell(coarse_db->file_fasta_index)/8;
+    num_fasta_entries = ftell(coarse_db->coarsedb->file_fasta_index)/8;
 
     for (i = 0; i < num_fasta_entries; i++) {
-        struct fasta_seq *current_seq = cb_coarse_read_fasta_seq(coarse_db, i);
+        struct fasta_seq *current_seq = cb_coarse_read_fasta_seq_r(coarse_db, i);
         if (!current_seq)
             fprintf(stderr, "Error getting FASTA sequence #%d in "
                             "cb_coarse_get_all_residues\n", i);
@@ -332,7 +328,7 @@ cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db)
     }
 
     coarse_db->all_residues =
-        malloc(num_bases*sizeof(*(coarse_db->all_residues)));
+      malloc(num_bases*sizeof(*(coarse_db->all_residues)));
     assert(coarse_db->all_residues);
 
     for (i = 0; i < num_fasta_entries; i++) {
@@ -345,7 +341,7 @@ cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db)
     }
     coarse_db->all_residues[num_bases] = '\0';
     ds_vector_free_no_data(fasta_seqs);
-}*/
+}
 
 /*Takes in an ID number and the residues and original start and end indices
  *for a sequence to be added to a coarse database and creates a coarse
@@ -570,6 +566,7 @@ struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
 
     if (offset < 0)
         return NULL;
+
     fseek_success = fseek(coarsedb->file_fasta, offset, SEEK_SET) == 0;
     if (!fseek_success) {
         fprintf(stderr, "Error in seeking to offset %d\n", offset);
@@ -592,6 +589,12 @@ cb_coarse_read_init(int32_t seed_size,
                                         file_links, file_links_index,
                                         file_fasta_index, file_params);
     coarsedb->all_residues = NULL;
+
+    /*If the --load-coarse-residues search flag was passed in, load the coarse
+      residues into coarse_db->all_residues.*/
+    if (load_coarse_residues)
+        cb_coarse_get_all_residues(coarsedb);
+
     return coarsedb;
 }
 
