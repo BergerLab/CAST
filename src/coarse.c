@@ -325,6 +325,7 @@ void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db){
                                        coarse_db->coarsedb->file_links_index,i);
         for (j = 0; j < links->size; j++)
             ds_vector_append(coarse_db->links, ds_vector_get(links, j));
+        ds_vector_free_no_data(links);
     }
 }
 
@@ -353,7 +354,7 @@ void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
     }
 
     coarse_db->all_residues =
-      malloc(num_bases*sizeof(*(coarse_db->all_residues)));
+      malloc((num_bases+1)*sizeof(*(coarse_db->all_residues)));
     assert(coarse_db->all_residues);
 
     for (i = 0; i < num_fasta_entries; i++) {
@@ -625,7 +626,7 @@ cb_coarse_read_init(int32_t seed_size,
         cb_coarse_get_all_residues(coarsedb);
 
     if (load_coarse_links)
-        coarsedb->links = ds_vector_create();
+        cb_coarse_get_all_links(coarsedb);
 
     return coarsedb;
 }
@@ -640,8 +641,9 @@ cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
         free(coarsedb->all_residues);
     if (coarsedb->links) {
         for (i = 0; i < coarsedb->links->size; i++)
-            cb_link_to_compressed_free(ds_vector_get(coarsedb->links, i));
-        ds_vector_free(coarsedb->links);
+            cb_link_to_compressed_free(
+              (struct cb_link_to_compressed *)ds_vector_get(coarsedb->links,i));
+        ds_vector_free_no_data(coarsedb->links);
     }
     ds_vector_free(coarsedb->link_inds_by_block);
     free(coarsedb);
