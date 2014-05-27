@@ -18,21 +18,21 @@ https://github.com/BurntSushi/cablastp
 
 Installation
 ============
-c_cablastp depends on three libraries: `opt`, `ds` and `pthread`. `pthread` 
+c_cablast depends on three libraries: `opt`, `ds` and `pthread`. `pthread` 
 should be installed via your system's package manager. `opt` and `ds` can be 
 found in Andrew Gallant's [clibs respository](https://github.com/BurntSushi/clibs).
 
-Briefly, the following commands should get c_cablastp into a working state:
+Briefly, the following commands should get c_cablast into a working state:
 
 ```bash
-mkdir c_cablastp
+mkdir c_cablast
 git clone git://github.com/BurntSushi/clibs
-git clone git://github.com/BurntSushi/c_cablastp
+git clone git://github.com/BergerLab/c_cablast
 cd clibs
 make
 export C_INCLUDE_PATH=$(pwd)/include
 export LIBRARY_PATH=$(pwd)/lib
-cd ../c_cablastp
+cd ../c_cablast
 make
 ./cablast-compress --help
 ```
