@@ -57,7 +57,7 @@ cb_coarse_free(struct cb_coarse *coarse_db);
 
 struct cb_coarse_seq *
 cb_coarse_add(struct cb_coarse *coarse_db,
-               char *residues, int32_t start, int32_t end);
+              char *residues, int32_t start, int32_t end);
 
 struct cb_coarse_seq *
 cb_coarse_get(struct cb_coarse *coarse_db, int32_t i);
@@ -83,6 +83,6 @@ struct DSVector *get_coarse_sequence_links_at(FILE *links, FILE *index,
                                                            int32_t id);
 int64_t cb_coarse_find_offset(FILE *index_file, int id);
 struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
-                                            int id);
+                                           int id);
 
 #endif

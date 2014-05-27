@@ -10,13 +10,16 @@
 #include "seeds.h"
 #include "seq.h"
 
-/*Takes in the size of the k-mers that will be used in compression and file
-  pointers for the database and returns a newly-created coarse database.*/
+/*Takes in the size of the k-mers that will be used in compression, the file
+ *pointers for the database, and whether or not to load in the coarse residues
+ *from the coarse database's coarse FASTA file and returns a newly-created
+ *coarse database.
+ */
 struct cb_coarse *
 cb_coarse_init(int32_t seed_size,
-                FILE *file_fasta, FILE *file_seeds, FILE *file_links,
-                FILE *file_links_index, FILE *file_fasta_index,
-                FILE *file_params, bool load_coarse_residues)
+               FILE *file_fasta, FILE *file_seeds, FILE *file_links,
+               FILE *file_links_index, FILE *file_fasta_index,
+               FILE *file_params, bool load_coarse_residues)
 {
     struct cb_coarse *coarse_db;
     int32_t errno;
@@ -42,6 +45,8 @@ cb_coarse_init(int32_t seed_size,
         exit(1);
     }
 
+    /*If the --load-coarse-residues search flag was passed in, load the coarse
+      residues into coarse_db->all_residues.*/
     if (load_coarse_residues)
         cb_coarse_get_all_residues(coarse_db);
 
@@ -80,9 +85,14 @@ cb_coarse_free(struct cb_coarse *coarse_db)
     free(coarse_db);
 }
 
+/*Takes in the coarse database and the residues and original start and end
+ *indices for a sequence to be added to a coarse database and adds a sequence
+ *created from those residues while also adding the sequence to the seeds
+ *table.
+ */
 struct cb_coarse_seq *
 cb_coarse_add(struct cb_coarse *coarse_db,
-               char *residues, int32_t start, int32_t end)
+              char *residues, int32_t start, int32_t end)
 {
     struct cb_coarse_seq *seq;
     int32_t id;
@@ -98,6 +108,7 @@ cb_coarse_add(struct cb_coarse *coarse_db,
     return seq;
 }
 
+/*Get the coarse sequence in the coarse database at index i.*/
 struct cb_coarse_seq *
 cb_coarse_get(struct cb_coarse *coarse_db, int32_t i)
 {
@@ -162,7 +173,7 @@ cb_coarse_save_binary(struct cb_coarse *coarse_db)
 
         /*Output all links for the current sequence to the coarse links file*/
         for (link = seq->links; link != NULL; link = link->next) {
-            int j;
+            int32_t j;
             /*Convert the start and end indices for the link to two
               characters.*/
             int16_t coarse_start = (int16_t)link->coarse_start,
@@ -206,6 +217,8 @@ cb_coarse_save_binary(struct cb_coarse *coarse_db)
     putc('\n', coarse_db->file_links);
 }
 
+/*Output the coarse database's sequences and links in a human-readable format.
+  Used for debugging purposes.*/
 void
 cb_coarse_save_plain(struct cb_coarse *coarse_db)
 {
@@ -221,12 +234,13 @@ cb_coarse_save_plain(struct cb_coarse *coarse_db)
         for (link = seq->links; link != NULL; link = link->next)
             fprintf(coarse_db->file_links_index,
                 "original sequence id: %d, reference range: (%d, %d), "
-                  "direction: %c\n",
+                "direction: %c\n",
                 link->org_seq_id, link->coarse_start, link->coarse_end,
                 (link->dir?'0':'1'));
     }
 }
 
+/*Takes in the coarse database and saves its seeds table in a binary format.*/
 void
 cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db)
 {
@@ -259,6 +273,8 @@ cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db)
     putc('\n', coarse_db->file_seeds);
 }
 
+/*Takes in the coarse database and saves its seeds table in a human-readable
+  format.  Used for debugging.*/
 void
 cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db)
 {
@@ -332,6 +348,10 @@ void cb_coarse_get_all_residues(struct cb_coarse *coarse_db){
     ds_vector_free_no_data(fasta_seqs);
 }
 
+/*Takes in an ID number and the residues and original start and end indices
+ *for a sequence to be added to a coarse database and creates a coarse
+ *sequence from that information.
+ */
 struct cb_coarse_seq *
 cb_coarse_seq_init(int32_t id, char *residues, int32_t start, int32_t end)
 {
@@ -341,8 +361,8 @@ cb_coarse_seq_init(int32_t id, char *residues, int32_t start, int32_t end)
     seq = malloc(sizeof(*seq));
     assert(seq);
 
-    seq->id = id;
-    seq->seq = cb_seq_init_range(id, "", residues, start, end);
+    seq->id    = id;
+    seq->seq   = cb_seq_init_range(id, "", residues, start, end);
     seq->links = NULL;
 
     if (0 != (errno = pthread_rwlock_init(&seq->lock_links, NULL))) {
@@ -353,6 +373,7 @@ cb_coarse_seq_init(int32_t id, char *residues, int32_t start, int32_t end)
     return seq;
 }
 
+/*Frees a coarse sequence.*/
 void
 cb_coarse_seq_free(struct cb_coarse_seq *seq)
 {
@@ -373,9 +394,11 @@ cb_coarse_seq_free(struct cb_coarse_seq *seq)
     free(seq);
 }
 
+/*Takes in a coarse sequence and a link_to_compressed and adds the link to the
+  sequence at the end of the linked list of links.*/
 void
 cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
-                       struct cb_link_to_compressed *newlink)
+                      struct cb_link_to_compressed *newlink)
 {
     struct cb_link_to_compressed *link;
 

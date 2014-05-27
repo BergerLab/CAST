@@ -328,26 +328,25 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                   sequence.*/
                 cb_compressed_seq_addlink(cseq,
                     cb_link_to_coarse_init(coarse_seq->id,
-                                            current - rev_olen,
-                                            current + seed_size + fwd_olen - 1,
-                                            resind - rev_rlen,
-                                            resind + seed_size + fwd_rlen - 1,
-                                            alignment, true));
+                                           current - rev_olen,
+                                           current + seed_size + fwd_olen - 1,
+                                           resind - rev_rlen,
+                                           resind + seed_size + fwd_rlen - 1,
+                                           alignment, true));
 
                 /*Add a link to the compressed sequence in the coarse
                   sequence.*/
                 cb_coarse_seq_addlink(coarse_seq,
-                                       cb_link_to_compressed_init(
-                                       org_seq->id,
-                                       resind - rev_rlen,
-                                       resind + seed_size + fwd_rlen-1,
-                                       current - rev_olen,
-                                       current + seed_size + fwd_olen-1,
-                                       true));
+                                      cb_link_to_compressed_init(
+                                      org_seq->id,
+                                      resind - rev_rlen,
+                                      resind + seed_size + fwd_rlen-1,
+                                      current - rev_olen,
+                                      current + seed_size + fwd_olen-1,
+                                      true));
 
                 /*Update the current position in the sequence*/
-                if (current + fwd_olen <
-                      org_seq->length - seed_size - ext_seed - 1)
+                if (current + fwd_olen < org_seq->length-seed_size-ext_seed-1)
                     start_of_section = current + fwd_olen -
                                        compress_flags.overlap + seed_size;
                 else
@@ -484,22 +483,22 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                   sequence.*/
                 cb_compressed_seq_addlink(cseq,
                     cb_link_to_coarse_init(coarse_seq->id,
-                                            current - fwd_olen,
-                                            current + seed_size + rev_olen - 1,
-                                            resind - rev_rlen,
-                                            resind + seed_size + fwd_rlen - 1,
-                                            alignment, false));
+                                           current - fwd_olen,
+                                           current + seed_size + rev_olen - 1,
+                                           resind - rev_rlen,
+                                           resind + seed_size + fwd_rlen - 1,
+                                           alignment, false));
 
                 /*Add a link to the compressed sequence in the coarse
                   sequence.*/
                 cb_coarse_seq_addlink(coarse_seq,
-                                       cb_link_to_compressed_init(
-                                       org_seq->id,
-                                       resind - rev_rlen,
-                                       resind + seed_size + fwd_rlen - 1,
-                                       current - fwd_olen,
-                                       current + seed_size + rev_olen - 1,
-                                       false));
+                                      cb_link_to_compressed_init(
+                                      org_seq->id,
+                                      resind - rev_rlen,
+                                      resind + seed_size + fwd_rlen - 1,
+                                      current - fwd_olen,
+                                      current + seed_size + rev_olen - 1,
+                                      false));
 
                 /*Update the current position in the sequence*/
                 if (current + rev_olen < org_seq->length-seed_size-ext_seed-1)
