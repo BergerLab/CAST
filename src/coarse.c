@@ -19,7 +19,7 @@ struct cb_coarse *
 cb_coarse_init(int32_t seed_size,
                FILE *file_fasta, FILE *file_seeds, FILE *file_links,
                FILE *file_links_index, FILE *file_fasta_index,
-               FILE *file_params, bool load_coarse_residues)
+               FILE *file_params)
 {
     struct cb_coarse *coarse_db;
     int32_t errno;
@@ -30,7 +30,6 @@ cb_coarse_init(int32_t seed_size,
     coarse_db->seqs         = ds_vector_create_capacity(10000000);
     coarse_db->seeds        = cb_seeds_init(seed_size);
     coarse_db->dbsize       = (uint64_t)0;
-    coarse_db->all_residues = NULL;
 
     /*Initialize the file pointers*/
     coarse_db->file_fasta       = file_fasta;
@@ -46,9 +45,9 @@ cb_coarse_init(int32_t seed_size,
     }
 
     /*If the --load-coarse-residues search flag was passed in, load the coarse
-      residues into coarse_db->all_residues.*/
+      residues into coarse_db->all_residues.*//*
     if (load_coarse_residues)
-        cb_coarse_get_all_residues(coarse_db);
+        cb_coarse_get_all_residues(coarse_db);*/
 
     return coarse_db;
 }
@@ -79,8 +78,8 @@ cb_coarse_free(struct cb_coarse *coarse_db)
     ds_vector_free_no_data(coarse_db->seqs);
     cb_seeds_free(coarse_db->seeds);
 
-    if (coarse_db->all_residues != NULL)
-        free(coarse_db->all_residues);
+    /*if (coarse_db->all_residues != NULL)
+        free(coarse_db->all_residues);*/
 
     free(coarse_db);
 }
@@ -312,7 +311,7 @@ cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db)
 
 /*Loads all of the residues in the coarse database's FASTA file into the coarse
   database's all_residues string*/
-void cb_coarse_get_all_residues(struct cb_coarse *coarse_db){
+/*void cb_coarse_get_all_residues(struct cb_coarse *coarse_db){
     struct DSVector *fasta_seqs = ds_vector_create();
     int32_t num_fasta_entries = 0, num_bases = 0,
             i = 0, j = 0, bases_copied = 0;
@@ -346,7 +345,7 @@ void cb_coarse_get_all_residues(struct cb_coarse *coarse_db){
     }
     coarse_db->all_residues[num_bases] = '\0';
     ds_vector_free_no_data(fasta_seqs);
-}
+}*/
 
 /*Takes in an ID number and the residues and original start and end indices
  *for a sequence to be added to a coarse database and creates a coarse
@@ -578,3 +577,39 @@ struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
     }
     return fasta_read_next(coarsedb->file_fasta, "");
 }
+
+/*Loads a cb_coarse_db_read struct, which includes a coarse database as well
+  as data from the files being read*/
+struct cb_coarse_db_read *
+cb_coarse_read_init(int32_t seed_size,
+                    FILE *file_fasta, FILE *file_seeds, FILE *file_links,
+                    FILE *file_links_index, FILE *file_fasta_index,
+                    FILE *file_params, bool load_coarse_residues){
+    struct cb_coarse_db_read *coarsedb = malloc(sizeof(*coarsedb));
+    assert(coarsedb);
+
+    coarsedb->coarsedb = cb_coarse_init(seed_size, file_fasta, file_seeds,
+                                        file_links, file_links_index,
+                                        file_fasta_index, file_params);
+    coarsedb->all_residues = NULL;
+    return coarsedb;
+}
+
+/*Frees a cb_coarse_db_read struct.*/
+void
+cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
+    cb_coarse_free(coarsedb->coarsedb);
+    if (coarsedb->all_residues)
+        free(coarsedb->all_residues);
+}
+
+struct cb_coarse_seq *
+cb_coarse_get_r(struct cb_coarse_db_read *coarse_db, int32_t i){
+    return cb_coarse_get(coarse_db->coarsedb, i);
+}
+
+struct fasta_seq *cb_coarse_read_fasta_seq_r(struct cb_coarse_db_read *coarsedb,
+                                             int id){
+    return cb_coarse_read_fasta_seq(coarsedb->coarsedb, id);
+}
+

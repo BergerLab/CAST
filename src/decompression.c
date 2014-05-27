@@ -108,7 +108,6 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
     struct fasta_seq *residues = cb_coarse_read_fasta_seq(coarsedb, id);
     int64_t *seq_lengths = cb_compressed_get_lengths(comdb);
     int32_t fasta_length = strlen(residues->seq), i = 0, j = 0;
-
     /*Get all links_to_compressed for the coarse sequence we are expanding.*/
     coarse_seq_links =
         get_coarse_sequence_links_at(links, coarse_links_index, id);

@@ -36,7 +36,6 @@ struct cb_coarse {
     struct DSVector *seqs;
     struct cb_seeds *seeds;
     uint64_t dbsize;
-    char *all_residues;
     FILE *file_fasta;
     FILE *file_seeds;
     FILE *file_links;
@@ -50,7 +49,7 @@ struct cb_coarse *
 cb_coarse_init(int32_t seed_size,
                FILE *file_fasta, FILE *file_seeds, FILE *file_links,
                FILE *file_links_index, FILE *file_fasta_index,
-               FILE *file_params, bool load_coarse_residues);
+               FILE *file_params);
 
 void
 cb_coarse_free(struct cb_coarse *coarse_db);
@@ -84,5 +83,31 @@ struct DSVector *get_coarse_sequence_links_at(FILE *links, FILE *index,
 int64_t cb_coarse_find_offset(FILE *index_file, int id);
 struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
                                            int id);
+
+struct cb_coarse_db_read {
+    struct cb_coarse *coarsedb;
+    char *all_residues;
+};
+
+struct cb_coarse_db_read *
+cb_coarse_read_init(int32_t seed_size,
+                    FILE *file_fasta, FILE *file_seeds, FILE *file_links,
+                    FILE *file_links_index, FILE *file_fasta_index,
+                    FILE *file_params, bool load_coarse_residues);
+
+void
+cb_coarse_db_read_free(struct cb_coarse_db_read *coarse_db);
+
+void cb_coarse_get_all_residues(struct cb_coarse *coarse_db);
+
+/*Coarse database functions ending in _r are used on cb_coarse_db_read structs
+ *and are used as wrapper functions for the regular coarse database functions
+ *being called on the cb_coarse_db_read struct's coarsedb.
+ */
+struct cb_coarse_seq *
+cb_coarse_get_r(struct cb_coarse_db_read *coarse_db, int32_t i);
+
+struct fasta_seq *cb_coarse_read_fasta_seq_r(struct cb_coarse_db_read *coarsedb,
+                                             int id);
 
 #endif

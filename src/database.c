@@ -84,7 +84,7 @@ cb_database_init(char *dir, int32_t seed_size, bool add)
 
     db->coarse_db = cb_coarse_init(seed_size, ffasta, fseeds, flinks,
                                    findex_coarse_links, findex_coarse_fasta,
-                                   findex_params, false);
+                                   findex_params);
     db->com_db = cb_compressed_init(fcompressed, findex_compressed);
 
     free(pfasta);
@@ -137,7 +137,7 @@ cb_database_read(char *dir, int32_t seed_size, bool load_coarse_residues)
 
     db->coarse_db = cb_coarse_init(seed_size, ffasta, fseeds, flinks,
                                    findex_coarse_links, findex_coarse_fasta,
-                                   findex_params, load_coarse_residues);
+                                   findex_params);
     db->com_db = cb_compressed_init(fcompressed, findex_compressed);
     /*cb_database_populate(db, pfasta, plinks);*/
 

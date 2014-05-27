@@ -273,7 +273,6 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
             int32_t coarse_start  = h->hit_from-1,
                     coarse_end    = h->hit_to-1,
                     coarse_seq_id = current_hit->accession;
-
             oseqs = cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
                                      coarse_start, coarse_end, 50);
             for (k = 0; k < oseqs->size; k++)
@@ -319,7 +318,6 @@ main(int argc, char **argv)
     fprintf(stderr, "Loading database data\n\n");
     db = cb_database_read(args->args[0], search_flags.map_seed_size,
                           search_flags.load_coarse_residues);
-
     dbsize = read_int_from_file(8, db->coarse_db->file_params);
 
     fprintf(stderr, "Running coarse BLAST\n\n");
