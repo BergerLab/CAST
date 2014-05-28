@@ -287,7 +287,6 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
     return expanded_hits;
 }
 
-
 int
 main(int argc, char **argv)
 {

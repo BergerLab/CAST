@@ -99,9 +99,10 @@ cb_coarse_read_init(int32_t seed_size,
                     int32_t link_block_size);
 
 void cb_coarse_db_read_free(struct cb_coarse_db_read *coarse_db);
+void cb_coarse_db_read_init_indices(struct cb_coarse_db_read *coarse_db,
+                                    int32_t link_block_size);
 
 void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db);
-
 void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db);
 
 /*Coarse database functions ending in _r are used on cb_coarse_db_read structs
