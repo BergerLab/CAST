@@ -11,6 +11,7 @@
 #define CABLAST_COARSE_SEEDS "coarse.seeds"
 #define CABLAST_COARSE_LINKS_INDEX "coarse.links.index"
 #define CABLAST_COARSE_FASTA_INDEX "coarse.fasta.index"
+#define CABLAST_COARSE_FASTA_BASE_INDEX "coarse.fasta.base.index"
 #define CABLAST_COMPRESSED "compressed.cb"
 #define CABLAST_COMPRESSED_INDEX "compressed.cb.index"
 #define CABLAST_PARAMS "params"
