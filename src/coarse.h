@@ -95,7 +95,8 @@ cb_coarse_read_init(int32_t seed_size,
                     FILE *file_fasta, FILE *file_seeds, FILE *file_links,
                     FILE *file_links_index, FILE *file_fasta_index,
                     FILE *file_fasta_base_index, FILE *file_params,
-                    bool load_coarse_residues, bool load_coarse_links);
+                    bool load_coarse_residues, bool load_coarse_links,
+                    int32_t link_block_size);
 
 void cb_coarse_db_read_free(struct cb_coarse_db_read *coarse_db);
 

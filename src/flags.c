@@ -121,6 +121,10 @@ load_search_args()
         &search_flags.load_coarse_links, "load-coarse-links",
         "Pass this flag to load all links from the coarse FASTA file into "
         "memory.  Not recommended for machines with limited memory.");
+    opt_flag_int(conf,
+        &search_flags.link_block_size, "link-block-size", 30000,
+        "The number of bases in the coarse FASTA file each vector used for "
+        "grouping the links in the coarse database represents.");
 
     return conf;
 }
