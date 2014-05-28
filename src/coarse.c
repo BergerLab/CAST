@@ -36,6 +36,7 @@ cb_coarse_init(int32_t seed_size,
     coarse_db->file_fasta            = file_fasta;
     coarse_db->file_seeds            = file_seeds;
     coarse_db->file_links            = file_links;
+    coarse_db->file_links_base_index = file_links_base_index;
     coarse_db->file_fasta_index      = file_fasta_index;
     coarse_db->file_fasta_base_index = file_fasta_base_index;
     coarse_db->file_links_index      = file_links_index;
