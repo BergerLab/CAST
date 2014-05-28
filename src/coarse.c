@@ -127,13 +127,14 @@ cb_coarse_save_binary(struct cb_coarse *coarse_db)
     struct cb_coarse_seq *seq;
     struct cb_link_to_compressed *link;
     int64_t i;
-    /*Keeps track of the index to be printed to coarse.links.index*/
-    uint64_t index = (uint64_t)0;
+    /*Keeps track of the indices to be printed to coarse.links.index and
+      coarse_fasta_base_index.*/
+    uint64_t index = (uint64_t)0, base_index = (uint64_t)0;
     int16_t mask = (int16_t)0xff;
     int j;
 
     for (i = 0; i < coarse_db->seqs->size; i++) {
-        uint64_t coarse_fasta_loc;
+        uint64_t coarse_fasta_index;
         char *fasta_output, *link_header;
 
         fasta_output = malloc(30000*sizeof(*fasta_output));
@@ -144,11 +145,15 @@ cb_coarse_save_binary(struct cb_coarse *coarse_db)
 
         seq = (struct cb_coarse_seq *) ds_vector_get(coarse_db->seqs, i);
 
+        coarse_fasta_index = ftell(coarse_db->file_fasta);
+
         /*At the start of outputting each sequence, output the indices for the
           coarse links and FASTA files to their index files.*/
         output_int_to_file(index, 8, coarse_db->file_links_index);
-        coarse_fasta_loc = ftell(coarse_db->file_fasta);
-        output_int_to_file(coarse_fasta_loc, 8, coarse_db->file_fasta_index);
+        output_int_to_file(base_index, 8, coarse_db->file_fasta_base_index);
+        output_int_to_file(coarse_fasta_index, 8, coarse_db->file_fasta_index);
+
+        base_index += strlen(seq->seq->residues);
 
         /*Output the FASTA sequence to the coarse FASTA file*/
         sprintf(fasta_output, ">%ld\n%s\n", i, seq->seq->residues);
