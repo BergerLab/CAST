@@ -3,9 +3,7 @@
 #include "flags.h"
 #include "util.h"
 
-struct opt_config *
-load_compress_args()
-{
+struct opt_config *load_compress_args(){
     struct opt_config *conf;
     int32_t cpus;
 
@@ -88,9 +86,7 @@ load_compress_args()
 }
 
 
-struct opt_config *
-load_search_args()
-{
+struct opt_config *load_search_args(){
     struct opt_config *conf;
     int32_t cpus;
 
@@ -113,6 +109,10 @@ load_search_args()
     opt_flag_bool(conf,
         &search_flags.show_hit_info, "show-hit-info",
         "Pass this flag to output information on each fine BLAST hit.");
+    opt_flag_bool(conf,
+        &search_flags.hide_progress, "hide-progress",
+        "Pass this flag to hide messages about the progress of CaBLAST as well "
+        "as the progress bar for hit expansion.");
     opt_flag_bool(conf,
         &search_flags.load_coarse_residues, "load-coarse-residues",
         "Pass this flag to load all residues from the coarse FASTA file into "

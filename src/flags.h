@@ -34,6 +34,7 @@ struct search_flags {
     char    *coarse_evalue;
     bool    no_cleanup;
     bool    show_hit_info;
+    bool    hide_progress;
     bool    load_coarse_residues;
     bool    load_coarse_links;
     bool    load_coarse_db;
@@ -41,10 +42,8 @@ struct search_flags {
 } search_flags;
 
 
-struct opt_config *
-load_compress_args();
+struct opt_config *load_compress_args();
 
-struct opt_config *
-load_search_args();
+struct opt_config *load_search_args();
 
 #endif

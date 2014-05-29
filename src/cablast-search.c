@@ -54,7 +54,10 @@ void blast_coarse(struct opt_args *args, uint64_t dbsize){
     sprintf(blastn,"blastn -db %s -outfmt 5 -query %s -dbsize %lu -task blastn"
                    " -evalue %s > CaBLAST_temp_blast_results.xml",
             input_path, args->args[1], dbsize, search_flags.coarse_evalue);
-    fprintf(stderr, "%s\n", blastn);
+
+    if (!search_flags.hide_progress)
+        fprintf(stderr, "%s\n", blastn);
+
     system(blastn);
 
     free(blastn);
@@ -78,6 +81,7 @@ void blast_fine(char *subject, uint64_t dbsize, struct fasta_seq *query){
         fprintf(stderr,"Could not open CaBLAST_fine_query.fasta for writing.");
         return;
     }
+
     fprintf(fine_blast_query, "> %s\n%s\n", query->name, query->seq);
     fclose(fine_blast_query);
 
@@ -86,7 +90,10 @@ void blast_fine(char *subject, uint64_t dbsize, struct fasta_seq *query){
             "blastn -subject %s -query CaBLAST_fine_query.fasta -dbsize %lu "
             "-task blastn -outfmt 5 -evalue 1e-30 > CaBLAST_results.xml",
             subject, dbsize);
-    /*fprintf(stderr, "%s\n", blastn);*/
+
+    /*if (!search_flags.hide_progress)
+          fprintf(stderr, "%s\n", blastn);*/
+
     system(blastn); /*Run fine BLAST*/
 
     free(blastn);
@@ -315,7 +322,8 @@ main(int argc, char **argv)
 
     system("rm CaBLAST_results.xml");
 
-    fprintf(stderr, "Loading database data\n\n");
+    if (!search_flags.hide_progress)
+        fprintf(stderr, "Loading database data\n\n");
     db = cb_database_read_init(args->args[0], search_flags.map_seed_size,
                                (search_flags.load_coarse_db ||
                                 search_flags.load_coarse_residues),
@@ -324,7 +332,8 @@ main(int argc, char **argv)
                                search_flags.link_block_size);
     dbsize = read_int_from_file(8, db->coarse_db->coarsedb->file_params);
 
-    fprintf(stderr, "Running coarse BLAST\n\n");
+    if (!search_flags.hide_progress)
+        fprintf(stderr, "Running coarse BLAST\n\n");
     blast_coarse(args, dbsize);
 
     query_file = fopen(args->args[1], "r");
@@ -337,7 +346,8 @@ main(int argc, char **argv)
 
     fclose(query_file);
 
-    fprintf(stderr, "Processing coarse BLAST hits for fine BLAST\n\n");
+    if (!search_flags.hide_progress)
+        fprintf(stderr, "Processing coarse BLAST hits for fine BLAST\n\n");
     if (search_flags.show_hit_info)
         test_hits_file = fopen("CaBLAST_hits.txt", "w");
 
@@ -351,16 +361,18 @@ main(int argc, char **argv)
     iterations = get_blast_iterations(root);
 
     for (i = 0; i < iterations->size; i++) {
-        int32_t digits_full = floor(log10((double)iterations->size)),
-                digits_i = floor(log10((double)i)), spaces;
-        char *bar = progress_bar(i, iterations->size);
-        spaces = digits_full - digits_i;
-        fprintf(stderr, "\r");
-        fprintf(stderr, "iteration: %d/%d", i+1, iterations->size);
-        for (j = 0; j < spaces; j++)
-            putc(' ', stderr);
-        fprintf(stderr, " %s ", bar);
-        free(bar);
+        if (!search_flags.hide_progress) {
+            int32_t digits_full = floor(log10((double)iterations->size)),
+                    digits_i = floor(log10((double)i)), spaces;
+            char *bar = progress_bar(i, iterations->size);
+            spaces = digits_full - digits_i;
+            fprintf(stderr, "\r");
+            fprintf(stderr, "iteration: %d/%d", i+1, iterations->size);
+            for (j = 0; j < spaces; j++)
+                putc(' ', stderr);
+            fprintf(stderr, " %s ", bar);
+            free(bar);
+        }
 
         /*Expand any BLAST hits we got from the current query sequence during
           coarse BLAST.*/
@@ -428,7 +440,8 @@ main(int argc, char **argv)
         ds_vector_free_no_data(expanded_hits);
         fasta_free_seq(query);
     }
-    fprintf(stderr, "\n"); /*Make a newline after the progress bar*/
+    if (!search_flags.hide_progress)
+        fprintf(stderr, "\n"); /*Make a newline after the progress bar*/
     ds_vector_free_no_data(queries);
     if (search_flags.show_hit_info)
         fclose(test_hits_file);
