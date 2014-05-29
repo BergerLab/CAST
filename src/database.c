@@ -163,7 +163,7 @@ cb_database_read_init(char *dir, int32_t seed_size,
     flinks                    = open_db_file(plinks, "r");
     findex_coarse_links       = open_db_file(pindex_coarse_links, "r");
     findex_coarse_links_base  = open_db_file(pindex_coarse_links_base, "r");
-    findex_coarse_links_count = open_db_file(pindex_coarse_links_base, "r");
+    findex_coarse_links_count = open_db_file(pindex_coarse_links_count, "r");
     findex_coarse_fasta       = open_db_file(pindex_coarse_fasta, "r");
     findex_coarse_fasta_base  = open_db_file(pindex_coarse_fasta_base, "r");
     fcompressed               = open_db_file(pcompressed, "r");

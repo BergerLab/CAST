@@ -94,10 +94,10 @@ char *get_coarse_header(FILE *f);
 struct cb_link_to_compressed *read_coarse_link(FILE *f);
 struct DSVector *get_coarse_sequence_links(FILE *f);
 struct DSVector *get_coarse_sequence_links_at(FILE *links, FILE *index,
-                                                           int32_t id);
+                                              int32_t id);
 int64_t cb_coarse_find_offset(FILE *index_file, int id);
 struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
-                                                              int id);
+                                           int id);
 
 struct cb_coarse_db_read {
     struct cb_coarse *coarsedb;
