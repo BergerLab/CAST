@@ -33,7 +33,10 @@ struct cb_coarse;
 
 struct cb_compressed {
     struct DSVector *seqs;
+    /*Binary representation of each compressed sequence*/
     FILE *file_compressed;
+    /*The byte index in the compressed file of the start of each compressed
+      sequence*/
     FILE *file_index;
 };
 
