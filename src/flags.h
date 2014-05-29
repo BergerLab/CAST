@@ -36,6 +36,7 @@ struct search_flags {
     bool    show_hit_info;
     bool    load_coarse_residues;
     bool    load_coarse_links;
+    bool    load_coarse_db;
     int32_t link_block_size;
 } search_flags;
 
