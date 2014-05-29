@@ -586,9 +586,8 @@ struct DSVector *get_coarse_sequence_links_at(FILE *links, FILE *index,
   sequence in the corresponding database file that the user wants to seek to
   and returns the byte offset of the sequence in its database file.*/
 int64_t cb_coarse_find_offset(FILE *index_file, int id){
-    int64_t mask = make_mask(8),
-            offset = (int64_t)(-1);
-    int i, try_off = id * 8;
+    int64_t mask = make_mask(8), offset = (int64_t)(-1), try_off = id * 8;
+    int32_t i;
     bool fseek_success = fseek(index_file, try_off, SEEK_SET) == 0;
 
     if (!fseek_success) {
@@ -608,7 +607,7 @@ int64_t cb_coarse_find_offset(FILE *index_file, int id){
  *sequence.
  */
 struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
-                                                               int id){
+                                           int id){
     int64_t offset = cb_coarse_find_offset(coarsedb->file_fasta_index, id);
     bool fseek_success;
 
@@ -694,7 +693,9 @@ void cb_coarse_db_read_init_indices(struct cb_coarse_db_read *coarse_db,
 
     coarse_db->link_inds_by_block = ds_vector_create();
 
-    fseek_success = (fseek(file_fasta_base_index, -8, SEEK_END)) == 0;
+    /*Seek to the second to last base index (the last index is the total number
+      of bases in the coarse FASTA file)*/
+    fseek_success = (fseek(file_fasta_base_index, -16, SEEK_END)) == 0;
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA base index file\n");
     fseek(file_fasta_base_index, 0, SEEK_SET);
@@ -707,7 +708,7 @@ void cb_coarse_db_read_init_indices(struct cb_coarse_db_read *coarse_db,
 }
 
 struct cb_coarse_seq *cb_coarse_get_r(struct cb_coarse_db_read *coarse_db,
-                                       int32_t i){
+                                      int32_t i){
     return cb_coarse_get(coarse_db->coarsedb, i);
 }
 
