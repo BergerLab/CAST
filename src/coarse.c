@@ -343,9 +343,7 @@ void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db){
         struct DSVector *links =
           get_coarse_sequence_links_at(coarse_db->coarsedb->file_links,
                                        coarse_db->coarsedb->file_links_index,i);
-        for (j = 0; j < links->size; j++)
-            ds_vector_append(coarse_db->links, ds_vector_get(links, j));
-        ds_vector_free_no_data(links);
+        ds_vector_append(coarse_db->links, (void *)links);
     }
 }
 
@@ -369,7 +367,8 @@ void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
       fseek(coarse_db->coarsedb->file_fasta_base_index, -8, SEEK_END) == 0;
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA index file\n");
-    num_bases = (int64_t)read_int_from_file(8,coarse_db->file_fasta_base_index);
+    num_bases =
+      (int64_t)read_int_from_file(8,coarse_db->coarsedb->file_fasta_base_index);
     fseek(coarse_db->coarsedb->file_fasta_base_index, 0, SEEK_SET) == 0;
 
     for (i = 0; i < num_fasta_entries; i++) {
@@ -670,7 +669,7 @@ cb_coarse_read_init(int32_t seed_size,
 /*Frees a cb_coarse_db_read struct.*/
 void
 cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
-    int i;
+    int32_t i, j;
 
     cb_coarse_free(coarsedb->coarsedb);
 
@@ -678,9 +677,14 @@ cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
         free(coarsedb->all_residues);
 
     if (coarsedb->links) {
-        for (i = 0; i < coarsedb->links->size; i++)
-            cb_link_to_compressed_free(
-              (struct cb_link_to_compressed *)ds_vector_get(coarsedb->links,i));
+        for (i = 0; i < coarsedb->links->size; i++) {
+            struct DSVector *seq_links =
+              (struct DSVector *)ds_vector_get(coarsedb->links, i);
+            for (j = 0; j < seq_links->size; j++)
+                cb_link_to_compressed_free(
+                  (struct cb_link_to_compressed *)ds_vector_get(seq_links, j));
+            ds_vector_free_no_data(seq_links);
+        }
         ds_vector_free_no_data(coarsedb->links);
     }
 
