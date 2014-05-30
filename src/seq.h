@@ -15,17 +15,11 @@ struct cb_hit_expansion {
     int64_t offset;
 };
 
-struct cb_seq *
-cb_seq_init(int32_t id, char *name, char *residues);
+struct cb_seq *cb_seq_init(int32_t id, char *name, char *residues);
+struct cb_seq *cb_seq_init_range(int32_t id, char *name, char *residues,
+                                 int32_t start, int32_t end);
 
-struct cb_seq *
-cb_seq_init_range(int32_t id, char *name, char *residues,
-                   int32_t start, int32_t end);
-
-void
-cb_seq_free(struct cb_seq *seq);
-
-void
-cb_hit_expansion_free(struct cb_hit_expansion *expansion);
+void cb_seq_free(struct cb_seq *seq);
+void cb_hit_expansion_free(struct cb_hit_expansion *expansion);
 
 #endif

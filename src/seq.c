@@ -5,16 +5,12 @@
 
 #include "seq.h"
 
-struct cb_seq *
-cb_seq_init(int32_t id, char *name, char *residues)
-{
+struct cb_seq *cb_seq_init(int32_t id, char *name, char *residues){
     return cb_seq_init_range(id, name, residues, 0, strlen(residues));
 }
 
-struct cb_seq *
-cb_seq_init_range(int32_t id, char *name, char *residues,
-                  int32_t start, int32_t end)
-{
+struct cb_seq *cb_seq_init_range(int32_t id, char *name, char *residues,
+                                 int32_t start, int32_t end){
     int len;
 
     struct cb_seq *seq = malloc(sizeof(*seq));
@@ -50,17 +46,13 @@ cb_seq_init_range(int32_t id, char *name, char *residues,
     return seq;
 }
 
-void
-cb_seq_free(struct cb_seq *seq)
-{
+void cb_seq_free(struct cb_seq *seq){
     free(seq->name);
     free(seq->residues);
     free(seq);
 }
 
-void
-cb_hit_expansion_free(struct cb_hit_expansion *expansion)
-{
+void cb_hit_expansion_free(struct cb_hit_expansion *expansion){
     cb_seq_free(expansion->seq);
     free(expansion);
 }

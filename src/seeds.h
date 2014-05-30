@@ -17,11 +17,10 @@ struct cb_seed_loc {
     struct cb_seed_loc *next;
 };
 
-struct cb_seed_loc *
-cb_seed_loc_init(uint32_t coarse_seq_id, uint16_t residue_index);
+struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
+                                     uint16_t residue_index);
 
-void
-cb_seed_loc_free(struct cb_seed_loc *seedLoc);
+void cb_seed_loc_free(struct cb_seed_loc *seedLoc);
 
 struct cb_seeds {
     int32_t seed_size;
@@ -32,21 +31,17 @@ struct cb_seeds {
     pthread_rwlock_t lock;
 };
 
-struct cb_seeds *
-cb_seeds_init(int32_t seed_size);
+struct cb_seeds *cb_seeds_init(int32_t seed_size);
 
-void
-cb_seeds_free(struct cb_seeds *seeds);
+void cb_seeds_free(struct cb_seeds *seeds);
 
 struct cb_coarse_seq;
 
-void
-cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq);
+void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq);
 
-/* Produces a copy of the list of seeds for 'kmer', and therefore the
- * result needs to be freed with `cb_seed_loc_free` when finished. */
-struct cb_seed_loc *
-cb_seeds_lookup(struct cb_seeds *seeds, char *kmer);
+/*Produces a copy of the list of seeds for 'kmer', and therefore the
+  result needs to be freed with `cb_seed_loc_free` when finished. */
+struct cb_seed_loc *cb_seeds_lookup(struct cb_seeds *seeds, char *kmer);
 
 void print_seeds(struct cb_seeds *seeds);
 

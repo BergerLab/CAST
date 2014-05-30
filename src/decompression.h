@@ -14,10 +14,11 @@
 
 struct cb_seq *cb_decompress_seq(struct cb_compressed_seq *cseq,
                                    struct cb_coarse *coarsedb);
-struct DSVector *
-cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
-                  int32_t id, int32_t start, int32_t end,
-                  int32_t hit_pad_length);
+
+struct DSVector *cb_coarse_expand(struct cb_coarse *coarsedb,
+                                  struct cb_compressed *comdb,
+                                  int32_t id, int32_t start, int32_t end,
+                                  int32_t hit_pad_length);
 
 void decode_edit_script(char *orig, int dest_len, int original_start,
                         struct cb_coarse *coarsedb,

@@ -98,18 +98,19 @@ int get_max(int a, int b){return a>b?a:b;}
  *sequence section for each link_to_compressed from the coarse sequence that is
  *in the range between the indices hit_from and hit_to.
  */
-struct DSVector *
-cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
-                  int32_t id, int32_t hit_from, int32_t hit_to,
-                  int32_t hit_pad_length){
-    FILE *links = coarsedb->file_links,
+struct DSVector *cb_coarse_expand(struct cb_coarse *coarsedb,
+                                  struct cb_compressed *comdb,
+                                  int32_t id, int32_t hit_from, int32_t hit_to,
+                                  int32_t hit_pad_length){
+    FILE *links              = coarsedb->file_links,
          *coarse_links_index = coarsedb->file_links_index,
-         *fasta = coarsedb->file_fasta,
-         *compressed = comdb->file_compressed;
+         *fasta              = coarsedb->file_fasta,
+         *compressed         = comdb->file_compressed;
     struct DSVector *oseqs = ds_vector_create(), *coarse_seq_links;
     struct fasta_seq *residues = cb_coarse_read_fasta_seq(coarsedb, id);
     int64_t *seq_lengths = cb_compressed_get_lengths(comdb);
     int32_t fasta_length = strlen(residues->seq), i = 0, j = 0;
+
     /*Get all links_to_compressed for the coarse sequence we are expanding.*/
     coarse_seq_links =
         get_coarse_sequence_links_at(links, coarse_links_index, id);
@@ -156,8 +157,7 @@ cb_coarse_expand(struct cb_coarse *coarsedb, struct cb_compressed *comdb,
 
             seq = cb_compressed_read_seq_at(comdb, link->org_seq_id);
 
-            orig_str = malloc((original_end-original_start+2) *
-                              sizeof(*orig_str));
+            orig_str=malloc((original_end-original_start+2)*sizeof(*orig_str));
             assert(orig_str);
 
             for (j = 0; j < original_end-original_start+1; orig_str[j++]='?');

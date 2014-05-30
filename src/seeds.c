@@ -37,9 +37,7 @@ static int32_t residue_value(char residue);
 
 static int32_t hash_kmer(struct cb_seeds *seeds, char *kmer);
 
-struct cb_seeds *
-cb_seeds_init(int32_t seed_size)
-{
+struct cb_seeds *cb_seeds_init(int32_t seed_size){
     struct cb_seeds *seeds;
     int32_t errno, i, p;
 
@@ -74,8 +72,7 @@ cb_seeds_init(int32_t seed_size)
     return seeds;
 }
 
-void
-cb_seeds_free(struct cb_seeds *seeds) {
+void cb_seeds_free(struct cb_seeds *seeds){
     int32_t errno, i;
 
     if (0 != (errno = pthread_rwlock_destroy(&seeds->lock))) {
@@ -89,9 +86,7 @@ cb_seeds_free(struct cb_seeds *seeds) {
     free(seeds);
 }
 
-void
-cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq)
-{
+void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
     struct cb_seed_loc *sl1, *sl2;
     int32_t hash, i;
     char *kmer;
@@ -112,9 +107,7 @@ cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq)
     pthread_rwlock_unlock(&seeds->lock);
 }
 
-struct cb_seed_loc *
-cb_seeds_lookup(struct cb_seeds *seeds, char *kmer)
-{
+struct cb_seed_loc *cb_seeds_lookup(struct cb_seeds *seeds, char *kmer){
     struct cb_seed_loc *sl, *copy_first, *copy;
 
     pthread_rwlock_rdlock(&seeds->lock);
@@ -137,9 +130,8 @@ cb_seeds_lookup(struct cb_seeds *seeds, char *kmer)
     return copy_first;
 }
 
-struct cb_seed_loc *
-cb_seed_loc_init(uint32_t coarse_seq_id, uint16_t residue_index)
-{
+struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
+                                     uint16_t residue_index){
     struct cb_seed_loc *seedLoc;
 
     seedLoc = malloc(sizeof(*seedLoc));
@@ -152,9 +144,7 @@ cb_seed_loc_init(uint32_t coarse_seq_id, uint16_t residue_index)
     return seedLoc;
 }
 
-void
-cb_seed_loc_free(struct cb_seed_loc *seedLoc)
-{
+void cb_seed_loc_free(struct cb_seed_loc *seedLoc){
     struct cb_seed_loc *seed1, *seed2;
 
     for (seed1 = seedLoc; seed1 != NULL; ) {
@@ -164,11 +154,9 @@ cb_seed_loc_free(struct cb_seed_loc *seedLoc)
     }
 }
 
-static int32_t residue_value(char residue)
-{
-    int32_t i, val;
+static int32_t residue_value(char residue){
+    int32_t i = residue - 'A', val;
 
-    i = residue - 'A';
     if (i < 0 || i >= 26) {
         fprintf(stderr, "Invalid nucleotide residue: %c\n", residue);
         exit(1);
@@ -182,9 +170,9 @@ static int32_t residue_value(char residue)
 
 /*Takes in as input a seeds table and a k-mer and returns the k-mer's index
   in the seeds table*/
-static int32_t hash_kmer(struct cb_seeds *seeds, char *kmer)
-{
+static int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
     int32_t i = 0, key = 0;
+
     for (i = 0; i < seeds->seed_size; i++)
         key += residue_value(kmer[i]) * seeds->powers[i];
     return key;
@@ -218,6 +206,7 @@ void print_seeds(struct cb_seeds *seeds){
         struct cb_seed_loc *s = seeds->locs[i];
         uint32_t new_kmer = (uint32_t)0;
         char *kmer = unhash_kmer(seeds, i);
+
         printf("%s\n", kmer);
         for (j = 0; j < seeds->seed_size; j++) {
             new_kmer <<= 2;

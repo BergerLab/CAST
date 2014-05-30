@@ -7,15 +7,11 @@
 
 #include "util.h"
 
-char *
-trim_space(char *s)
-{
+char *trim_space(char *s){
     return trim(s, " \r\n\t");
 }
 
-char *
-trim(char *s, const char *totrim)
-{
+char *trim(char *s, const char *totrim){
     int32_t i, j,
              start, end,
              slen, totrimlen, newlen;
@@ -62,9 +58,7 @@ trim(char *s, const char *totrim)
     return news;
 }
 
-int32_t
-readline(FILE *f, char **line)
-{
+int32_t readline(FILE *f, char **line){
     int32_t allocated;
     char buf[1024];
 
@@ -89,9 +83,7 @@ readline(FILE *f, char **line)
     return allocated - 1;
 }
 
-int32_t
-num_cpus()
-{
+int32_t num_cpus(){
     int32_t cpus;
 
     cpus = (int32_t) sysconf(_SC_NPROCESSORS_ONLN);
@@ -100,9 +92,7 @@ num_cpus()
     return cpus;
 }
 
-char *
-str_slice(char *str, int32_t start, int32_t end)
-{
+char *str_slice(char *str, int32_t start, int32_t end){
     int32_t len;
     char *ret;
 

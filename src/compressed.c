@@ -304,13 +304,7 @@ struct cb_compressed_seq *cb_compressed_seq_init(int32_t id, char *name){
 }
 
 void cb_compressed_seq_free(struct cb_compressed_seq *seq){
-    struct cb_link_to_coarse *link1, *link2;
-
-    for (link1 = seq->links; link1 != NULL; ) {
-        link2 = link1->next;
-        cb_link_to_coarse_free(link1);
-        link1 = link2;
-    }
+    cb_link_to_coarse_free(seq->links);
     free(seq->name);
     free(seq);
 }

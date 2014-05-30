@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "link_to_compressed.h"
@@ -8,11 +9,8 @@
 struct cb_link_to_compressed *
 cb_link_to_compressed_init(int32_t org_seq_id, int16_t coarse_start,
                            int16_t coarse_end, uint64_t original_start,
-                           uint64_t original_end, bool dir)
-{
-    struct cb_link_to_compressed *link;
-
-    link = malloc(sizeof(*link));
+                           uint64_t original_end, bool dir){
+    struct cb_link_to_compressed *link = malloc(sizeof(*link));
     assert(link);
 
     link->org_seq_id     = org_seq_id;
@@ -26,9 +24,10 @@ cb_link_to_compressed_init(int32_t org_seq_id, int16_t coarse_start,
     return link;
 }
 
-void
-cb_link_to_compressed_free(struct cb_link_to_compressed *link)
-{
-    free(link);
+void cb_link_to_compressed_free(struct cb_link_to_compressed *link){
+    if (link != NULL) {
+        cb_link_to_compressed_free(link->next);
+        free(link);
+    }
 }
 

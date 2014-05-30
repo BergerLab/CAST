@@ -56,7 +56,10 @@ cb_link_to_coarse_init_nodiff(int32_t coarse_seq_id,
 }
 
 void cb_link_to_coarse_free(struct cb_link_to_coarse *link){
-    free(link->diff);
-    free(link);
+    if (link != NULL) {
+        cb_link_to_coarse_free(link->next);
+        free(link->diff);
+        free(link);
+    }
 }
 

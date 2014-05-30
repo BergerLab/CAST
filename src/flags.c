@@ -85,7 +85,6 @@ struct opt_config *load_compress_args(){
     return conf;
 }
 
-
 struct opt_config *load_search_args(){
     struct opt_config *conf;
     int32_t cpus;
