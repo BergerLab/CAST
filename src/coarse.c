@@ -751,8 +751,9 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db,
             current_end =
               read_int_from_file(8, file_links_base_index);
 
+        current_start += seq_base_indices[current_seq];
+        current_end += seq_base_indices[current_seq];
         fprintf(stderr, "%d %d\n", current_start, current_end);
-
         current_start /= block_size; current_end /= block_size;
 
         for (i = current_start; i <= current_end; i++) {
