@@ -28,9 +28,7 @@ static char *path_join(char *a, char *b)
     return joined;
 }
 
-int
-main(int argc, char **argv)
-{ 
+int main(int argc, char **argv){
     struct cb_database *db;
     struct cb_compress_workers *workers;
     struct fasta_seq_gen *fsg;

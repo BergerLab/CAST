@@ -116,10 +116,10 @@ cb_compress_worker(void *data)
 
     args = (struct worker_args *) data;
     mem = cb_align_nw_memory_init();
-    while (NULL != (s = (struct cb_seq *) ds_queue_get(args->jobs))) {
+    while (NULL != (s = (struct cb_seq *)ds_queue_get(args->jobs))) {
         cseq = cb_compress(args->db->coarse_db, s, mem);
         cb_compressed_write_binary(args->db->com_db, cseq);
-
+printf("@@@@@@@ %d\n", s->length);
         args->db->coarse_db->dbsize += s->length;
 
         cb_seq_free(s);
