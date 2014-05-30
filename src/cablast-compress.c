@@ -79,7 +79,7 @@ main(int argc, char **argv)
     }
 
     cb_compress_join_workers(workers);
-    cb_coarse_save_binary(db->coarse_db);
+    cb_coarse_save_plain(db->coarse_db);
     cb_coarse_save_seeds_binary(db->coarse_db);
     cb_compressed_save_binary(db->com_db);
 

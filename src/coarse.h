@@ -77,17 +77,10 @@ cb_coarse_add(struct cb_coarse *coarse_db,
 struct cb_coarse_seq *
 cb_coarse_get(struct cb_coarse *coarse_db, int32_t i);
 
-void
-cb_coarse_save_binary(struct cb_coarse *coarse_db);
-
-void
-cb_coarse_save_plain(struct cb_coarse *coarse_db);
-
-void
-cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db);
-
-void
-cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db);
+void cb_coarse_save_binary(struct cb_coarse *coarse_db);
+void cb_coarse_save_plain(struct cb_coarse *coarse_db);
+void cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db);
+void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db);
 
 char *get_coarse_header(FILE *f);
 struct cb_link_to_compressed *read_coarse_link(FILE *f);
@@ -126,8 +119,8 @@ void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db);
  *and are used as wrapper functions for the regular coarse database functions
  *being called on the cb_coarse_db_read struct's coarsedb.
  */
-struct cb_coarse_seq *
-cb_coarse_get_r(struct cb_coarse_db_read *coarse_db, int32_t i);
+struct cb_coarse_seq *cb_coarse_get_r(struct cb_coarse_db_read *coarse_db,
+                                      int32_t i);
 
 struct fasta_seq *cb_coarse_read_fasta_seq_r(struct cb_coarse_db_read *coarsedb,
                                              int id);

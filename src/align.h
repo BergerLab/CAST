@@ -21,9 +21,9 @@ struct ungapped_alignment{
 
 struct ungapped_alignment
 cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
-                   int32_t i1, char *oseq, int32_t ostart, int32_t oend,
-                   int32_t dir2, int32_t i2, bool *matches,
-                   bool *matches_past_clump, int *matches_index);
+                  int32_t i1, char *oseq, int32_t ostart, int32_t oend,
+                  int32_t dir2, int32_t i2, bool *matches,
+                  bool *matches_past_clump, int *matches_index);
 
 struct cb_align_nw_memory {
     int32_t *table;
@@ -59,9 +59,9 @@ struct cb_alignment {
 
 struct cb_alignment
 cb_align_nw(struct cb_align_nw_memory *mem,
-             char *rseq, int dp_len1, int i1, int dir1,
-             char *oseq, int dp_len2, int i2, int dir2,
-             bool *matches, int *matches_index);
+            char *rseq, int dp_len1, int i1, int dir1,
+            char *oseq, int dp_len2, int i2, int dir2,
+            bool *matches, int *matches_index);
 
 int32_t
 cb_align_length_nogaps(char *residues);

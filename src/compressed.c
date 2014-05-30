@@ -8,9 +8,8 @@
 #include "compressed.h"
 #include "edit_scripts.h"
 
-struct cb_compressed *
-cb_compressed_init(FILE *file_compressed, FILE *file_index)
-{
+struct cb_compressed *cb_compressed_init(FILE *file_compressed,
+                                         FILE *file_index){
     struct cb_compressed *com_db;
 
     com_db = malloc(sizeof(*com_db));
@@ -23,9 +22,7 @@ cb_compressed_init(FILE *file_compressed, FILE *file_index)
     return com_db;
 }
 
-void
-cb_compressed_free(struct cb_compressed *com_db)
-{
+void cb_compressed_free(struct cb_compressed *com_db){
     int i;
 
     fclose(com_db->file_compressed);
@@ -38,16 +35,12 @@ cb_compressed_free(struct cb_compressed *com_db)
     free(com_db);
 }
 
-int32_t
-cb_compressed_size(struct cb_compressed *com_db)
-{
+int32_t cb_compressed_size(struct cb_compressed *com_db){
     return com_db->seqs->size;
 }
 
-void
-cb_compressed_add(struct cb_compressed *com_db,
-                   struct cb_compressed_seq *seq)
-{
+void cb_compressed_add(struct cb_compressed *com_db,
+                       struct cb_compressed_seq *seq){
     ds_vector_append(com_db->seqs, (void*) seq);
 }
 
@@ -55,9 +48,7 @@ cb_compressed_add(struct cb_compressed *com_db,
  *binary output format, which is printed to the file pointed to by
  *com_db->file_compressed.
  */
-void
-cb_compressed_save_binary(struct cb_compressed *com_db)
-{
+void cb_compressed_save_binary(struct cb_compressed *com_db){
     struct cb_compressed_seq *seq;
     struct cb_link_to_coarse *link;
 
@@ -167,9 +158,7 @@ cb_compressed_save_binary(struct cb_compressed *com_db)
     }
 }
 
-void
-cb_compressed_save_plain(struct cb_compressed *com_db)
-{
+void cb_compressed_save_plain(struct cb_compressed *com_db){
     struct cb_compressed_seq *seq;
     struct cb_link_to_coarse *link;
     int i;
@@ -187,10 +176,8 @@ cb_compressed_save_plain(struct cb_compressed *com_db)
     }
 }
 
-void
-cb_compressed_write(struct cb_compressed *com_db,
-                     struct cb_compressed_seq *seq)
-{
+void cb_compressed_write(struct cb_compressed *com_db,
+                         struct cb_compressed_seq *seq){
     struct cb_link_to_coarse *link;
 
     fprintf(com_db->file_compressed, "> %ld; %s\n", seq->id, seq->name);
@@ -204,10 +191,8 @@ cb_compressed_write(struct cb_compressed *com_db,
 
 /*Outputs a compressed sequence in the compressed database to the database's
   compressed file in binary format.*/
-void
-cb_compressed_write_binary(struct cb_compressed *com_db,
-                            struct cb_compressed_seq *seq)
-{
+void cb_compressed_write_binary(struct cb_compressed *com_db,
+                                struct cb_compressed_seq *seq){
     struct cb_link_to_coarse *link, *find_length;
     uint64_t index = ftell(com_db->file_compressed), original_length = 0;
     int32_t i;
@@ -303,9 +288,7 @@ cb_compressed_write_binary(struct cb_compressed *com_db,
     putc('\n', com_db->file_compressed);
 }
 
-struct cb_compressed_seq *
-cb_compressed_seq_init(int32_t id, char *name)
-{
+struct cb_compressed_seq *cb_compressed_seq_init(int32_t id, char *name){
     struct cb_compressed_seq *seq;
 
     seq = malloc(sizeof(*seq));
@@ -321,9 +304,7 @@ cb_compressed_seq_init(int32_t id, char *name)
     return seq;
 }
 
-void
-cb_compressed_seq_free(struct cb_compressed_seq *seq)
-{
+void cb_compressed_seq_free(struct cb_compressed_seq *seq){
     struct cb_link_to_coarse *link1, *link2;
 
     for (link1 = seq->links; link1 != NULL; ) {
@@ -335,10 +316,8 @@ cb_compressed_seq_free(struct cb_compressed_seq *seq)
     free(seq);
 }
 
-void
-cb_compressed_seq_addlink(struct cb_compressed_seq *seq,
-                           struct cb_link_to_coarse *newlink)
-{
+void cb_compressed_seq_addlink(struct cb_compressed_seq *seq,
+                               struct cb_link_to_coarse *newlink){
     struct cb_link_to_coarse *link;
 
     assert(newlink->next == NULL);
@@ -352,9 +331,8 @@ cb_compressed_seq_addlink(struct cb_compressed_seq *seq,
     link->next = newlink;
 }
 
-struct cb_compressed_seq *
-cb_compressed_seq_at(struct cb_compressed *com_db, int32_t i)
-{
+struct cb_compressed_seq *cb_compressed_seq_at(struct cb_compressed *com_db,
+                                               int32_t i){
     return (struct cb_compressed_seq *) ds_vector_get(com_db->seqs, i);
 }
 
@@ -501,9 +479,8 @@ struct cb_compressed_seq *get_compressed_seq(FILE *f, int id){
  *pointer must be pointing to the start of the header of a sequence entry in the
  *links file.
  */
-struct cb_compressed_seq *cb_compressed_read_seq_at(
-                                                 struct cb_compressed *comdb,
-                                                 int32_t id){
+struct cb_compressed_seq *
+cb_compressed_read_seq_at(struct cb_compressed *comdb, int32_t id){
     FILE *links = comdb->file_compressed;
     int64_t offset = cb_compressed_link_offset(comdb, id);
     bool fseek_success;

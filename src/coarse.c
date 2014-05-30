@@ -22,10 +22,9 @@ cb_coarse_init(int32_t seed_size,
                FILE *file_links_count_index, FILE *file_fasta_index,
                FILE *file_fasta_base_index, FILE *file_params)
 {
-    struct cb_coarse *coarse_db;
     int32_t errno;
 
-    coarse_db = malloc(sizeof(*coarse_db));
+    struct cb_coarse *coarse_db = malloc(sizeof(*coarse_db));
     assert(coarse_db);
 
     coarse_db->seqs   = ds_vector_create_capacity(10000000);
@@ -88,10 +87,8 @@ cb_coarse_free(struct cb_coarse *coarse_db)
  *created from those residues while also adding the sequence to the seeds
  *table.
  */
-struct cb_coarse_seq *
-cb_coarse_add(struct cb_coarse *coarse_db,
-              char *residues, int32_t start, int32_t end)
-{
+struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db,
+                                    char *residues, int32_t start, int32_t end){
     struct cb_coarse_seq *seq;
     int32_t id;
 
@@ -107,9 +104,7 @@ cb_coarse_add(struct cb_coarse *coarse_db,
 }
 
 /*Get the coarse sequence in the coarse database at index i.*/
-struct cb_coarse_seq *
-cb_coarse_get(struct cb_coarse *coarse_db, int32_t i)
-{
+struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db, int32_t i){
     struct cb_coarse_seq *seq;
 
     pthread_rwlock_rdlock(&coarse_db->lock_seq);
@@ -123,9 +118,7 @@ cb_coarse_get(struct cb_coarse *coarse_db, int32_t i)
  *outputs the links to the compressed database in a binary format, and outputs
  *the size of the database to the params file.
  */
-void
-cb_coarse_save_binary(struct cb_coarse *coarse_db)
-{
+void cb_coarse_save_binary(struct cb_coarse *coarse_db){
     struct cb_coarse_seq *seq;
     struct cb_link_to_compressed *link;
     int64_t i;
@@ -232,9 +225,7 @@ cb_coarse_save_binary(struct cb_coarse *coarse_db)
 
 /*Output the coarse database's sequences and links in a human-readable format.
   Used for debugging purposes.*/
-void
-cb_coarse_save_plain(struct cb_coarse *coarse_db)
-{
+void cb_coarse_save_plain(struct cb_coarse *coarse_db){
     struct cb_coarse_seq *seq;
     struct cb_link_to_compressed *link;
     int32_t i;
@@ -244,19 +235,18 @@ cb_coarse_save_plain(struct cb_coarse *coarse_db)
         fprintf(coarse_db->file_fasta, "> %d\n%s\n", i, seq->seq->residues);
 
         fprintf(coarse_db->file_links, "> %d\n", i);
-        for (link = seq->links; link != NULL; link = link->next)
-            fprintf(coarse_db->file_links_index,
-              "original sequence id: %d, reference range: (%d, %d), "
+        for (link = seq->links; link != NULL; link = link->next) {
+            fprintf(coarse_db->file_links,
+              "    original sequence id: %d, reference range: (%d, %d), "
               "direction: %c\n",
               link->org_seq_id, link->coarse_start, link->coarse_end,
               (link->dir?'0':'1'));
+        }
     }
 }
 
 /*Takes in the coarse database and saves its seeds table in a binary format.*/
-void
-cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db)
-{
+void cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db){
     struct cb_coarse_seq *seq;
     struct cb_link_to_compressed *link;
     int32_t i, j;
@@ -289,9 +279,7 @@ cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db)
 
 /*Takes in the coarse database and saves its seeds table in a human-readable
   format.  Used for debugging.*/
-void
-cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db)
-{
+void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db){
     struct cb_coarse_seq *seq;
     struct cb_link_to_compressed *link;
     int32_t i, j;
@@ -343,6 +331,11 @@ void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db){
         struct DSVector *links =
           get_coarse_sequence_links_at(coarse_db->coarsedb->file_links,
                                        coarse_db->coarsedb->file_links_index,i);
+        for (j = 0; j < links->size; j++) {
+            struct cb_link_to_compressed *l =
+              (struct cb_link_to_compressed *)ds_vector_get(links, j);
+            printf("%d %d    %d %d\n", l->coarse_start, l->coarse_end, l->original_start, l->original_end);
+        }
         ds_vector_append(coarse_db->links, (void *)links);
     }
 }
@@ -422,9 +415,7 @@ cb_coarse_seq_init(int32_t id, char *residues, int32_t start, int32_t end)
 }
 
 /*Frees a coarse sequence.*/
-void
-cb_coarse_seq_free(struct cb_coarse_seq *seq)
-{
+void cb_coarse_seq_free(struct cb_coarse_seq *seq){
     struct cb_link_to_compressed *link1, *link2;
     int32_t errno;
 
@@ -444,10 +435,8 @@ cb_coarse_seq_free(struct cb_coarse_seq *seq)
 
 /*Takes in a coarse sequence and a link_to_compressed and adds the link to the
   sequence at the end of the linked list of links.*/
-void
-cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
-                      struct cb_link_to_compressed *newlink)
-{
+void cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
+                           struct cb_link_to_compressed *newlink){
     struct cb_link_to_compressed *link;
 
     assert(newlink->next == NULL);
@@ -656,6 +645,16 @@ cb_coarse_read_init(int32_t seed_size,
 
     cb_coarse_db_read_init_blocks(coarsedb, link_block_size);
 
+    /*for (i = 0; i < coarsedb->link_inds_by_block->size; i++) {
+        printf("%d\n", i);
+        struct DSVector *block =
+            (struct DSVector *)ds_vector_get(coarsedb->link_inds_by_block, i);
+        int j;
+        for (j = 0; j < block->size; j++)
+            printf("    %d\n", *(int *)ds_vector_get(block, j));
+    }*/
+
+
     /*If the --load-coarse-residues or --load-coarse-db search flag was passed
       in, load the coarse residues into coarse_db->all_residues.*/
     if (load_coarse_residues)
@@ -670,8 +669,7 @@ cb_coarse_read_init(int32_t seed_size,
 }
 
 /*Frees a cb_coarse_db_read struct.*/
-void
-cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
+void cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
     int32_t i, j;
 
     cb_coarse_free(coarsedb->coarsedb);
@@ -707,7 +705,7 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db,
     int64_t num_coarse_seqs, num_link_blocks,
             *seq_base_indices = NULL, *seq_link_counts = NULL;
     int32_t current_seq = 0, current_link = 0, link_count = 0,
-             i = 0, *current_link_ptr = NULL;
+            i = 0, *current_link_ptr = NULL;
     bool fseek_success;
 
     coarse_db->link_inds_by_block = ds_vector_create();
@@ -755,7 +753,7 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db,
 
         current_start = read_int_from_file(8, file_links_base_index);
         current_end   = read_int_from_file(8, file_links_base_index);
-
+/*printf("%d %d\n", current_start, current_end);*/
         current_start /= block_size;
         current_end /= block_size;
 
