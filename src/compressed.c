@@ -289,16 +289,15 @@ void cb_compressed_write_binary(struct cb_compressed *com_db,
 }
 
 struct cb_compressed_seq *cb_compressed_seq_init(int32_t id, char *name){
-    struct cb_compressed_seq *seq;
-
-    seq = malloc(sizeof(*seq));
+    struct cb_compressed_seq *seq = malloc(sizeof(*seq));
     assert(seq);
 
     seq->id = id;
     seq->links = NULL;
 
-    seq->name = malloc((1 + strlen(name)) * sizeof(*seq->name));
+    seq->name = malloc((1+strlen(name))*sizeof(*seq->name));
     assert(seq->name);
+
     strcpy(seq->name, name);
 
     return seq;
@@ -479,8 +478,8 @@ struct cb_compressed_seq *get_compressed_seq(FILE *f, int id){
  *pointer must be pointing to the start of the header of a sequence entry in the
  *links file.
  */
-struct cb_compressed_seq *
-cb_compressed_read_seq_at(struct cb_compressed *comdb, int32_t id){
+struct cb_compressed_seq *cb_compressed_read_seq_at(struct cb_compressed *comdb,
+                                                    int32_t id){
     FILE *links = comdb->file_compressed;
     int64_t offset = cb_compressed_link_offset(comdb, id);
     bool fseek_success;

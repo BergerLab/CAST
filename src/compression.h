@@ -22,21 +22,18 @@ struct cb_compress_workers {
     void *args;
 };
 
-struct cb_compress_workers *
-cb_compress_start_workers(struct cb_database *db, int32_t num_workers);
+struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
+                                                      int32_t num_workers);
 
-void
-cb_compress_join_workers(struct cb_compress_workers *workers);
+void cb_compress_join_workers(struct cb_compress_workers *workers);
 
-void
-cb_compress_free_workers(struct cb_compress_workers *workers);
+void cb_compress_free_workers(struct cb_compress_workers *workers);
 
-void
-cb_compress_send_job(struct cb_compress_workers *workers,
-                      struct cb_seq *org_seq);
+void cb_compress_send_job(struct cb_compress_workers *workers,
+                          struct cb_seq *org_seq);
 
-struct cb_compressed_seq *
-cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
-             struct cb_align_nw_memory *mem);
+struct cb_compressed_seq *cb_compress(struct cb_coarse *coarse_db,
+                                      struct cb_seq *org_seq,
+                                      struct cb_align_nw_memory *mem);
 
 #endif

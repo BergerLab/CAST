@@ -9,9 +9,9 @@
 
 struct cb_link_to_coarse *
 cb_link_to_coarse_init(int32_t coarse_seq_id,
-                        uint64_t original_start, uint64_t original_end,
-                        uint16_t coarse_start, uint16_t coarse_end,
-                        struct cb_alignment alignment, bool dir){
+                       uint64_t original_start, uint64_t original_end,
+                       uint16_t coarse_start, uint16_t coarse_end,
+                       struct cb_alignment alignment, bool dir){
     struct cb_link_to_coarse *link;
 
     link = malloc(sizeof(*link));
@@ -32,9 +32,9 @@ cb_link_to_coarse_init(int32_t coarse_seq_id,
 
 struct cb_link_to_coarse *
 cb_link_to_coarse_init_nodiff(int32_t coarse_seq_id,
-                               uint64_t original_start, uint64_t original_end,
-                               uint16_t coarse_start, uint16_t coarse_end,
-                               bool dir){
+                              uint64_t original_start, uint64_t original_end,
+                              uint16_t coarse_start, uint16_t coarse_end,
+                              bool dir){
     struct cb_link_to_coarse *link;
 
     link = malloc(sizeof(*link));
@@ -55,9 +55,7 @@ cb_link_to_coarse_init_nodiff(int32_t coarse_seq_id,
     return link;
 }
 
-void
-cb_link_to_coarse_free(struct cb_link_to_coarse *link)
-{
+void cb_link_to_coarse_free(struct cb_link_to_coarse *link){
     free(link->diff);
     free(link);
 }
