@@ -280,9 +280,8 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
             int32_t coarse_start  = h->hit_from-1,
                     coarse_end    = h->hit_to-1,
                     coarse_seq_id = current_hit->accession;
-            oseqs = cb_coarse_expand(db->coarse_db->coarsedb, db->com_db,
-                                     coarse_seq_id, coarse_start, coarse_end,
-                                     50);
+            oseqs = cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
+                                     coarse_start, coarse_end, 50);
             for (k = 0; k < oseqs->size; k++)
                 ds_vector_append(expanded_hits, ds_vector_get(oseqs, k));
             ds_vector_free_no_data(oseqs);
@@ -294,9 +293,7 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
     return expanded_hits;
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv){
     FILE *query_file = NULL, *test_hits_file = NULL;
     struct cb_database_r *db = NULL;
     struct opt_config *conf;
@@ -441,6 +438,7 @@ main(int argc, char **argv)
         ds_vector_free_no_data(expanded_hits);
         fasta_free_seq(query);
     }
+
     if (!search_flags.hide_progress)
         fprintf(stderr, "\n"); /*Make a newline after the progress bar*/
     ds_vector_free_no_data(queries);
@@ -463,7 +461,7 @@ main(int argc, char **argv)
 
     /*Free the coarse BLAST results file if the --no-cleanup flag is not being
       used.*/
-    if(!search_flags.no_cleanup)
+    if (!search_flags.no_cleanup)
         system("rm CaBLAST_temp_blast_results.xml");
     return 0;
 }

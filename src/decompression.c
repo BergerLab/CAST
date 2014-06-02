@@ -98,10 +98,11 @@ int get_max(int a, int b){return a>b?a:b;}
  *sequence section for each link_to_compressed from the coarse sequence that is
  *in the range between the indices hit_from and hit_to.
  */
-struct DSVector *cb_coarse_expand(struct cb_coarse *coarsedb,
+struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
                                   struct cb_compressed *comdb,
                                   int32_t id, int32_t hit_from, int32_t hit_to,
                                   int32_t hit_pad_length){
+    struct cb_coarse *coarsedb  = coarse_db->coarsedb;
     FILE *links              = coarsedb->file_links,
          *coarse_links_index = coarsedb->file_links_index,
          *fasta              = coarsedb->file_fasta,
