@@ -16,8 +16,8 @@ struct cb_compressed *cb_compressed_init(FILE *file_compressed,
     assert(com_db);
 
     com_db->file_compressed = file_compressed;
-    com_db->file_index = file_index;
-    com_db->seqs = ds_vector_create_capacity(100);
+    com_db->file_index      = file_index;
+    com_db->seqs            = ds_vector_create_capacity(100);
 
     return com_db;
 }
@@ -41,7 +41,7 @@ int32_t cb_compressed_size(struct cb_compressed *com_db){
 
 void cb_compressed_add(struct cb_compressed *com_db,
                        struct cb_compressed_seq *seq){
-    ds_vector_append(com_db->seqs, (void*) seq);
+    ds_vector_append(com_db->seqs, (void *)seq);
 }
 
 /*Takes in as input the compressed database and converts its sequences to a
@@ -168,11 +168,11 @@ void cb_compressed_save_plain(struct cb_compressed *com_db){
         fprintf(com_db->file_compressed, "> %ld; %s\n", seq->id, seq->name);
         for (link = seq->links; link != NULL; link = link->next)
             fprintf(com_db->file_compressed,
-                "reference sequence id: %d, reference range: (%d, %d), "
-                  "original sequence range: (%ld %ld)\n%s\n",
-                link->coarse_seq_id, link->coarse_start, link->coarse_end,
-                link->original_start, link->original_end,
-                link->diff);
+              "reference sequence id: %d, reference range: (%d, %d), "
+              "original sequence range: (%ld %ld)\n%s\n",
+              link->coarse_seq_id, link->coarse_start, link->coarse_end,
+              link->original_start, link->original_end,
+              link->diff);
     }
 }
 
@@ -183,9 +183,9 @@ void cb_compressed_write(struct cb_compressed *com_db,
     fprintf(com_db->file_compressed, "> %ld; %s\n", seq->id, seq->name);
     for (link = seq->links; link != NULL; link = link->next) {
         fprintf(com_db->file_compressed,
-            "reference sequence id: %d, reference range: (%d, %d)\n%s\n",
-            link->coarse_seq_id, link->coarse_start, link->coarse_end,
-            link->diff);
+          "reference sequence id: %d, reference range: (%d, %d)\n%s\n",
+          link->coarse_seq_id, link->coarse_start, link->coarse_end,
+          link->diff);
     }
 }
 
@@ -453,6 +453,7 @@ struct cb_compressed_seq *get_compressed_seq(FILE *f, int id){
         char c = 1;
         if (current_link == NULL)
             break;
+
         if (!first_link)
             first_link = current_link;
         else
@@ -557,7 +558,7 @@ struct cb_compressed_seq **read_compressed(FILE *f){
     int length = 0;
 
     struct cb_compressed_seq **compressed_seqs =
-        malloc(1000*sizeof(*compressed_seqs));
+      malloc(1000*sizeof(*compressed_seqs));
     assert(compressed_seqs);
 
     /*Read each sequence*/
@@ -603,7 +604,7 @@ struct cb_compressed_seq **read_compressed(FILE *f){
     }
 
     compressed_seqs =
-        realloc(compressed_seqs, (length+1)*sizeof(*compressed_seqs));
+      realloc(compressed_seqs, (length+1)*sizeof(*compressed_seqs));
     assert(compressed_seqs);
 
     compressed_seqs[length] = NULL;

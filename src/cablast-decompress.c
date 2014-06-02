@@ -77,11 +77,11 @@ main(int argc, char **argv)
         last_end = 0;
         printf("> %s\n", compressed[i]->name);
         for (link = (compressed[i])->links; link != NULL; link = link->next) {
-            int length;
             struct cb_seq *chunk =
-                cb_seq_init_range(-1, "",
-                                   coarse_sequences[link->coarse_seq_id]->seq,
-                                   link->coarse_start, link->coarse_end + 1);
+              cb_seq_init_range(-1, "",
+                                coarse_sequences[link->coarse_seq_id]->seq,
+                                link->coarse_start, link->coarse_end + 1);
+            int length;
             char *decompressed;
 
 

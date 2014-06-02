@@ -338,8 +338,8 @@ void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db){
   database's all_residues string*/
 void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
     struct DSVector *fasta_seqs = ds_vector_create();
-    int64_t num_bases = 0;
-    int32_t num_fasta_entries = 0, bases_copied = 0, i = 0, j = 0;
+    int64_t num_bases = 0, i = 0;
+    int32_t num_fasta_entries = 0, bases_copied = 0, j = 0;
 
     /*Get the number of entries in the coarse FASTA file*/
     bool fseek_success =
@@ -761,22 +761,6 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db,
             current_seq++;
     }
 
-/***************************************************************************************************/
-/***************************************************************************************************/
-/***************************************************************************************************/
-    /*int j = 0;
-
-    for (i = 0; i < coarse_db->link_inds_by_block->size; i++) {
-        struct DSVector *block = (struct DSVector *)ds_vector_get(coarse_db->link_inds_by_block, i);
-        printf("Block %d:\n    ", i);
-        for (j = 0; j < block->size; j++)
-            printf("%d ", *(int *)ds_vector_get(block, j));
-        printf("\n");
-    }*/
-/***************************************************************************************************/
-/***************************************************************************************************/
-/***************************************************************************************************/
-        
     free(seq_base_indices);
 }
 
@@ -791,6 +775,6 @@ struct cb_coarse_seq *cb_coarse_get_r(struct cb_coarse_db_read *coarse_db,
 }
 
 struct fasta_seq *cb_coarse_read_fasta_seq_r(struct cb_coarse_db_read *coarsedb,
-                                             int id){
+                                             int64_t id){
     return cb_coarse_read_fasta_seq(coarsedb->coarsedb, id);
 }

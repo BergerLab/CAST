@@ -224,7 +224,7 @@ void write_fine_fasta(struct DSVector *oseqs){
     }
     for (i = 0; i < oseqs->size; i++) {
         struct cb_seq *current_seq =
-            ((struct cb_hit_expansion *)ds_vector_get(oseqs, i))->seq;
+          ((struct cb_hit_expansion *)ds_vector_get(oseqs, i))->seq;
         fprintf(temp, "> %s\n%s\n", current_seq->name, current_seq->residues);
     }
     fclose(temp);
@@ -267,8 +267,8 @@ char *get_blast_args(struct opt_args *args){
 struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
                                    struct cb_database_r *db){
     struct DSVector *expanded_hits = ds_vector_create(),
-                    *hits = get_blast_hits((xmlNode *)
-                                ds_vector_get(iterations, index));
+                    *hits = get_blast_hits(
+                              (xmlNode *)ds_vector_get(iterations, index));
     int i = 0, j = 0, k = 0;
 
     for (i = 0; i < hits->size; i++) {
@@ -363,7 +363,7 @@ main(int argc, char **argv)
     for (i = 0; i < iterations->size; i++) {
         if (!search_flags.hide_progress) {
             int32_t digits_full = floor(log10((double)iterations->size)),
-                    digits_i = floor(log10((double)i)), spaces;
+                    digits_i    = floor(log10((double)i)), spaces;
             char *bar = progress_bar(i, iterations->size);
             spaces = digits_full - digits_i;
             fprintf(stderr, "\r");
@@ -388,7 +388,7 @@ main(int argc, char **argv)
             blast_fine("CaBLAST_fine.fasta", dbsize, query);
             /*Delete the expanded hits file if the --no-cleanup flag is not
               being used.*/
-            if(!search_flags.no_cleanup)
+            if (!search_flags.no_cleanup)
                 system("rm CaBLAST_fine.fasta");
 
             /*Output information on each fine BLAST hit if the --show-hit-info
@@ -397,37 +397,38 @@ main(int argc, char **argv)
                 xmlDoc *test_doc = xmlReadFile("CaBLAST_results.xml", NULL, 0);
                 xmlNode *test_root = xmlDocGetRootElement(test_doc);
                 struct DSVector *test_iterations =
-                    get_blast_iterations(test_root);
+                  get_blast_iterations(test_root);
 
                 for (j = 0; j < test_iterations->size; j++) {
                     struct cb_hit_expansion *expansion =
-                        (struct cb_hit_expansion *)ds_vector_get(
-                                                       expanded_hits, j);
+                      (struct cb_hit_expansion *)ds_vector_get(expanded_hits,j);
                     struct DSVector *test_hits =
-                        get_blast_hits((xmlNode *)
-                            ds_vector_get(test_iterations, j));
+                      get_blast_hits((xmlNode *)
+                        ds_vector_get(test_iterations, j));
 
                     for (k = 0; k < test_hits->size; k++) {
                         struct hit *current_hit =
-                            (struct hit *)ds_vector_get(test_hits, k);
+                          (struct hit *)ds_vector_get(test_hits, k);
                         struct DSVector *test_hsps = current_hit->hsps;
                         for (l = 0; l < test_hsps->size; l++) {
                             struct hsp *current_hsp =
-                                (struct hsp *)ds_vector_get(test_hsps, l);
+                              (struct hsp *)ds_vector_get(test_hsps, l);
                             int64_t offset = expansion->offset;
                             int32_t hit_from = current_hsp->hit_from+offset-1,
                                     hit_to   = current_hsp->hit_to+offset-1;
-                            fprintf(test_hits_file, "hit from query %d: %d-%d\n", i, hit_from, hit_to);
+                            fprintf(test_hits_file,
+                                    "hit from query %d: %d-%d\n",
+                                    i, hit_from, hit_to);
                         }
                     }
                 }
                 /*Free the XML data for the current query's expanded hits.*/
                 for (j = 0; j < test_iterations->size; j++) {
                     struct DSVector *current_iteration =
-                        (struct DSVector *)ds_vector_get(test_iterations, j);
+                      (struct DSVector *)ds_vector_get(test_iterations, j);
                     for (k = 0; k < current_iteration->size; k++) {
                         struct hit *h =
-                            (struct hit *)ds_vector_get(current_iteration, k);
+                          (struct hit *)ds_vector_get(current_iteration, k);
                         ds_vector_free(h->hsps);
                         free(h);
                     }
@@ -449,7 +450,7 @@ main(int argc, char **argv)
     /*Free the XML data and expanded hits*/
     for (i = 0; i < iterations->size; i++) {
         struct DSVector *iteration =
-            (struct DSVector *)ds_vector_get(iterations, i);
+          (struct DSVector *)ds_vector_get(iterations, i);
         for (j = 0; j < iteration->size; j++) {
             struct hit *h = (struct hit *)ds_vector_get(iteration, j);
             ds_vector_free(h->hsps);

@@ -123,6 +123,6 @@ struct cb_coarse_seq *cb_coarse_get_r(struct cb_coarse_db_read *coarse_db,
                                       int32_t i);
 
 struct fasta_seq *cb_coarse_read_fasta_seq_r(struct cb_coarse_db_read *coarsedb,
-                                             int id);
+                                             int64_t id);
 
 #endif

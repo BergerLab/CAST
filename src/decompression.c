@@ -277,13 +277,12 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
 
             i0 -= edit->last_dist - last_edit_str_len;
             coarse_pos += edit->last_dist - last_edit_str_len;
-            for (i = 0; i < edit->str_length; i++) {
+            for (i = 0; i < edit->str_length; i++)
                 if (edit->str[i] != '-') {
                     if (0 <= i0 && i0 < dest_len)
                         orig[i0] = base_complement(edit->str[i]);
                     i0--;
                 }
-            }
 
             if (edit->is_subdel) coarse_pos += edit->str_length;
 

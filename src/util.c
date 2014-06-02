@@ -13,8 +13,8 @@ char *trim_space(char *s){
 
 char *trim(char *s, const char *totrim){
     int32_t i, j,
-             start, end,
-             slen, totrimlen, newlen;
+            start, end,
+            slen, totrimlen, newlen;
     char *news;
     bool trimmed;
 
@@ -48,7 +48,7 @@ char *trim(char *s, const char *totrim){
 
     newlen = (end >= start) ? (end - start) : 0;
 
-    news = malloc((newlen + 1) * sizeof(*news));
+    news = malloc((newlen+1)*sizeof(*news));
     assert(news);
 
     strncpy(news, s + start, newlen);
@@ -64,14 +64,14 @@ int32_t readline(FILE *f, char **line){
 
     allocated = 1; /* for \0 */
 
-    *line = malloc(allocated * sizeof(**line));
+    *line = malloc(allocated*sizeof(**line));
     assert(line);
 
     (*line)[0] = '\0';
     while (NULL != fgets(buf, 1024, f)) {
         allocated += strlen(buf);
 
-        *line = realloc(*line, allocated * sizeof(**line));
+        *line = realloc(*line, allocated*sizeof(**line));
         assert(*line);
 
         strcat(*line, buf);
@@ -102,7 +102,7 @@ char *str_slice(char *str, int32_t start, int32_t end){
     assert(start >= 0);
     assert(end <= len);
 
-    ret = malloc((1 + end - start) * sizeof(*ret));
+    ret = malloc((1+end-start)*sizeof(*ret));
     assert(ret);
 
     strncpy(ret, str + start, end - start);

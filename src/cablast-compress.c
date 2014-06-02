@@ -43,8 +43,8 @@ int main(int argc, char **argv){
 
     if (args->nargs < 2) {
         fprintf(stderr, 
-            "Usage: %s [flags] database-dir fasta-file [ fasta-file ... ]\n",
-            argv[0]);
+          "Usage: %s [flags] database-dir fasta-file [ fasta-file ... ]\n",
+          argv[0]);
         opt_config_print_usage(conf);
         exit(1);
     }
@@ -56,7 +56,7 @@ int main(int argc, char **argv){
     gettimeofday(&start, NULL);
     for (i = 1; i < args->nargs; i++) {
         fsg = fasta_generator_start(
-            args->args[i], FASTA_EXCLUDE_NCBI_BLOSUM62, 100);
+          args->args[i], FASTA_EXCLUDE_NCBI_BLOSUM62, 100);
 
         while (NULL != (seq = fasta_generator_next(fsg))) {
             org_seq = cb_seq_init(org_seq_id, seq->name, seq->seq);
@@ -69,7 +69,7 @@ int main(int argc, char **argv){
                 gettimeofday(&current, NULL);
                 elapsed = (long double)(current.tv_sec - start.tv_sec);
                 printf("%d sequences compressed (%0.4Lf seqs/sec)\n",
-                    org_seq_id, ((long double) org_seq_id) / elapsed);
+                  org_seq_id, ((long double) org_seq_id) / elapsed);
             }
         }
 
@@ -85,11 +85,11 @@ int main(int argc, char **argv){
     len_command = strlen("makeblastdb -dbtype nucl -in  -out") + 2
                   * strlen(coarse_filename) + 1;
 
-    makeblastdb = malloc(len_command * sizeof(makeblastdb));
+    makeblastdb = malloc(len_command*sizeof(makeblastdb));
     assert(makeblastdb);
 
     sprintf(makeblastdb, "makeblastdb -dbtype nucl -in %s -out %s",
-                                 coarse_filename, coarse_filename);
+                         coarse_filename, coarse_filename);
 
     system(makeblastdb);
 
