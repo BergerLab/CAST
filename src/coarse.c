@@ -362,7 +362,7 @@ void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
         struct fasta_seq *current_seq = cb_coarse_read_fasta_seq_r(coarse_db,i);
 
         if (!current_seq)
-            fprintf(stderr, "Error getting FASTA sequence #%d in "
+            fprintf(stderr, "Error getting FASTA sequence #%ld in "
                             "cb_coarse_get_all_residues\n", i);
         ds_vector_append(fasta_seqs, (void *)current_seq);
     }
@@ -574,7 +574,7 @@ int64_t cb_coarse_find_offset(FILE *index_file, int id){
     bool fseek_success = fseek(index_file, try_off, SEEK_SET) == 0;
 
     if (!fseek_success) {
-        fprintf(stderr, "Error in seeking to offset %d\n", try_off);
+        fprintf(stderr, "Error in seeking to offset %ld\n", try_off);
         return (int64_t)(-1);
     }
     for (i = 0; i < 8; i++) {
@@ -599,7 +599,7 @@ struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
 
     fseek_success = fseek(coarsedb->file_fasta, offset, SEEK_SET) == 0;
     if (!fseek_success) {
-        fprintf(stderr, "Error in seeking to offset %d\n", offset);
+        fprintf(stderr, "Error in seeking to offset %ld\n", offset);
         return NULL;
     }
     return fasta_read_next(coarsedb->file_fasta, "");
@@ -615,8 +615,6 @@ cb_coarse_read_init(int32_t seed_size,
                     FILE *file_fasta_base_index, FILE *file_params,
                     bool load_coarse_residues, bool load_coarse_links,
                     int32_t link_block_size){
-    int64_t num_coarse_seqs;
-    uint64_t num_link_blocks = (uint64_t)0;
     int32_t i;
     bool fseek_success;
 
@@ -634,19 +632,19 @@ cb_coarse_read_init(int32_t seed_size,
     fseek_success = (fseek(file_fasta_base_index, 0, SEEK_END)) == 0;
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA base index file\n");
-    num_coarse_seqs = ftell(file_fasta_base_index) / 8 - 1;
+    coarsedb->num_coarse_seqs = ftell(file_fasta_base_index) / 8 - 1;
     fseek(file_fasta_base_index, 0, SEEK_SET);
 
     coarsedb->seq_base_indices =
-      malloc(num_coarse_seqs*sizeof(*(coarsedb->seq_base_indices)));
+      malloc(coarsedb->num_coarse_seqs*sizeof(*(coarsedb->seq_base_indices)));
     assert(coarsedb->seq_base_indices);
 
-    for (i = 0; i < num_coarse_seqs; i++)
+    for (i = 0; i < coarsedb->num_coarse_seqs; i++)
         (coarsedb->seq_base_indices)[i] =
           read_int_from_file(8, file_fasta_base_index);
 
-    coarsedb->all_residues     = NULL;
-    coarsedb->links            = NULL;
+    coarsedb->all_residues = NULL;
+    coarsedb->links        = NULL;
 
     cb_coarse_db_read_init_blocks(coarsedb, link_block_size);
 
@@ -697,25 +695,13 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db,
     FILE *file_fasta_base_index  = coarse_db->coarsedb->file_fasta_base_index,
          *file_links_base_index  = coarse_db->coarsedb->file_links_base_index,
          *file_links_count_index = coarse_db->coarsedb->file_links_count_index;
-    int64_t num_coarse_seqs, num_link_blocks,
-            /**seq_base_indices = NULL,*/ *seq_link_counts = NULL;
+    int64_t num_link_blocks, *seq_link_counts = NULL;
     int32_t current_seq = 0, current_link = 0, link_count = 0,
             i = 0, *current_link_ptr = NULL;
     bool fseek_success;
 
     /*Initialize link_inds_by_block*/
     coarse_db->link_inds_by_block = ds_vector_create();
-
-    /*Get the number of sequences in the coarse database*/
-    fseek_success = (fseek(file_fasta_base_index, 0, SEEK_END)) == 0;
-    if (!fseek_success)
-        fprintf(stderr, "Error in seeking to end of FASTA base index file\n");
-    num_coarse_seqs = ftell(file_fasta_base_index) / 8 - 1;
-    fseek(file_fasta_base_index, 0, SEEK_SET);
-
-    fseek_success = (fseek(file_fasta_base_index, -8, SEEK_END)) == 0;
-    if (!fseek_success)
-        fprintf(stderr, "Error in seeking to end of FASTA base index file\n");
 
     /*Get the number of bases in the coarse FASTA file to determine the number
       of blocks of link indices to make.*/
@@ -731,20 +717,17 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db,
         ds_vector_append(coarse_db->link_inds_by_block,
                          (void *)ds_vector_create());
 
-    /*seq_base_indices = malloc(num_coarse_seqs*sizeof(*seq_base_indices));
-    assert(seq_base_indices);*/
-
-    seq_link_counts = malloc(num_coarse_seqs*sizeof(*seq_link_counts));
+    seq_link_counts=malloc(coarse_db->num_coarse_seqs*sizeof(*seq_link_counts));
     assert(seq_link_counts);
 
     link_count = 0;
 
     /*Read the base index for each coarse FASTA sequence*/
-    for (i = 0; i < num_coarse_seqs; i++) {
+    for (i = 0; i < coarse_db->num_coarse_seqs; i++) {
         link_count += read_int_from_file(8, file_links_count_index);
-        /*seq_base_indices[i] = read_int_from_file(8, file_fasta_base_index);*/
         seq_link_counts[i] = link_count;
     }
+
     fseek(file_fasta_base_index, 0, SEEK_SET);
     fseek(file_links_count_index, 0, SEEK_SET);
 
@@ -777,6 +760,8 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db,
         if (current_link == seq_link_counts[current_seq])
             current_seq++;
     }
+
+    free(seq_link_counts);
 }
 
 /*Coarse database functions ending in _r are used on cb_coarse_db_read structs
