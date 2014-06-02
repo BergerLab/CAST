@@ -183,9 +183,9 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             new_coarse_seq_id = add_without_match(coarse_db, org_seq, 0,
                                                   max_chunk_size);
             cb_compressed_seq_addlink(cseq, cb_link_to_coarse_init_nodiff(
-                                                 new_coarse_seq_id, 0,
-                                                 end_of_chunk - 1, 0,
-                                                 end_of_chunk - 1, true));
+                                               new_coarse_seq_id, 0,
+                                               end_of_chunk - 1, 0,
+                                               end_of_chunk - 1, true));
 
             if (end_of_chunk < org_seq->length - seed_size - ext_seed) {
                 start_of_section += max_chunk_size - overlap;
@@ -306,38 +306,38 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                                     current - rev_olen +
                                                       compress_flags.overlap);
                     cb_compressed_seq_addlink(cseq,
-                        cb_link_to_coarse_init_nodiff(
-                            new_coarse_seq_id,
-                            start_of_section,
-                            current - rev_olen
-                                    + compress_flags.overlap - 1,
-                            0, current - rev_olen
-                                       + compress_flags.overlap
-                                       - start_of_section - 1,
-                            true));
+                      cb_link_to_coarse_init_nodiff(
+                        new_coarse_seq_id,
+                        start_of_section,
+                        current - rev_olen
+                                + compress_flags.overlap - 1,
+                        0, current - rev_olen
+                                   + compress_flags.overlap
+                                   - start_of_section - 1,
+                        true));
                     chunks++;
                 }
 
                 /*Add a link to the coarse sequence in the compressed
                   sequence.*/
                 cb_compressed_seq_addlink(cseq,
-                    cb_link_to_coarse_init(coarse_seq->id,
-                                           current - rev_olen,
-                                           current + seed_size + fwd_olen - 1,
-                                           resind - rev_rlen,
-                                           resind + seed_size + fwd_rlen - 1,
-                                           alignment, true));
+                                          cb_link_to_coarse_init(coarse_seq->id,
+                                            current - rev_olen,
+                                            current + seed_size + fwd_olen - 1,
+                                            resind - rev_rlen,
+                                            resind + seed_size + fwd_rlen - 1,
+                                            alignment, true));
 
                 /*Add a link to the compressed sequence in the coarse
                   sequence.*/
                 cb_coarse_seq_addlink(coarse_seq,
                                       cb_link_to_compressed_init(
-                                      org_seq->id,
-                                      resind - rev_rlen,
-                                      resind + seed_size + fwd_rlen-1,
-                                      current - rev_olen,
-                                      current + seed_size + fwd_olen-1,
-                                      true));
+                                        org_seq->id,
+                                        resind - rev_rlen,
+                                        resind + seed_size + fwd_rlen - 1,
+                                        current - rev_olen,
+                                        current + seed_size + fwd_olen - 1,
+                                        true));
 
                 /*Update the current position in the sequence*/
                 if (current + fwd_olen < org_seq->length-seed_size-ext_seed-1)
@@ -346,9 +346,9 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 else
                     start_of_section = current + fwd_olen + seed_size;
 
-                current = start_of_section-1;
-                end_of_chunk = min(start_of_section + max_chunk_size,
-                                   org_seq->length-ext_seed);
+                current        = start_of_section - 1;
+                end_of_chunk   = min(start_of_section + max_chunk_size,
+                                     org_seq->length-ext_seed);
                 end_of_section = min(start_of_section + max_section_size,
                                      org_seq->length-ext_seed);
 
@@ -463,12 +463,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                                     current - fwd_olen +
                                                       compress_flags.overlap);
                     cb_compressed_seq_addlink(cseq,
-                        cb_link_to_coarse_init_nodiff(
-                          new_coarse_seq_id,
-                          start_of_section,
-                          current - fwd_olen + compress_flags.overlap - 1,
-                          0, current - fwd_olen + compress_flags.overlap
-                                     - start_of_section - 1,
+                      cb_link_to_coarse_init_nodiff(
+                        new_coarse_seq_id,
+                        start_of_section,
+                        current - fwd_olen + compress_flags.overlap - 1,
+                        0, current - fwd_olen + compress_flags.overlap
+                                   - start_of_section - 1,
                         true));
                     chunks++;
                 }
@@ -542,11 +542,11 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
 
             if (end_of_chunk < org_seq->length - seed_size - ext_seed - 1) {
                 start_of_section = end_of_chunk - overlap;
-                end_of_chunk = min(start_of_section + max_chunk_size,
-                                   org_seq->length - ext_seed);
-                end_of_section = min(start_of_section + max_section_size,
-                                     org_seq->length - ext_seed);
-                current = start_of_section - 1;
+                end_of_chunk     = min(start_of_section + max_chunk_size,
+                                       org_seq->length - ext_seed);
+                end_of_section   = min(start_of_section + max_section_size,
+                                       org_seq->length - ext_seed);
+                current          = start_of_section - 1;
             }
             chunks++;
         }
@@ -605,6 +605,7 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
     while (true) {
         int dp_len1, dp_len2, i, r_align_len, o_align_len;
         char *r_segment, *o_segment;
+
         if (mseqs.rlen == rlen || mseqs.olen == olen)
             break;
 
@@ -745,11 +746,10 @@ static int32_t add_without_match(struct cb_coarse *coarse_db,
 {
     struct cb_link_to_compressed *link = NULL;
     struct cb_coarse_seq *coarse_seq =
-        cb_coarse_add(coarse_db, org_seq->residues, ostart, oend);
-    cb_coarse_seq_addlink(
-        coarse_seq,
-        cb_link_to_compressed_init(org_seq->id, 0, oend - ostart - 1,
-                                    ostart, oend - 1, true));
+      cb_coarse_add(coarse_db, org_seq->residues, ostart, oend);
+    cb_coarse_seq_addlink(coarse_seq,
+      cb_link_to_compressed_init(org_seq->id, 0, oend - ostart - 1,
+                                 ostart, oend - 1, true));
     link = coarse_seq->links;
     return coarse_seq->id;
 }

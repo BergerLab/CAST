@@ -32,7 +32,7 @@ uint64_t shift_right(uint64_t x, int bits){
   and returns its representation as an array of characters.*/
 char *read_int_to_bytes(uint64_t number, int length){
     int i;
-    uint64_t mask = make_mask(8);
+    uint64_t mask = (uint64_t)0xff;
 
     char *bytes = malloc(length * sizeof(*bytes));
     assert(bytes);
@@ -56,18 +56,14 @@ void output_int_to_file(uint64_t number, int length, FILE *f){
   of bytes from the file and copies them into a 64-bit integer.*/
 uint64_t read_int_from_file(int length, FILE *f){
     int i;
-    uint64_t bytes = (uint64_t)0;
-    uint64_t mask = make_mask(8);
+    uint64_t bytes = (uint64_t)0, mask = (uint64_t)0xff;
 
     for (i = 0; i < length; i++) {
         uint64_t current_byte = ((uint64_t)getc(f)) & mask;
         bytes <<= 8;
         bytes |= current_byte;
-        if (feof(f)) {
-            printf("EOF, i = %d!!!\n", i);
-            fprintf(stderr, "EOF, i = %d!!!\n", i);
+        if (feof(f))
             break;
-        }
     }
     return bytes;
 }
