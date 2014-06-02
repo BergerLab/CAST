@@ -113,13 +113,14 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
     int32_t fasta_length = strlen(residues->seq), i = 0, j = 0;
 
     /*Get all links_to_compressed for the coarse sequence we are expanding.*/
-    coarse_seq_links =
-        get_coarse_sequence_links_at(links, coarse_links_index, id);
+    coarse_seq_links = coarse_db->links == NULL ?
+      get_coarse_sequence_links_at(links, coarse_links_index, id) :
+      (struct DSVector *)ds_vector_get(coarse_db->links, id);
 
     /*Get the residues of the coarse sequence we are expanding.*/
     for (i = 0; i < coarse_seq_links->size; i++) {
         struct cb_link_to_compressed *link =
-            (struct cb_link_to_compressed *)ds_vector_get(coarse_seq_links, i);
+          (struct cb_link_to_compressed *)ds_vector_get(coarse_seq_links, i);
 
         /*Only expand the link if it overlaps the range for the BLAST Hsp we
           are expanding from.*/
@@ -153,7 +154,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
                                        (hit_from-link->coarse_start),
                                        link->original_start +
                                        link->coarse_end-hit_from))
-                         + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
+                        + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
             original_range = original_end - original_start + 1;
 
             seq = cb_compressed_read_seq_at(comdb, link->org_seq_id);
@@ -173,7 +174,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
 
                 if (0 < last_i0 && (int32_t)original_range > init_i0)
                     decode_edit_script(orig_str, original_end-original_start+1,
-                                       original_start, coarsedb, current);
+                                       original_start, coarse_db, current);
             }
             orig_str[original_end-original_start+1] = '\0';
 
@@ -181,15 +182,15 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
             assert(expansion);
 
             expansion->offset = (int64_t)original_start;
-            expansion->seq = cb_seq_init(link->org_seq_id,
-                                         seq->name, orig_str);
+            expansion->seq = cb_seq_init(link->org_seq_id, seq->name, orig_str);
             ds_vector_append(oseqs, (void *)expansion);
             free(orig_str);
             cb_compressed_seq_free(seq);
         }
     }
 
-    ds_vector_free(coarse_seq_links);
+    if (!coarse_db->links)
+        ds_vector_free(coarse_seq_links);
     fasta_free_seq(residues);
     return oseqs;
 }
@@ -204,9 +205,9 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
  *all of the section of the original sequence.
  */
 void decode_edit_script(char *orig, int dest_len, int original_start,
-                        struct cb_coarse *coarsedb,
+                        struct cb_coarse_db_read *coarsedb,
                         struct cb_link_to_coarse *link){
-    struct fasta_seq *sequence = cb_coarse_read_fasta_seq(coarsedb,
+    struct fasta_seq *sequence = cb_coarse_read_fasta_seq_r(coarsedb,
                                           link->coarse_seq_id);
     struct edit_info *edit = NULL;
     int i = 0, i0 = 0, i1 = 0, coarse_pos, last_edit_str_len, script_pos;
