@@ -63,8 +63,11 @@ uint64_t read_int_from_file(int length, FILE *f){
         uint64_t current_byte = ((uint64_t)getc(f)) & mask;
         bytes <<= 8;
         bytes |= current_byte;
-        if (feof(f))
+        if (feof(f)) {
+            printf("EOF, i = %d!!!\n", i);
+            fprintf(stderr, "EOF, i = %d!!!\n", i);
             break;
+        }
     }
     return bytes;
 }
