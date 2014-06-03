@@ -91,6 +91,7 @@ struct cb_coarse_db_read {
     struct DSVector *links;
     struct DSVector *link_inds_by_block;
     struct DSVector *link_inds_by_seq;
+    int32_t link_block_size;
     int64_t num_coarse_seqs;
     int64_t *seq_base_indices;
     char *all_residues;
@@ -106,8 +107,7 @@ cb_coarse_read_init(int32_t seed_size,
                     int32_t link_block_size);
 
 void cb_coarse_db_read_free(struct cb_coarse_db_read *coarse_db);
-void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db,
-                                   int32_t block_size);
+void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db);
 
 void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db);
 void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db);

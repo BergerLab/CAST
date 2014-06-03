@@ -646,9 +646,10 @@ cb_coarse_read_init(int32_t seed_size,
         (coarsedb->seq_base_indices)[i] =
           read_int_from_file(8, file_fasta_base_index);
 
+    coarsedb->link_block_size = link_block_size;
 
     /*Get the blocks of link indices.*/
-    cb_coarse_db_read_init_blocks(coarsedb, link_block_size);
+    cb_coarse_db_read_init_blocks(coarsedb);
 
     coarsedb->all_residues = NULL;
     coarsedb->links        = NULL;
@@ -699,14 +700,14 @@ void cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
 
 /*Initializes a cb_coarse_db_read's link_inds_by_block to have an empty vector
   of link indices for each block of bases in the coarse FASTA file.*/
-void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db,
-                                   int32_t block_size){
+void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db){
     FILE *file_fasta_base_index  = coarse_db->coarsedb->file_fasta_base_index,
          *file_links_base_index  = coarse_db->coarsedb->file_links_base_index,
          *file_links_count_index = coarse_db->coarsedb->file_links_count_index;
     int64_t num_link_blocks, *seq_link_counts = NULL;
     int32_t current_seq = 0, current_link = 0, link_count = 0,
-            i = 0, *current_link_ptr = NULL;
+            i = 0, block_size = coarse_db->link_block_size,
+            *current_link_ptr = NULL;
     bool fseek_success;
 
     /*Initialize link_inds_by_block*/
