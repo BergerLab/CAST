@@ -19,7 +19,7 @@
   the decompressed sequence that the database entry came from as a pointer to
   a struct cb_seq.*/
 struct cb_seq *cb_decompress_seq(struct cb_compressed_seq *cseq,
-                                   struct cb_coarse *coarsedb){
+                                 struct cb_coarse *coarsedb){
     struct DSVector *decompressed_chunks = ds_vector_create();
     struct cb_link_to_coarse *link = NULL;
     struct cb_seq *seq = NULL;
@@ -110,7 +110,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
     struct DSVector *oseqs = ds_vector_create(), *coarse_seq_links = NULL;
     struct fasta_seq *residues = cb_coarse_read_fasta_seq(coarsedb, id);
     int64_t *seq_lengths = cb_compressed_get_lengths(comdb);
-    int32_t fasta_length = strlen(residues->seq), i = 0, j = 0;
+    int32_t fasta_length = strlen(residues->seq), i = 0, j = 0, k = 0;
 
     int64_t hit_from_ind = coarse_db->seq_base_indices[id] + hit_from,
             hit_to_ind   = coarse_db->seq_base_indices[id] + hit_to;
@@ -126,36 +126,38 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
             /*Only expand the link if it overlaps the range for the BLAST Hsp we
               are expanding from.*/
             if (link->coarse_start <= hit_to && link->coarse_end >= hit_from) {
-                /*struct cb_link_to_coarse *current = NULL;
+                struct cb_link_to_coarse *current = NULL;
                 struct cb_compressed_seq *seq;
                 struct cb_hit_expansion *expansion;
                 uint64_t original_start, original_end, original_range;
                 char *orig_str;
                 bool dir = link->dir;
 
-                /*Calculate the range in the original sequence for the section of
-                  the original sequence we want to re-create with this expansion.*//*
+                /*Calculate the range in the original sequence for the section
+                 *of the original sequence we want to re-create with this
+                 *expansion.
+                 */
                 original_start =
-                    get_max(0, (dir ?
-                                get_min(hit_from + (link->original_start -
-                                                    link->coarse_start),
-                                        hit_from + (link->original_end -
-                                                    link->coarse_end)) :
-                                get_min(link->original_start +
-                                        link->coarse_end - hit_to,
-                                        link->original_end -
-                                        (hit_to-link->coarse_start)))
-                                - hit_pad_length);
+                  get_max(0, (dir ?
+                              get_min(hit_from + (link->original_start -
+                                                  link->coarse_start),
+                                      hit_from + (link->original_end -
+                                                  link->coarse_end)) :
+                              get_min(link->original_start +
+                                      link->coarse_end - hit_to,
+                                      link->original_end -
+                                      (hit_to-link->coarse_start)))
+                              - hit_pad_length);
                 original_end =
-                    get_min((dir ? get_max(hit_to + (link->original_start -
-                                                     link->coarse_start),
-                                           hit_to + (link->original_end -
-                                                     link->coarse_end)) :
-                                   get_max(link->original_end -
-                                           (hit_from-link->coarse_start),
-                                           link->original_start +
-                                           link->coarse_end-hit_from))
-                            + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
+                  get_min((dir ? get_max(hit_to + (link->original_start -
+                                                   link->coarse_start),
+                                         hit_to + (link->original_end -
+                                                   link->coarse_end)) :
+                                 get_max(link->original_end -
+                                         (hit_from-link->coarse_start),
+                                         link->original_start +
+                                         link->coarse_end-hit_from))
+                          + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
                 original_range = original_end - original_start + 1;
 
                 seq = cb_compressed_read_seq_at(comdb, link->org_seq_id);
@@ -163,7 +165,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
                 orig_str = malloc((original_range+1)*sizeof(*orig_str));
                 assert(orig_str);
 
-                for (j = 0; j < original_range; orig_str[j++]='?');
+                for (k = 0; k < original_range; orig_str[k++]='?');
 
                 /*Run decode_edit_script for each link_to_coarse in the compressed
                   sequence to re-create the section of the original string.*//*
@@ -192,9 +194,9 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
         }
     }
 
-    if (!coarse_db->links)
+    /*if (!coarse_db->links)
         ds_vector_free(coarse_seq_links);
-    fasta_free_seq(residues);
+    fasta_free_seq(residues);*/
 
     return oseqs;
 }

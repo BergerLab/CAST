@@ -38,6 +38,7 @@ struct search_flags {
     bool    load_coarse_residues;
     bool    load_coarse_links;
     bool    load_coarse_db;
+    bool    load_compressed_db;
     int32_t link_block_size;
 } search_flags;
 
