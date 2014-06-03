@@ -117,6 +117,8 @@ cb_coarse_read_init(int32_t seed_size,
 
 void cb_coarse_db_read_free(struct cb_coarse_db_read *coarse_db);
 void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db);
+struct DSVector *cb_coarse_get_block(struct cb_coarse_db_read *coarse_db,
+                                     int32_t index);
 
 void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db);
 void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db);
