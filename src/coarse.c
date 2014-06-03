@@ -326,8 +326,10 @@ void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db){
     for (i = 0; i < num_link_vectors; i++) {
         struct DSVector *links =
           get_coarse_sequence_links_at(coarse_db->db->file_links,
-                                       coarse_db->db->file_links_index,i);
-        ds_vector_append(coarse_db->links, (void *)links);
+                                       coarse_db->db->file_links_index, i);
+        for (j = 0; j < links->size; j++)
+            ds_vector_append(coarse_db->links, ds_vector_get(links, j));
+        ds_vector_free_no_data(links);
     }
 }
 
@@ -654,7 +656,7 @@ cb_coarse_read_init(int32_t seed_size,
 
 
     /*Get the blocks of link indices.*/
-    cb_coarse_db_read_init_blocks(coarsedb);
+    /*cb_coarse_db_read_init_blocks(coarsedb);*/
 
     coarsedb->all_residues = NULL;
     coarsedb->links        = NULL;
@@ -677,9 +679,9 @@ void cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
 
     cb_coarse_free(coarsedb->db);
 
-    for (i = 0; i < coarsedb->link_inds_by_block->size; i++)
+    /*for (i = 0; i < coarsedb->link_inds_by_block->size; i++)
         ds_vector_free(ds_vector_get(coarsedb->link_inds_by_block, i));
-    ds_vector_free_no_data(coarsedb->link_inds_by_block);
+    ds_vector_free_no_data(coarsedb->link_inds_by_block);*/
 
     free(coarsedb->seq_base_indices);
     free(coarsedb->seq_link_counts);
@@ -688,17 +690,8 @@ void cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
     if (coarsedb->all_residues)
         free(coarsedb->all_residues);
 
-    if (coarsedb->links) {
-        for (i = 0; i < coarsedb->links->size; i++) {
-            struct DSVector *seq_links =
-              (struct DSVector *)ds_vector_get(coarsedb->links, i);
-            for (j = 0; j < seq_links->size; j++)
-                cb_link_to_compressed_free(
-                  (struct cb_link_to_compressed *)ds_vector_get(seq_links, j));
-            ds_vector_free_no_data(seq_links);
-        }
-        ds_vector_free_no_data(coarsedb->links);
-    }
+    if (coarsedb->links)
+        ds_vector_free(coarsedb->links);
 
     free(coarsedb);
 }
@@ -709,7 +702,7 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db){
     FILE *file_fasta_base_index  = coarse_db->db->file_fasta_base_index,
          *file_links_base_index  = coarse_db->db->file_links_base_index,
          *file_links_count_index = coarse_db->db->file_links_count_index;
-    int64_t num_link_blocks/*, *seq_link_counts = NULL*/;
+    int64_t num_link_blocks;
     int32_t current_seq = 0, current_link = 0, link_count = 0,
             i = 0, block_size = coarse_db->link_block_size,
             *current_link_ptr = NULL;
