@@ -327,7 +327,7 @@ int main(int argc, char **argv){
                                (search_flags.load_coarse_db ||
                                 search_flags.load_coarse_links),
                                search_flags.link_block_size);
-    dbsize = read_int_from_file(8, db->coarse_db->coarsedb->file_params);
+    dbsize = read_int_from_file(8, db->coarse_db->db->file_params);
 
     if (!search_flags.hide_progress)
         fprintf(stderr, "Running coarse BLAST\n\n");
