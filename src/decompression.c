@@ -102,7 +102,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
                                   struct cb_compressed *comdb,
                                   int32_t id, int32_t hit_from, int32_t hit_to,
                                   int32_t hit_pad_length){
-    struct cb_coarse *coarsedb  = coarse_db->db;
+    struct cb_coarse *coarsedb = coarse_db->db;
     FILE *links              = coarsedb->file_links,
          *coarse_links_index = coarsedb->file_links_index,
          *fasta              = coarsedb->file_fasta,
@@ -116,90 +116,85 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
             hit_to_ind   = coarse_db->seq_base_indices[id] + hit_to;
     int32_t first_block = hit_from_ind / coarse_db->link_block_size,
             last_block  = hit_to_ind / coarse_db->link_block_size;
-/*
-    /*Get all links_to_compressed for the coarse sequence we are expanding.*//*
-    if (coarse_db->links == NULL)
-        coarse_seq_links=get_coarse_sequence_links_at(links, coarse_links_index,
-                                                      id);
-    else
-        coarse_seq_links=(struct DSVector *)ds_vector_get(coarse_db->links,id);
+    for (i = first_block; i <= last_block; i++) {
+        struct DSVector *current_block = cb_coarse_get_block(coarse_db, i);
 
-    /*Get the residues of the coarse sequence we are expanding.*//*
-    for (i = 0; i < coarse_seq_links->size; i++) {
-        struct cb_link_to_compressed *link =
-          (struct cb_link_to_compressed *)ds_vector_get(coarse_seq_links, i);
+        for (j = 0; j < current_block->size; j++){
+            struct cb_link_to_compressed *link =
+              (struct cb_link_to_compressed *)ds_vector_get(current_block, j);
 
-        /*Only expand the link if it overlaps the range for the BLAST Hsp we
-          are expanding from.*//*
-        if (link->coarse_start <= hit_to && link->coarse_end >= hit_from) {
-            struct cb_link_to_coarse *current = NULL;
-            struct cb_compressed_seq *seq;
-            struct cb_hit_expansion *expansion;
-            uint64_t original_start, original_end, original_range;
-            char *orig_str;
-            bool dir = link->dir;
+            /*Only expand the link if it overlaps the range for the BLAST Hsp we
+              are expanding from.*/
+            if (link->coarse_start <= hit_to && link->coarse_end >= hit_from) {
+                /*struct cb_link_to_coarse *current = NULL;
+                struct cb_compressed_seq *seq;
+                struct cb_hit_expansion *expansion;
+                uint64_t original_start, original_end, original_range;
+                char *orig_str;
+                bool dir = link->dir;
 
-            /*Calculate the range in the original sequence for the section of
-              the original sequence we want to re-create with this expansion.*/
-/*            original_start =
-                get_max(0, (dir ?
-                            get_min(hit_from + (link->original_start -
-                                                link->coarse_start),
-                                    hit_from + (link->original_end -
-                                                link->coarse_end)) :
-                            get_min(link->original_start +
-                                    link->coarse_end - hit_to,
-                                    link->original_end -
-                                    (hit_to-link->coarse_start)))
-                            - hit_pad_length);
-            original_end =
-                get_min((dir ? get_max(hit_to + (link->original_start -
-                                                 link->coarse_start),
-                                       hit_to + (link->original_end -
-                                                 link->coarse_end)) :
-                               get_max(link->original_end -
-                                       (hit_from-link->coarse_start),
-                                       link->original_start +
-                                       link->coarse_end-hit_from))
-                        + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
-            original_range = original_end - original_start + 1;
+                /*Calculate the range in the original sequence for the section of
+                  the original sequence we want to re-create with this expansion.*//*
+                original_start =
+                    get_max(0, (dir ?
+                                get_min(hit_from + (link->original_start -
+                                                    link->coarse_start),
+                                        hit_from + (link->original_end -
+                                                    link->coarse_end)) :
+                                get_min(link->original_start +
+                                        link->coarse_end - hit_to,
+                                        link->original_end -
+                                        (hit_to-link->coarse_start)))
+                                - hit_pad_length);
+                original_end =
+                    get_min((dir ? get_max(hit_to + (link->original_start -
+                                                     link->coarse_start),
+                                           hit_to + (link->original_end -
+                                                     link->coarse_end)) :
+                                   get_max(link->original_end -
+                                           (hit_from-link->coarse_start),
+                                           link->original_start +
+                                           link->coarse_end-hit_from))
+                            + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
+                original_range = original_end - original_start + 1;
 
-            seq = cb_compressed_read_seq_at(comdb, link->org_seq_id);
+                seq = cb_compressed_read_seq_at(comdb, link->org_seq_id);
 
-            orig_str = malloc((original_range+1)*sizeof(*orig_str));
-            assert(orig_str);
+                orig_str = malloc((original_range+1)*sizeof(*orig_str));
+                assert(orig_str);
 
-            for (j = 0; j < original_range; orig_str[j++]='?');
-*/
-            /*Run decode_edit_script for each link_to_coarse in the compressed
-              sequence to re-create the section of the original string.*//*
-            current = seq->links;
-            for (; current; current = current->next) {
-                int coarse_range = current->coarse_end - current->coarse_start,
-                    init_i0 = current->original_start-(int32_t)original_start,
-                    last_i0 = init_i0 + coarse_range;
+                for (j = 0; j < original_range; orig_str[j++]='?');
 
-                if (0 < last_i0 && (int32_t)original_range > init_i0)
-                    decode_edit_script(orig_str, original_range,
-                                       original_start, coarse_db, current);
+                /*Run decode_edit_script for each link_to_coarse in the compressed
+                  sequence to re-create the section of the original string.*//*
+                current = seq->links;
+                for (; current; current = current->next) {
+                    int coarse_range = current->coarse_end - current->coarse_start,
+                        init_i0 = current->original_start-(int32_t)original_start,
+                        last_i0 = init_i0 + coarse_range;
+
+                    if (0 < last_i0 && (int32_t)original_range > init_i0)
+                        decode_edit_script(orig_str, original_range,
+                                           original_start, coarse_db, current);
+                }
+                orig_str[original_range] = '\0';
+
+                expansion = malloc(sizeof(*expansion));
+                assert(expansion);
+
+                expansion->offset = (int64_t)original_start;
+                expansion->seq = cb_seq_init(link->org_seq_id, seq->name, orig_str);
+                ds_vector_append(oseqs, (void *)expansion);
+
+                free(orig_str);
+                cb_compressed_seq_free(seq);*/
             }
-            orig_str[original_range] = '\0';
-
-            expansion = malloc(sizeof(*expansion));
-            assert(expansion);
-
-            expansion->offset = (int64_t)original_start;
-            expansion->seq = cb_seq_init(link->org_seq_id, seq->name, orig_str);
-            ds_vector_append(oseqs, (void *)expansion);
-
-            free(orig_str);
-            cb_compressed_seq_free(seq);
         }
     }
 
     if (!coarse_db->links)
         ds_vector_free(coarse_seq_links);
-    fasta_free_seq(residues);*/
+    fasta_free_seq(residues);
 
     return oseqs;
 }

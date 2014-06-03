@@ -26,8 +26,7 @@
 #include "util.h"
 #include "xml.h"
 
-static char *path_join(char *a, char *b)
-{
+static char *path_join(char *a, char *b){
     char *joined;
 
     joined = malloc((1 + strlen(a) + 1 + strlen(b)) * sizeof(*joined));
