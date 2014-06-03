@@ -102,7 +102,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
                                   struct cb_compressed *comdb,
                                   int32_t id, int32_t hit_from, int32_t hit_to,
                                   int32_t hit_pad_length){
-    struct cb_coarse *coarsedb  = coarse_db->coarsedb;
+    struct cb_coarse *coarsedb  = coarse_db->db;
     FILE *links              = coarsedb->file_links,
          *coarse_links_index = coarsedb->file_links_index,
          *fasta              = coarsedb->file_fasta,
