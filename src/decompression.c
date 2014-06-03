@@ -108,14 +108,13 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
          *fasta              = coarsedb->file_fasta,
          *compressed         = comdb->file_compressed;
     struct DSVector *oseqs = ds_vector_create(), *coarse_seq_links = NULL;
-    struct fasta_seq *residues = cb_coarse_read_fasta_seq(coarsedb, id);
-    int64_t *seq_lengths = cb_compressed_get_lengths(comdb);
-    int32_t fasta_length = strlen(residues->seq), i = 0, j = 0, k = 0;
-
-    int64_t hit_from_ind = coarse_db->seq_base_indices[id] + hit_from,
+    int64_t *seq_lengths = cb_compressed_get_lengths(comdb),
+            hit_from_ind = coarse_db->seq_base_indices[id] + hit_from,
             hit_to_ind   = coarse_db->seq_base_indices[id] + hit_to;
     int32_t first_block = hit_from_ind / coarse_db->link_block_size,
-            last_block  = hit_to_ind / coarse_db->link_block_size;
+            last_block  = hit_to_ind / coarse_db->link_block_size,
+            i = 0, j = 0, k = 0;
+
     for (i = first_block; i <= last_block; i++) {
         struct DSVector *current_block = cb_coarse_get_block(coarse_db, i);
 
@@ -195,8 +194,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
     }
 
     /*if (!coarse_db->links)
-        ds_vector_free(coarse_seq_links);
-    fasta_free_seq(residues);*/
+        ds_vector_free(coarse_seq_links);*/
 
     return oseqs;
 }

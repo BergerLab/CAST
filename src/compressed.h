@@ -39,7 +39,7 @@ struct cb_compressed {
 };
 
 struct cb_compressed *cb_compressed_init(FILE *file_compressed,
-                                         FILE *file_index);
+                                         FILE *file_index, bool populate);
 
 void cb_compressed_free(struct cb_compressed *com_db);
 

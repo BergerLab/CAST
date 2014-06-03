@@ -18,9 +18,7 @@ static char * path_join(char *a, char *b);
 
 static char * basename(char *path);
 
-struct cb_database *
-cb_database_init(char *dir, int32_t seed_size, bool add)
-{
+struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
     struct cb_database *db;
     struct stat buf;
     FILE *ffasta, *fseeds, *flinks, *fcompressed, *findex_coarse_links,
@@ -101,7 +99,7 @@ cb_database_init(char *dir, int32_t seed_size, bool add)
                                  findex_coarse_links, findex_coarse_links_base,
                                  findex_coarse_links_count, findex_coarse_fasta,
                                  findex_coarse_fasta_base, findex_params);
-    db->com_db    = cb_compressed_init(fcompressed, findex_compressed);
+    db->com_db    = cb_compressed_init(fcompressed, findex_compressed, false);
 
     free(pfasta);
     free(pseeds);
@@ -121,8 +119,7 @@ cb_database_init(char *dir, int32_t seed_size, bool add)
 struct cb_database_r *
 cb_database_read_init(char *dir, int32_t seed_size,
                       bool load_coarse_residues, bool load_coarse_links,
-                      int32_t link_block_size)
-{
+                      bool load_compressed_db, int32_t link_block_size){
     struct cb_database_r *db;
     struct stat buf;
     FILE *ffasta, *fseeds, *flinks, *fcompressed, *findex_coarse_links,
@@ -179,7 +176,8 @@ cb_database_read_init(char *dir, int32_t seed_size,
                                         findex_params,
                                         load_coarse_residues,
                                         load_coarse_links, link_block_size);
-    db->com_db = cb_compressed_init(fcompressed, findex_compressed);
+    db->com_db = cb_compressed_init(fcompressed, findex_compressed,
+                                    load_compressed_db);
 
     return db;
 }
@@ -191,9 +189,7 @@ void cb_database_populate(struct cb_database *db, const char *pfasta,
     fclose(flinks);
 }
 
-void
-cb_database_free(struct cb_database *db)
-{
+void cb_database_free(struct cb_database *db){
     /* All files opened in cb_database_init are close in subsequent frees. */
     cb_coarse_free(db->coarse_db);
     cb_compressed_free(db->com_db);
@@ -201,9 +197,7 @@ cb_database_free(struct cb_database *db)
     free(db);
 }
 
-void
-cb_database_read_free(struct cb_database_r *db)
-{
+void cb_database_read_free(struct cb_database_r *db){
     /* All files opened in cb_database_init are close in subsequent frees. */
     cb_coarse_db_read_free(db->coarse_db);
     cb_compressed_free(db->com_db);

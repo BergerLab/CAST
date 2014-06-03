@@ -9,7 +9,7 @@
 #include "edit_scripts.h"
 
 struct cb_compressed *cb_compressed_init(FILE *file_compressed,
-                                         FILE *file_index){
+                                         FILE *file_index, bool populate){
     struct cb_compressed *com_db;
 
     com_db = malloc(sizeof(*com_db));
@@ -18,6 +18,28 @@ struct cb_compressed *cb_compressed_init(FILE *file_compressed,
     com_db->file_compressed = file_compressed;
     com_db->file_index      = file_index;
     com_db->seqs            = ds_vector_create_capacity(100);
+
+    if (populate) {
+        int64_t num_sequences;
+        int32_t i;
+
+        bool fseek_success = fseek(file_index, 0, SEEK_END) == 0;
+        if (!fseek_success) {
+            fprintf(stderr, "Error in seeking to end of compressed.cb.index\n");
+            return NULL;
+        }
+        num_sequences = ftell(file_index) / 8;
+        fseek_success = fseek(file_index, 0, SEEK_SET) == 0;
+        if (!fseek_success) {
+            fprintf(stderr,
+                    "Error in seeking to start of compressed.cb.index\n");
+            return NULL;
+        }
+
+        for (i = 0; i < num_sequences; i++)
+            ds_vector_append(com_db->seqs,
+                             cb_compressed_read_seq_at(com_db, i));
+    }
 
     return com_db;
 }
@@ -507,10 +529,8 @@ int64_t cb_compressed_get_seq_length(FILE *f){
 
 /*Gets the lengths in bases for all sequences in the database*/
 int64_t *cb_compressed_get_lengths(struct cb_compressed *comdb){
-    FILE *links = comdb->file_compressed,
-         *index = comdb->file_index;
-    int64_t *lengths = NULL,
-            num_sequences;
+    FILE *links = comdb->file_compressed, *index = comdb->file_index;
+    int64_t *lengths = NULL, num_sequences;
     bool fseek_success;
 
     fseek_success = fseek(index, 0, SEEK_END) == 0;
@@ -518,7 +538,6 @@ int64_t *cb_compressed_get_lengths(struct cb_compressed *comdb){
         fprintf(stderr, "Error in seeking to end of compressed.cb.index\n");
         return NULL;
     }
-
     num_sequences = ftell(index) / 8;
     fseek_success = fseek(index, 0, SEEK_SET) == 0;
     if (!fseek_success) {
@@ -618,6 +637,7 @@ int64_t cb_compressed_link_offset(struct cb_compressed *comdb, int id){
     int64_t offset = (int64_t)0, mask = make_mask(8);
     int32_t try_off = id * 8;
     bool fseek_success = fseek(comdb->file_index, try_off, SEEK_SET) == 0;
+
     if (!fseek_success) {
         fprintf(stderr, "Error in seeking to offset %d", try_off);
         return (int64_t)(-1);

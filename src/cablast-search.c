@@ -325,6 +325,7 @@ int main(int argc, char **argv){
                                 search_flags.load_coarse_residues),
                                (search_flags.load_coarse_db ||
                                 search_flags.load_coarse_links),
+                               search_flags.load_compressed_db,
                                search_flags.link_block_size);
     dbsize = read_int_from_file(8, db->coarse_db->db->file_params);
 

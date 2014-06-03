@@ -84,8 +84,8 @@ void cb_coarse_free(struct cb_coarse *coarse_db){
  *created from those residues while also adding the sequence to the seeds
  *table.
  */
-struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db,
-                                    char *residues, int32_t start, int32_t end){
+struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
+                                    int32_t start, int32_t end){
     struct cb_coarse_seq *seq;
     int32_t id;
 
