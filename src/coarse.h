@@ -45,7 +45,7 @@ struct cb_coarse {
     /*The links to the compressed sequences in each coarse sequence*/
     FILE *file_links;
 
-    /*The index of the start of each coarse sequence in coarse.links*/
+    /*The byte index of the start of each coarse sequence in coarse.links*/
     FILE *file_links_index;
 
     /*The indices into the bases of the coarse FASTA file for the coarse start
