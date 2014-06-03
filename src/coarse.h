@@ -93,6 +93,7 @@ struct cb_coarse_db_read {
     struct DSVector *link_inds_by_seq;
     int32_t link_block_size;
     int64_t num_coarse_seqs;
+    int64_t *seq_link_counts;
     int64_t *seq_base_indices;
     char *all_residues;
 };

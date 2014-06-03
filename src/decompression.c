@@ -112,6 +112,11 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
     int64_t *seq_lengths = cb_compressed_get_lengths(comdb);
     int32_t fasta_length = strlen(residues->seq), i = 0, j = 0;
 
+    int64_t hit_from_ind = coarse_db->seq_base_indices[id] + hit_from,
+            hit_to_ind   = coarse_db->seq_base_indices[id] + hit_to;
+    int32_t first_block = hit_from_ind / coarse_db->link_block_size,
+            last_block  = hit_to_ind / coarse_db->link_block_size;
+
     /*Get all links_to_compressed for the coarse sequence we are expanding.*/
     if (coarse_db->links == NULL)
         coarse_seq_links=get_coarse_sequence_links_at(links, coarse_links_index,
