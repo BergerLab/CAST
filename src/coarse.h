@@ -22,15 +22,13 @@ struct cb_coarse_seq {
     pthread_rwlock_t lock_links;
 };
 
-struct cb_coarse_seq *
-cb_coarse_seq_init(int32_t id, char *residues, int32_t start, int32_t end);
+struct cb_coarse_seq *cb_coarse_seq_init(int32_t id, char *residues,
+                                         int32_t start, int32_t end);
 
-void
-cb_coarse_seq_free(struct cb_coarse_seq *seq);
+void cb_coarse_seq_free(struct cb_coarse_seq *seq);
 
-void
-cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
-                      struct cb_link_to_compressed *newlink);
+void cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
+                           struct cb_link_to_compressed *newlink);
 
 struct cb_coarse {
     struct DSVector *seqs;
@@ -67,15 +65,12 @@ cb_coarse_init(int32_t seed_size,
                FILE *file_links_count_index, FILE *file_fasta_index,
                FILE *file_fasta_base_index, FILE *file_params);
 
-void
-cb_coarse_free(struct cb_coarse *coarse_db);
+void cb_coarse_free(struct cb_coarse *coarse_db);
 
-struct cb_coarse_seq *
-cb_coarse_add(struct cb_coarse *coarse_db,
-              char *residues, int32_t start, int32_t end);
+struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
+                                    int32_t start, int32_t end);
 
-struct cb_coarse_seq *
-cb_coarse_get(struct cb_coarse *coarse_db, int32_t i);
+struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db, int32_t i);
 
 void cb_coarse_save_binary(struct cb_coarse *coarse_db);
 void cb_coarse_save_plain(struct cb_coarse *coarse_db);

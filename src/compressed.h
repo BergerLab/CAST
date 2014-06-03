@@ -29,6 +29,7 @@ void cb_compressed_seq_addlink(struct cb_compressed_seq *seq,
 struct cb_coarse;
 
 struct cb_compressed {
+    /*The sequences in the compressed database*/
     struct DSVector *seqs;
     /*Binary representation of each compressed sequence*/
     FILE *file_compressed;

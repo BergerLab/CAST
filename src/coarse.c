@@ -621,6 +621,8 @@ cb_coarse_read_init(int32_t seed_size,
     struct cb_coarse_db_read *coarsedb = malloc(sizeof(*coarsedb));
     assert(coarsedb);
 
+
+    /*Initialize the main cb_coarse structure*/
     coarsedb->coarsedb = cb_coarse_init(seed_size, file_fasta, file_seeds,
                                         file_links, file_links_index,
                                         file_links_base_index,
@@ -628,25 +630,28 @@ cb_coarse_read_init(int32_t seed_size,
                                         file_fasta_index, file_fasta_base_index,
                                         file_params);
 
-    /*Get the number of sequences in the coarse database*/
+    /*Get the number of sequences in the coarse database and get the base index
+      for each sequence.*/
     fseek_success = (fseek(file_fasta_base_index, 0, SEEK_END)) == 0;
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA base index file\n");
     coarsedb->num_coarse_seqs = ftell(file_fasta_base_index) / 8 - 1;
     fseek(file_fasta_base_index, 0, SEEK_SET);
 
-    coarsedb->seq_base_indices =
-      malloc(coarsedb->num_coarse_seqs*sizeof(*(coarsedb->seq_base_indices)));
+    coarsedb->seq_base_indices = malloc(coarsedb->num_coarse_seqs
+                                        *sizeof(*(coarsedb->seq_base_indices)));
     assert(coarsedb->seq_base_indices);
 
     for (i = 0; i < coarsedb->num_coarse_seqs; i++)
         (coarsedb->seq_base_indices)[i] =
           read_int_from_file(8, file_fasta_base_index);
 
+
+    /*Get the blocks of link indices.*/
+    cb_coarse_db_read_init_blocks(coarsedb, link_block_size);
+
     coarsedb->all_residues = NULL;
     coarsedb->links        = NULL;
-
-    cb_coarse_db_read_init_blocks(coarsedb, link_block_size);
 
     /*If the --load-coarse-residues or --load-coarse-db search flag was passed
       in, load the coarse residues into coarse_db->all_residues.*/
@@ -667,6 +672,13 @@ void cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
 
     cb_coarse_free(coarsedb->coarsedb);
 
+    for (i = 0; i < coarsedb->link_inds_by_block->size; i++)
+        ds_vector_free(ds_vector_get(coarsedb->link_inds_by_block, i));
+    ds_vector_free_no_data(coarsedb->link_inds_by_block);
+
+    free(coarsedb->seq_base_indices);
+
+    /*Only free the residues and links if they were allocated*/
     if (coarsedb->all_residues)
         free(coarsedb->all_residues);
 
@@ -682,9 +694,6 @@ void cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
         ds_vector_free_no_data(coarsedb->links);
     }
 
-    for (i = 0; i < coarsedb->link_inds_by_block->size; i++)
-        ds_vector_free(ds_vector_get(coarsedb->link_inds_by_block, i));
-    ds_vector_free_no_data(coarsedb->link_inds_by_block);
     free(coarsedb);
 }
 
