@@ -67,3 +67,18 @@ uint64_t read_int_from_file(int length, FILE *f){
     }
     return bytes;
 }
+
+/*Takes in an array of bytes, a starting index into that array, and the number
+ *of bytes in the integer being returned, and copies the bytes into a 64-bit
+ *integer.  Works like read_int_from_file but with the bytes already in memory.
+ */
+uint64_t bytes_to_int(char *bytes, int start, int size){
+    int i;
+    uint64_t val = (uint64_t)0, mask = (uint64_t)0xff;
+
+    for (i = 0; i < size; i++) {
+        uint64_t current_byte = ((uint64_t)(bytes[start+i])) & mask;
+        val <<= 8;
+        val |= current_byte;
+    }
+}

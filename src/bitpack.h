@@ -10,5 +10,6 @@ uint64_t shift_right(uint64_t x, int bits);
 char *read_int_to_bytes(uint64_t number, int bytes);
 void output_int_to_file(uint64_t number, int length, FILE *f);
 uint64_t read_int_from_file(int length, FILE *f);
+uint64_t bytes_to_int(char *bytes, int start, int size);
 
 #endif

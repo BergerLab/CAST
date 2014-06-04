@@ -727,7 +727,6 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db){
                          (void *)ds_vector_create());
 
     fseek(file_fasta_base_index, 0, SEEK_SET);
-    fseek(file_links_count_index, 0, SEEK_SET);
 
     current_link = 0;
 
