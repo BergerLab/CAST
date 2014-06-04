@@ -17,7 +17,7 @@ struct cb_compressed *cb_compressed_init(FILE *file_compressed,
 
     com_db->file_compressed = file_compressed;
     com_db->file_index      = file_index;
-    com_db->seqs            = ds_vector_create_capacity(100);
+    com_db->seqs            = ds_vector_create();
 
     if (populate) {
         int64_t num_sequences;
@@ -348,7 +348,7 @@ void cb_compressed_seq_addlink(struct cb_compressed_seq *seq,
 
 struct cb_compressed_seq *cb_compressed_seq_at(struct cb_compressed *com_db,
                                                int32_t i){
-    return (struct cb_compressed_seq *) ds_vector_get(com_db->seqs, i);
+    return (struct cb_compressed_seq *)ds_vector_get(com_db->seqs, i);
 }
 
 /*A function for getting the header for an entry in the compressed links file.

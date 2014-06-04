@@ -137,16 +137,15 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
                  *expansion.
                  */
                 original_start =
-                  get_max(0, (dir ?
-                              get_min(hit_from + (link->original_start -
-                                                  link->coarse_start),
-                                      hit_from + (link->original_end -
-                                                  link->coarse_end)) :
-                              get_min(link->original_start +
-                                      link->coarse_end - hit_to,
-                                      link->original_end -
-                                      (hit_to-link->coarse_start)))
-                              - hit_pad_length);
+                  get_max(0, (dir ? get_min(hit_from + (link->original_start -
+                                                        link->coarse_start),
+                                            hit_from + (link->original_end -
+                                                        link->coarse_end)) :
+                                    get_min(link->original_start +
+                                            link->coarse_end - hit_to,
+                                            link->original_end -
+                                            (hit_to-link->coarse_start)))
+                             - hit_pad_length);
                 original_end =
                   get_min((dir ? get_max(hit_to + (link->original_start -
                                                    link->coarse_start),
@@ -159,7 +158,9 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
                           + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
                 original_range = original_end - original_start + 1;
 
-                seq = cb_compressed_read_seq_at(comdb, link->org_seq_id);
+                seq = comdb->seqs->size == 0 ?
+                        cb_compressed_read_seq_at(comdb, link->org_seq_id) :
+                        cb_compressed_seq_at(comdb, link->org_seq_id);
 
                 orig_str = malloc((original_range+1)*sizeof(*orig_str));
                 assert(orig_str);

@@ -64,8 +64,8 @@ struct cb_compressed_seq *get_compressed_seq(FILE *f, int id);
 struct cb_compressed_seq **read_compressed(FILE *f);
 int64_t cb_compressed_link_offset(struct cb_compressed *comdb, int id);
 
-struct cb_compressed_seq *
-cb_compressed_read_seq_at(struct cb_compressed *comdb, int32_t id);
+struct cb_compressed_seq *cb_compressed_read_seq_at(struct cb_compressed *comdb,
+                                                    int32_t id);
 
 int64_t cb_compressed_get_seq_length(FILE *f);
 int64_t *cb_compressed_get_lengths(struct cb_compressed *comdb);
