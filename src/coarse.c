@@ -325,8 +325,7 @@ void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db){
 
     for (i = 0; i < num_link_vectors; i++) {
         struct DSVector *links =
-          get_coarse_sequence_links_at(coarse_db->db->file_links,
-                                       coarse_db->db->file_links_index, i);
+          get_coarse_sequence_links(coarse_db->db->file_links);
         for (j = 0; j < links->size; j++)
             ds_vector_append(coarse_db->links, ds_vector_get(links, j));
         ds_vector_free_no_data(links);
@@ -356,8 +355,10 @@ void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
       (int64_t)read_int_from_file(8, coarse_db->db->file_fasta_base_index);
     fseek(coarse_db->db->file_fasta_base_index, 0, SEEK_SET);
 
+    
     for (i = 0; i < num_fasta_entries; i++) {
-        struct fasta_seq *current_seq = cb_coarse_read_fasta_seq_r(coarse_db,i);
+        struct fasta_seq *current_seq =
+          fasta_read_next(coarse_db->db->file_fasta, "");
 
         if (!current_seq)
             fprintf(stderr, "Error getting FASTA sequence #%ld in "
