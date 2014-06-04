@@ -387,45 +387,28 @@ char *get_compressed_header(FILE *f){
   its data to a struct cb_link_to_coarse*/
 struct cb_link_to_coarse *read_compressed_link(FILE *f){
     struct cb_link_to_coarse *link;
-    int32_t i, chars_to_read;
-    uint32_t c = 0;
+    int32_t chars_to_read;
     uint16_t script_length = (uint16_t)0;
-    char *half_bytes, *diff;
+    char *link_bytes, *half_bytes;
 
     link = malloc(sizeof(*link));
     assert(link);
 
-    link->coarse_seq_id = read_int_from_file(8, f);
+    link_bytes = malloc(30*sizeof(link_bytes));
+    assert(link_bytes);
+
+    fread(link_bytes, 1, 30, f);
     if (feof(f)) {
         free(link);
         return NULL;
     }
 
-    link->original_start = read_int_from_file(8, f);
-    if (feof(f)) {
-        free(link);
-        return NULL;
-    }
-
-    link->original_end = read_int_from_file(8, f);
-    if (feof(f)) {
-        free(link);
-        return NULL;
-    }
- 
-    link->coarse_start = (uint16_t)read_int_from_file(2, f);
-    if (feof(f)) {
-        free(link);
-        return NULL;
-    }
-
-    link->coarse_end = (uint16_t)read_int_from_file(2, f);
-    if (feof(f)) {
-        free(link);
-        return NULL;
-    }
-
-    script_length = (uint16_t)read_int_from_file(2, f);
+    link->coarse_seq_id  = (uint64_t)bytes_to_int(link_bytes, 0, 8);
+    link->original_start = (uint64_t)bytes_to_int(link_bytes, 8, 8);
+    link->original_end   = (uint64_t)bytes_to_int(link_bytes, 16, 8);
+    link->coarse_start   = (int16_t)bytes_to_int(link_bytes, 24, 2);
+    link->coarse_end     = (int16_t)bytes_to_int(link_bytes, 26, 2);
+    script_length        = (int16_t)bytes_to_int(link_bytes, 28, 2);
 
     chars_to_read = script_length / 2;
     if (script_length % 2 == 1)
@@ -434,18 +417,13 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
     half_bytes = malloc(chars_to_read*sizeof(*half_bytes));
     assert(half_bytes);
 
-    for (i = 0; i < chars_to_read; i++) {
-        c = getc(f);
-        if (feof(f)) {
-            free(link);
-            return NULL;
-        }
-        half_bytes[i] = (char)c;
-    }
-    diff = half_bytes_to_ASCII(half_bytes, script_length);
-    free(half_bytes);
-    link->diff = diff;
+    fread(half_bytes, 1, chars_to_read, f);
+
+    link->diff = half_bytes_to_ASCII(half_bytes, script_length);
     link->next = NULL;
+
+    free(half_bytes);
+
     return link;
 }
 
@@ -608,6 +586,7 @@ struct cb_compressed_seq **read_compressed(FILE *f){
                 current_link->next = NULL;
             }
             c = getc(f);
+
             /*If we find a newline at the end of the link we are at the end of
               the sequence.*/
             if (c == '\n')
@@ -634,7 +613,6 @@ struct cb_compressed_seq **read_compressed(FILE *f){
  *link whose index is passed into id.
  */
 int64_t cb_compressed_link_offset(struct cb_compressed *comdb, int id){
-    int64_t offset = (int64_t)0, mask = make_mask(8);
     int32_t try_off = id * 8;
     bool fseek_success = fseek(comdb->file_index, try_off, SEEK_SET) == 0;
 

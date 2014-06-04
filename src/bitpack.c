@@ -81,4 +81,6 @@ uint64_t bytes_to_int(char *bytes, int start, int size){
         val <<= 8;
         val |= current_byte;
     }
+
+    return val;
 }
