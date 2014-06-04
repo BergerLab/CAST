@@ -279,8 +279,10 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
             int32_t coarse_start  = h->hit_from-1,
                     coarse_end    = h->hit_to-1,
                     coarse_seq_id = current_hit->accession;
+/****************************************************************************/
             oseqs = cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
                                      coarse_start, coarse_end, 50);
+/****************************************************************************/
             for (k = 0; k < oseqs->size; k++)
                 ds_vector_append(expanded_hits, ds_vector_get(oseqs, k));
             ds_vector_free_no_data(oseqs);
@@ -374,6 +376,9 @@ int main(int argc, char **argv){
         /*Expand any BLAST hits we got from the current query sequence during
           coarse BLAST.*/
         expanded_hits = expand_blast_hits(iterations, i, db);
+
+continue;
+
         query = (struct fasta_seq *)ds_vector_get(queries, i);
 
         /*If the current query sequence had hits in the call to coarse BLAST,

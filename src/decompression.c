@@ -168,7 +168,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
                 for (k = 0; k < original_range; orig_str[k++]='?');
 
                 /*Run decode_edit_script for each link_to_coarse in the compressed
-                  sequence to re-create the section of the original string.*//*
+                  sequence to re-create the section of the original string.*/
                 current = seq->links;
                 for (; current; current = current->next) {
                     int coarse_range = current->coarse_end - current->coarse_start,
@@ -180,7 +180,6 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
                                            original_start, coarse_db, current);
                 }
                 orig_str[original_range] = '\0';
-
                 expansion = malloc(sizeof(*expansion));
                 assert(expansion);
 
@@ -189,7 +188,11 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
                 ds_vector_append(oseqs, (void *)expansion);
 
                 free(orig_str);
-                cb_compressed_seq_free(seq);*/
+
+                /*Free the compressed sequence if it was loaded using
+                  cb_compressed_read_seq_at*/
+                if (comdb->seqs->size == 0)
+                    cb_compressed_seq_free(seq);
             }
         }
     }
