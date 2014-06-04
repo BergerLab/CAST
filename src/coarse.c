@@ -477,38 +477,23 @@ struct cb_link_to_compressed *read_coarse_link(FILE *f){
     struct cb_link_to_compressed *link = malloc(sizeof(*link));
     assert(link);
 
-    link->org_seq_id = (uint64_t)read_int_from_file(8, f);
+    char *link_bytes = malloc(29*sizeof(link_bytes));
+    assert(link_bytes);
+
+    fread(link_bytes, 1, 29, f);
     if (feof(f)) {
         free(link);
         return NULL;
     }
 
-    link->coarse_start = (uint16_t)read_int_from_file(2, f);
-    if (feof(f)) {
-        free(link);
-        return NULL;
-    }
-
-    link->coarse_end = (uint16_t)read_int_from_file(2, f);
-    if (feof(f)) {
-        free(link);
-        return NULL;
-    }
-
-    link->original_start = (uint64_t)read_int_from_file(8, f);
-    if (feof(f)) {
-        free(link);
-        return NULL;
-    }
-
-    link->original_end = (uint64_t)read_int_from_file(8, f);
-    if (feof(f)) {
-        free(link);
-        return NULL;
-    }
-
-    link->dir = getc(f) == '0';
+    link->org_seq_id     = (uint64_t)bytes_to_int(link_bytes, 0, 8);
+    link->coarse_start   = (uint16_t)bytes_to_int(link_bytes, 8, 2);
+    link->coarse_end     = (uint16_t)bytes_to_int(link_bytes, 10, 2);
+    link->original_start = (uint64_t)bytes_to_int(link_bytes, 12, 8);
+    link->original_end   = (uint64_t)bytes_to_int(link_bytes, 20, 8);
+    link->dir            = link_bytes[28] == '0';
     link->next = NULL;
+
     return link;
 }
 
