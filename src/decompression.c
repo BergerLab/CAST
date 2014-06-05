@@ -215,12 +215,18 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
 void decode_edit_script(char *orig, int dest_len, int original_start,
                         struct cb_coarse_db_read *coarsedb,
                         struct cb_link_to_coarse *link){
-    struct fasta_seq *sequence = cb_coarse_read_fasta_seq_r(coarsedb,
-                                          link->coarse_seq_id);
+    struct fasta_seq *fasta = NULL;
     struct edit_info *edit = NULL;
     int i = 0, i0 = 0, i1 = 0, coarse_pos, last_edit_str_len, script_pos;
-    char *diff = link->diff, *residues = sequence->seq;
+    char *diff = link->diff, *residues;/* = fasta->seq;*/
     bool fwd = (diff[0] & ((char)0x7f)) == '0';
+
+    if (coarsedb->all_residues == NULL) {
+        fasta = cb_coarse_read_fasta_seq_r(coarsedb, link->coarse_seq_id); 
+        residues = fasta->seq;
+    }
+    else
+        residues = cb_coarse_get_seq_residues(coarsedb, link->coarse_seq_id);
 
     /*The link represents an exact match so there are no edits to make*/
     if (diff[1] == '\0' && fwd) {
@@ -235,7 +241,11 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
             }
         /*If the link is from a reverse-complement match, convert the original
           string to its reverse complement.*/
-        fasta_free_seq(sequence);
+        if (fasta != NULL)
+            fasta_free_seq(fasta);
+        else
+            free(residues);
+
         return;
     }
 
@@ -271,7 +281,11 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
 
             if (i0 >= dest_len) {
                 free(edit);
-                fasta_free_seq(sequence);
+                if (fasta != NULL)
+                    fasta_free_seq(fasta);
+                else
+                    free(residues);
+
                 return;
             }
         }
@@ -301,7 +315,11 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
             if (i0 < 0) {
                 free(edit->str);
                 free(edit);
-                fasta_free_seq(sequence);
+                if (fasta != NULL)
+                    fasta_free_seq(fasta);
+                else
+                    free(residues);
+
                 return;
             }
         }
@@ -315,6 +333,9 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
         }
     }
     free(edit);
-    fasta_free_seq(sequence);
+    if (fasta != NULL)
+        fasta_free_seq(fasta);
+    else
+        free(residues);
 }
 

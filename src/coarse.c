@@ -637,6 +637,8 @@ cb_coarse_read_init(int32_t seed_size,
         (coarsedb->seq_base_indices)[i] =
           read_int_from_file(8, file_fasta_base_index);
     }
+    (coarsedb->seq_base_indices)[coarsedb->num_coarse_seqs] =
+      read_int_from_file(8, file_fasta_base_index);
 
     coarsedb->link_block_size = link_block_size;
 
@@ -773,8 +775,10 @@ char *cb_coarse_get_seq_residues(struct cb_coarse_db_read *coarse_db,
     }
 
     for (i = start; i < end; i++)
-        residues[start-i] = all_residues[i];
+        residues[i-start] = all_residues[i];
     residues[end-start] = '\0';
+
+    return residues;
 }
 
 
