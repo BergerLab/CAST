@@ -758,6 +758,26 @@ struct DSVector *cb_coarse_get_block(struct cb_coarse_db_read *coarse_db,
     return links;
 }
 
+char *cb_coarse_get_seq_residues(struct cb_coarse_db_read *coarse_db,
+                                 int64_t id){
+    int64_t start    = coarse_db->seq_base_indices[id],
+            end      = coarse_db->seq_base_indices[id+1], i;
+    char *residues     = malloc((end-start+1)*sizeof(*residues)),
+         *all_residues = coarse_db->all_residues;
+
+    if (all_residues == NULL) {
+        fprintf(stderr, "cb_coarse_get_seq_residues only works if "
+                        "all_residues was initialized in "
+                        "cb_coarse_read_init.\n");
+        return NULL;
+    }
+
+    for (i = start; i < end; i++)
+        residues[start-i] = all_residues[i];
+    residues[end-start] = '\0';
+}
+
+
 /*Coarse database functions ending in _r are used on cb_coarse_db_read structs
  *and are used as wrapper functions for the regular coarse database functions
  *being called on the cb_coarse_db_read struct's coarsedb.

@@ -123,6 +123,9 @@ struct DSVector *cb_coarse_get_block(struct cb_coarse_db_read *coarse_db,
 void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db);
 void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db);
 
+char *cb_coarse_get_seq_residues(struct cb_coarse_db_read *coarse_db,
+                                 int64_t id);
+
 /*Coarse database functions ending in _r are used on cb_coarse_db_read structs
  *and are used as wrapper functions for the regular coarse database functions
  *being called on the cb_coarse_db_read struct's coarsedb.
