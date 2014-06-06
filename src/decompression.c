@@ -108,9 +108,10 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
          *fasta              = coarsedb->file_fasta,
          *compressed         = comdb->file_compressed;
     struct DSVector *oseqs = ds_vector_create(), *coarse_seq_links = NULL;
-    int64_t *seq_lengths = cb_compressed_get_lengths(comdb),
-            hit_from_ind = coarse_db->seq_base_indices[id] + hit_from,
-            hit_to_ind   = coarse_db->seq_base_indices[id] + hit_to;
+    int64_t *seq_lengths      = cb_compressed_get_lengths(comdb),
+            *seq_base_indices = coarse_db->seq_base_indices,
+            hit_from_ind      = hit_from + seq_base_indices[id],
+            hit_to_ind        = hit_to + seq_base_indices[id];
     int32_t first_block = hit_from_ind / coarse_db->link_block_size,
             last_block  = hit_to_ind / coarse_db->link_block_size,
             i = 0, j = 0, k = 0;
@@ -118,43 +119,28 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
     for (i = first_block; i <= last_block; i++) {
 printf("\n");
         /*Current block of links*/
-        struct DSVector *current_block = cb_coarse_get_block(coarse_db, i);
+        struct DSVector *link_block = cb_coarse_get_block(coarse_db, i);
         /*Indices in the current block*/
-        struct DSVector *current_ind_block =
-          ds_vector_get(coarse_db->link_inds_by_block, i);
+        struct DSVector *ind_block =
+          (struct DSVector *)ds_vector_get(coarse_db->link_inds_by_block, i);
 
-        for (j = 0; j < current_block->size; j++){
-            /*The jth index in the current block*/
+        for (j = 0; j < link_block->size; j++){
             struct cb_link_to_compressed *link =
-              (struct cb_link_to_compressed *)ds_vector_get(current_block, j);
-            /*The index of the current link*/
-            int64_t link_ind = *(int64_t *)ds_vector_get(current_ind_block, j);
-            int64_t links_count = 0;
-            int64_t base_ind;
+              (struct cb_link_to_compressed *)ds_vector_get(link_block, j);
+            int64_t link_ind = *(int64_t *)ds_vector_get(ind_block, j);
             int64_t coarse_start = link->coarse_start, coarse_end = link->coarse_end;
+
             /*Determine which sequence the link belongs to*/
             for (k = 0; k <= coarse_db->num_coarse_seqs; k++)
                 if (coarse_db->seq_link_counts[k] > link_ind)
                     break;
-            base_ind = coarse_db->seq_base_indices[k];
-            coarse_start += base_ind;
-            coarse_end += base_ind;
 
-printf("%d %ld   %ld     %ld %ld\n",
-       id, base_ind, coarse_db->seq_base_indices[id],
-       coarse_start-coarse_db->seq_base_indices[id],
-       coarse_end-coarse_db->seq_base_indices[id]);
-
+            coarse_start += seq_base_indices[k];
+            coarse_end += seq_base_indices[k];
 
             /*Only expand the link if it overlaps the range for the BLAST Hsp we
               are expanding from.*/
             if (coarse_start <= hit_to_ind && coarse_end >= hit_from_ind) {
-
-printf("    %d %ld   %ld     %ld %ld\n",
-       id, base_ind, coarse_db->seq_base_indices[id],
-       coarse_start-coarse_db->seq_base_indices[id],
-       coarse_end-coarse_db->seq_base_indices[id]);
-
                 /*struct cb_link_to_coarse *current = NULL;
                 struct cb_compressed_seq *seq;
                 struct cb_hit_expansion *expansion;
