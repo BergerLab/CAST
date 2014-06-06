@@ -123,6 +123,35 @@ void traverse_blast_xml_r(xmlNode *r, void (*f)(xmlNode *, void *), void *acc){
     traverse_blast_xml(r->children, f, acc);
 }
 
+
+/*A function for traversing a parsed XML tree.  Takes in the root node, a
+ *void * accumulator, a function that takes in an xmlNode and a void *
+ *accumulator, and the name of a node and traverses the tree, applying the
+ *function on each node but ending the traversal if the name of the current node
+ *is the name passed into stop.
+ */
+void traverse_blast_xml_until(xmlNode *root, void (*f)(xmlNode *,void *),
+                              void *acc, char *stop){
+    for (; root; root = root->next) {
+        f(root, acc);
+        if (strcmp((char *)root->name, stop) != 0)
+            traverse_blast_xml(root->children, f, acc);
+    }
+}
+
+/*A wrapper function for traverse_blast_xml_until that treats the xmlNode
+ *passed into r as the root of the XML tree, skipping any sibling nodes r has.
+ *If the name of r is the same as the name passed into stop, traversal does not
+ *happen past r.
+ */
+void traverse_blast_xml_until_r(xmlNode *r, void (*f)(xmlNode *, void *),
+                                void *acc, char *stop){
+    f(r, acc);
+    if (strcmp((char *)r->name, stop) != 0)
+        traverse_blast_xml(r->children, f, acc);
+}
+
+
 /*Takes in the xmlNode representing a BLAST hsp and populates a struct hsp
   with its data.*/
 struct hsp *populate_blast_hsp(xmlNode *node){
