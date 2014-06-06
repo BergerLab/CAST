@@ -69,10 +69,10 @@ void blast_fine(uint64_t dbsize, struct fasta_seq *query){
 
     char *blastn,
          *blastn_command =
-           "blastn -db CaBLAST_fine.fasta -query CaBLAST_fine_query.fasta "
+           "blastn  CaBLAST_fine.fasta -query CaBLAST_fine_query.fasta "
            "-dbsize  -task blastn -outfmt 5 -evalue 1e-30 > "
            "CaBLAST_results.xml";
-    int command_length = strlen(blastn_command) + 49;
+    int command_length = strlen(blastn_command) + 31;
 
     blastn = malloc(command_length*sizeof(*blastn));
     assert(blastn);
@@ -87,12 +87,13 @@ void blast_fine(uint64_t dbsize, struct fasta_seq *query){
 
 
     sprintf(blastn,
-            "blastn -db CaBLAST_fine.fasta -query CaBLAST_fine_query.fasta "
+            "blastn %s CaBLAST_fine.fasta -query CaBLAST_fine_query.fasta "
             "-dbsize %lu -task blastn -outfmt 5 -evalue 1e-30 > "
-            "CaBLAST_results.xml", dbsize);
+            "CaBLAST_results.xml",
+            search_flags.fine_blast_db ? "-db" : "-subject", dbsize);
 
     /*if (!search_flags.hide_progress)
-          fprintf(stderr, "%s\n", blastn);*/
+          fprintf(stderr, "\n%s\n", blastn);*/
 
     system(blastn); /*Run fine BLAST*/
 
@@ -229,8 +230,9 @@ void write_fine_fasta(struct DSVector *oseqs){
     }
     fclose(temp);
 
-    system("makeblastdb -dbtype nucl -in CaBLAST_fine.fasta -out "
-           "CaBLAST_fine.fasta");
+    if (search_flags.fine_blast_db)
+        system("makeblastdb -dbtype nucl -in CaBLAST_fine.fasta -out "
+               "CaBLAST_fine.fasta");
 }
 
 /*Takes in the arguments for the program and returns a string of all of the
