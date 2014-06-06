@@ -116,16 +116,38 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
             i = 0, j = 0, k = 0;
 
     for (i = first_block; i <= last_block; i++) {
+        /*Current block of links*/
         struct DSVector *current_block = cb_coarse_get_block(coarse_db, i);
+        /*Indices in the current block*/
+        struct DSVector *current_ind_block =
+          ds_vector_get(coarse_db->link_inds_by_block, i);
 
         for (j = 0; j < current_block->size; j++){
+            /*The jth index in the current block*/
             struct cb_link_to_compressed *link =
               (struct cb_link_to_compressed *)ds_vector_get(current_block, j);
+            /*The index of the current link*/
+            int64_t link_ind = *(int64_t *)ds_vector_get(current_ind_block, j);
+            int64_t links_count = 0;
+            int64_t base_ind;
+            int64_t coarse_start = link->coarse_start, coarse_end = link->coarse_end;
+            /*Determine which sequence the link belongs to*/
+            for (k = 0; k <= coarse_db->num_coarse_seqs; k++)
+                if (coarse_db->seq_link_counts[k] >= link_ind)
+                    break;
+            base_ind = coarse_db->seq_base_indices[k];
+            coarse_start += base_ind;
+            coarse_end += base_ind;
 
+printf("%d %d %d %ld %ld   %ld     %ld %ld    %ld %ld\n",
+       i, j, id, link_ind, base_ind, coarse_db->seq_base_indices[id],
+       coarse_start-coarse_db->seq_base_indices[id],
+       coarse_end-coarse_db->seq_base_indices[id],
+       hit_from_ind, hit_to_ind);
             /*Only expand the link if it overlaps the range for the BLAST Hsp we
               are expanding from.*/
             if (link->coarse_start <= hit_to && link->coarse_end >= hit_from) {
-                struct cb_link_to_coarse *current = NULL;
+                /*struct cb_link_to_coarse *current = NULL;
                 struct cb_compressed_seq *seq;
                 struct cb_hit_expansion *expansion;
                 uint64_t original_start, original_end, original_range;
@@ -136,7 +158,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
                  *of the original sequence we want to re-create with this
                  *expansion.
                  */
-                original_start =
+                /*original_start =
                   get_max(0, (dir ? get_min(hit_from + (link->original_start -
                                                         link->coarse_start),
                                             hit_from + (link->original_end -
@@ -169,7 +191,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
 
                 /*Run decode_edit_script for each link_to_coarse in the compressed
                   sequence to re-create the section of the original string.*/
-                current = seq->links;
+                /*current = seq->links;
                 for (; current; current = current->next) {
                     int coarse_range = current->coarse_end - current->coarse_start,
                         init_i0 = current->original_start-(int32_t)original_start,
@@ -191,8 +213,8 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
 
                 /*Free the compressed sequence if it was loaded using
                   cb_compressed_read_seq_at*/
-                if (comdb->seqs->size == 0)
-                    cb_compressed_seq_free(seq);
+                /*if (comdb->seqs->size == 0)
+                    cb_compressed_seq_free(seq);*/
             }
         }
     }

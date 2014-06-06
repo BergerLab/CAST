@@ -634,10 +634,11 @@ cb_coarse_read_init(int32_t seed_size,
         link_count += read_int_from_file(8, file_links_count_index);
         coarsedb->seq_link_counts[i] = link_count;
 
-        (coarsedb->seq_base_indices)[i] =
+        coarsedb->seq_base_indices[i] =
           read_int_from_file(8, file_fasta_base_index);
+printf("seq #%ld: %ld links\n", i, coarsedb->seq_link_counts[i]);
     }
-    (coarsedb->seq_base_indices)[coarsedb->num_coarse_seqs] =
+    coarsedb->seq_base_indices[coarsedb->num_coarse_seqs] =
       read_int_from_file(8, file_fasta_base_index);
 
     coarsedb->link_block_size = link_block_size;
@@ -690,10 +691,9 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db){
     FILE *file_fasta_base_index  = coarse_db->db->file_fasta_base_index,
          *file_links_base_index  = coarse_db->db->file_links_base_index,
          *file_links_count_index = coarse_db->db->file_links_count_index;
-    int64_t num_link_blocks;
-    int32_t current_seq = 0, current_link = 0, link_count = 0,
-            i = 0, block_size = coarse_db->link_block_size,
-            *current_link_ptr = NULL;
+    int64_t num_link_blocks, current_link, *current_link_ptr = NULL;
+    int32_t current_seq = 0, link_count = 0, i = 0,
+            block_size = coarse_db->link_block_size;
     bool fseek_success;
 
     /*Initialize link_inds_by_block*/
@@ -718,10 +718,10 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db){
     current_link = 0;
 
     while (!feof(file_links_base_index)) {
-        int current_start =
-              read_int_from_file(8, file_links_base_index),
-            current_end =
-              read_int_from_file(8, file_links_base_index);
+        int64_t current_start =
+                  read_int_from_file(8, file_links_base_index),
+                current_end =
+                  read_int_from_file(8, file_links_base_index);
 
         if (feof(file_links_base_index))
             break;
@@ -762,8 +762,8 @@ struct DSVector *cb_coarse_get_block(struct cb_coarse_db_read *coarse_db,
 
 char *cb_coarse_get_seq_residues(struct cb_coarse_db_read *coarse_db,
                                  int64_t id){
-    int64_t start    = coarse_db->seq_base_indices[id],
-            end      = coarse_db->seq_base_indices[id+1], i;
+    int64_t start = coarse_db->seq_base_indices[id],
+            end   = coarse_db->seq_base_indices[id+1], i;
     char *residues     = malloc((end-start+1)*sizeof(*residues)),
          *all_residues = coarse_db->all_residues;
 
@@ -780,7 +780,6 @@ char *cb_coarse_get_seq_residues(struct cb_coarse_db_read *coarse_db,
 
     return residues;
 }
-
 
 /*Coarse database functions ending in _r are used on cb_coarse_db_read structs
  *and are used as wrapper functions for the regular coarse database functions
