@@ -47,7 +47,7 @@ void blast_coarse(struct opt_args *args, uint64_t dbsize){
     int command_length = strlen(blastn_command) + strlen(input_path) +
                                                   strlen(args->args[1]) + 31;
 
-    blastn = malloc(command_length * sizeof(*blastn));
+    blastn = malloc(command_length*sizeof(*blastn));
     assert(blastn);
 
     sprintf(blastn,"blastn -db %s -outfmt 5 -query %s -dbsize %lu -task blastn"
@@ -63,15 +63,16 @@ void blast_coarse(struct opt_args *args, uint64_t dbsize){
 }
 
 /*Runs BLAST on the fine FASTA file*/
-void blast_fine(char *subject, uint64_t dbsize, struct fasta_seq *query){
+void blast_fine(uint64_t dbsize, struct fasta_seq *query){
     /*Make a query FASTA file for the sequence we are testing*/
     FILE *fine_blast_query = fopen("CaBLAST_fine_query.fasta", "w");
 
     char *blastn,
          *blastn_command =
-           "blastn -subject  -query CaBLAST_fine_query.fasta -dbsize  "
-           "-task blastn -outfmt 5 -evalue 1e-30 > CaBLAST_results.xml";
-    int command_length = strlen(blastn_command) + strlen(subject) + 31;
+           "blastn -db CaBLAST_fine.fasta -query CaBLAST_fine_query.fasta "
+           "-dbsize  -task blastn -outfmt 5 -evalue 1e-30 > "
+           "CaBLAST_results.xml";
+    int command_length = strlen(blastn_command) + 49;
 
     blastn = malloc(command_length*sizeof(*blastn));
     assert(blastn);
@@ -86,9 +87,9 @@ void blast_fine(char *subject, uint64_t dbsize, struct fasta_seq *query){
 
 
     sprintf(blastn,
-            "blastn -subject %s -query CaBLAST_fine_query.fasta -dbsize %lu "
-            "-task blastn -outfmt 5 -evalue 1e-30 > CaBLAST_results.xml",
-            subject, dbsize);
+            "blastn -db CaBLAST_fine.fasta -query CaBLAST_fine_query.fasta "
+            "-dbsize %lu -task blastn -outfmt 5 -evalue 1e-30 > "
+            "CaBLAST_results.xml", dbsize);
 
     /*if (!search_flags.hide_progress)
           fprintf(stderr, "%s\n", blastn);*/
@@ -227,6 +228,9 @@ void write_fine_fasta(struct DSVector *oseqs){
         fprintf(temp, "> %s\n%s\n", current_seq->name, current_seq->residues);
     }
     fclose(temp);
+
+    system("makeblastdb -dbtype nucl -in CaBLAST_fine.fasta -out "
+           "CaBLAST_fine.fasta");
 }
 
 /*Takes in the arguments for the program and returns a string of all of the
@@ -311,9 +315,8 @@ int main(int argc, char **argv){
 
     if (args->nargs < 2) {
         fprintf(stderr, 
-            "Usage: %s [flags] database-dir fasta-file "
-            "[ --blast_args BLASTN_ARGUMENTS ]\n",
-            argv[0]);
+                "Usage: %s [flags] database-dir fasta-file "
+                "[ --blast_args BLASTN_ARGUMENTS ]\n", argv[0]);
         opt_config_print_usage(conf);
         exit(1);
     }
@@ -385,12 +388,12 @@ int main(int argc, char **argv){
          */
         if (expanded_hits->size > 0) {
             write_fine_fasta(expanded_hits);
-            blast_fine("CaBLAST_fine.fasta", dbsize, query);
+            blast_fine(dbsize, query);
 
-            /*Delete the expanded hits file if the --no-cleanup flag is not
+            /*Delete the expanded hits database if the --no-cleanup flag is not
               being used.*/
             if (!search_flags.no_cleanup)
-                system("rm CaBLAST_fine.fasta");
+                system("rm CaBLAST_fine.fasta*");
 
             /*Output information on each fine BLAST hit if the --show-hit-info
               flag is set to true.*/
