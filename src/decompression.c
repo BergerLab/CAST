@@ -116,6 +116,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
             i = 0, j = 0, k = 0;
 
     for (i = first_block; i <= last_block; i++) {
+printf("\n");
         /*Current block of links*/
         struct DSVector *current_block = cb_coarse_get_block(coarse_db, i);
         /*Indices in the current block*/
@@ -133,20 +134,27 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
             int64_t coarse_start = link->coarse_start, coarse_end = link->coarse_end;
             /*Determine which sequence the link belongs to*/
             for (k = 0; k <= coarse_db->num_coarse_seqs; k++)
-                if (coarse_db->seq_link_counts[k] >= link_ind)
+                if (coarse_db->seq_link_counts[k] > link_ind)
                     break;
             base_ind = coarse_db->seq_base_indices[k];
             coarse_start += base_ind;
             coarse_end += base_ind;
 
-printf("%d %d %d %ld %ld   %ld     %ld %ld    %ld %ld\n",
-       i, j, id, link_ind, base_ind, coarse_db->seq_base_indices[id],
+printf("%d %ld   %ld     %ld %ld\n",
+       id, base_ind, coarse_db->seq_base_indices[id],
        coarse_start-coarse_db->seq_base_indices[id],
-       coarse_end-coarse_db->seq_base_indices[id],
-       hit_from_ind, hit_to_ind);
+       coarse_end-coarse_db->seq_base_indices[id]);
+
+
             /*Only expand the link if it overlaps the range for the BLAST Hsp we
               are expanding from.*/
-            if (link->coarse_start <= hit_to && link->coarse_end >= hit_from) {
+            if (coarse_start <= hit_to_ind && coarse_end >= hit_from_ind) {
+
+printf("    %d %ld   %ld     %ld %ld\n",
+       id, base_ind, coarse_db->seq_base_indices[id],
+       coarse_start-coarse_db->seq_base_indices[id],
+       coarse_end-coarse_db->seq_base_indices[id]);
+
                 /*struct cb_link_to_coarse *current = NULL;
                 struct cb_compressed_seq *seq;
                 struct cb_hit_expansion *expansion;

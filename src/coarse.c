@@ -636,13 +636,11 @@ cb_coarse_read_init(int32_t seed_size,
 
         coarsedb->seq_base_indices[i] =
           read_int_from_file(8, file_fasta_base_index);
-printf("seq #%ld: %ld links\n", i, coarsedb->seq_link_counts[i]);
     }
     coarsedb->seq_base_indices[coarsedb->num_coarse_seqs] =
       read_int_from_file(8, file_fasta_base_index);
 
     coarsedb->link_block_size = link_block_size;
-
 
     /*Get the blocks of link indices.*/
     cb_coarse_db_read_init_blocks(coarsedb);
