@@ -223,7 +223,7 @@ void add_blast_hit(xmlNode *node, void *hits){
   a vector of all of the nodes in the tree that represent BLAST hits.*/
 struct DSVector *get_blast_hits(xmlNode *node){
     struct DSVector *hits = ds_vector_create();
-    traverse_blast_xml_r(node, add_blast_hit, hits);
+    traverse_blast_xml_until_r(node, add_blast_hit, hits, "Hit");
     return hits;
 }
 
@@ -239,7 +239,8 @@ void add_blast_iteration(xmlNode *node, void *iterations){
   a vector of all of the nodes in the tree that represent iterations.*/
 struct DSVector *get_blast_iterations(xmlNode *node){
     struct DSVector *iterations = ds_vector_create();
-    traverse_blast_xml_r(node, add_blast_iteration, iterations);
+    traverse_blast_xml_until_r(node, add_blast_iteration,
+                               iterations, "Iteration");
     return iterations;
 }
 

@@ -9,6 +9,7 @@
 #include "fasta.h"
 #include "seeds.h"
 #include "seq.h"
+#include "util.h"
 
 /*Takes in the size of the k-mers that will be used in compression, the file
  *pointers for the database, and whether or not to load in the coarse residues
@@ -335,9 +336,9 @@ void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db){
 /*Loads all of the residues in the coarse database's FASTA file into the coarse
   database's all_residues string*/
 void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
-    struct DSVector *fasta_seqs = ds_vector_create();
     int64_t num_bases = 0, i = 0;
     int32_t num_fasta_entries = 0, bases_copied = 0, j = 0;
+    char *line = NULL;
 
     /*Get the number of entries in the coarse FASTA file*/
     bool fseek_success = fseek(coarse_db->db->file_fasta_index,0,SEEK_END) == 0;
@@ -355,31 +356,27 @@ void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
       (int64_t)read_int_from_file(8, coarse_db->db->file_fasta_base_index);
     fseek(coarse_db->db->file_fasta_base_index, 0, SEEK_SET);
 
-    
-    for (i = 0; i < num_fasta_entries; i++) {
-        struct fasta_seq *current_seq =
-          fasta_read_next(coarse_db->db->file_fasta, "");
-
-        if (!current_seq)
-            fprintf(stderr, "Error getting FASTA sequence #%ld in "
-                            "cb_coarse_get_all_residues\n", i);
-        ds_vector_append(fasta_seqs, (void *)current_seq);
-    }
-
     coarse_db->all_residues =
       malloc((num_bases+1)*sizeof(*(coarse_db->all_residues)));
     assert(coarse_db->all_residues);
 
     for (i = 0; i < num_fasta_entries; i++) {
-        struct fasta_seq *sequence =
-          (struct fasta_seq *)ds_vector_get(fasta_seqs, i);
-
-        for (j = 0; j < strlen(sequence->seq); j++)
-            coarse_db->all_residues[bases_copied++] = sequence->seq[j];
-        fasta_free_seq(sequence);
+        FILE *fasta = coarse_db->db->file_fasta;
+        if (0 == readline(fasta, &line)) {
+            free(line);
+            return NULL;
+        }
+        else
+            free(line);
+        if (0 == readline(fasta, &line)) {
+            free(line);
+            return NULL;
+        }
+        strcat(coarse_db->all_residues, line);
+        free(line);
     }
+
     coarse_db->all_residues[num_bases] = '\0';
-    ds_vector_free_no_data(fasta_seqs);
 }
 
 /*Takes in an ID number and the residues and original start and end indices

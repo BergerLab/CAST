@@ -110,8 +110,8 @@ fasta_read_next(FILE *f, const char *exclude)
         exclude_residues(line, exclude);
         exclude_residues(line, "*");
 
-        fs->seq = realloc(
-            fs->seq, sizeof(*fs->seq) * (1 + strlen(line) + strlen(fs->seq)));
+        fs->seq =
+          realloc(fs->seq, sizeof(*fs->seq)*(1+strlen(line)+strlen(fs->seq)));
         assert(fs->seq);
 
         strcat(fs->seq, line);
