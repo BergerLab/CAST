@@ -141,7 +141,7 @@ printf("\n");
             /*Only expand the link if it overlaps the range for the BLAST Hsp we
               are expanding from.*/
             if (coarse_start <= hit_to_ind && coarse_end >= hit_from_ind) {
-                /*struct cb_link_to_coarse *current = NULL;
+                struct cb_link_to_coarse *current = NULL;
                 struct cb_compressed_seq *seq;
                 struct cb_hit_expansion *expansion;
                 uint64_t original_start, original_end, original_range;
@@ -152,7 +152,7 @@ printf("\n");
                  *of the original sequence we want to re-create with this
                  *expansion.
                  */
-                /*original_start =
+                original_start =
                   get_max(0, (dir ? get_min(hit_from + (link->original_start -
                                                         link->coarse_start),
                                             hit_from + (link->original_end -
@@ -174,6 +174,7 @@ printf("\n");
                           + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
                 original_range = original_end - original_start + 1;
 
+printf("start: %ld, end: %ld\n", original_start, original_end);
                 seq = comdb->seqs->size == 0 ?
                         cb_compressed_read_seq_at(comdb, link->org_seq_id) :
                         cb_compressed_seq_at(comdb, link->org_seq_id);
@@ -185,7 +186,7 @@ printf("\n");
 
                 /*Run decode_edit_script for each link_to_coarse in the compressed
                   sequence to re-create the section of the original string.*/
-                /*current = seq->links;
+                current = seq->links;
                 for (; current; current = current->next) {
                     int coarse_range = current->coarse_end - current->coarse_start,
                         init_i0 = current->original_start-(int32_t)original_start,
@@ -196,6 +197,7 @@ printf("\n");
                                            original_start, coarse_db, current);
                 }
                 orig_str[original_range] = '\0';
+printf("%s\n", orig_str);
                 expansion = malloc(sizeof(*expansion));
                 assert(expansion);
 
