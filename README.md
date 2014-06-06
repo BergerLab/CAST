@@ -46,7 +46,8 @@ cablast-compress [flags] database-directory fasta-file [fasta-file ...]
 
 Current progress:  Can compress and decompress two same-direction matches, two reverse-complement matches,
 one same-direction match and one reverse-complement match, and two matches that are at least one chunk
-apart.  On real test data, can currently compress and decompress all ten Brucella sequences from the test
+apart.  On real test data, can currently compress and decompress all 9997 Brucella sequences from the test
 file, producing as output coarse FASTA files, links tables, and seeds tables that perfectly match these data
 in Po-Ru Loh's C++ version of the code, and the order of sequences does not affect whether or not compression
-and decompression work correctly.
+and decompression work correctly.  Hit expansion and fine BLAST currently produce coarse BLAST hit expansions
+that are identical to Po-Ru's and fine BLAST hits at the same locations as in Po-Ru's code.

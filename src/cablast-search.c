@@ -279,10 +279,9 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
             int32_t coarse_start  = h->hit_from-1,
                     coarse_end    = h->hit_to-1,
                     coarse_seq_id = current_hit->accession;
-/****************************************************************************/
+
             oseqs = cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
                                      coarse_start, coarse_end, 50);
-/****************************************************************************/
             for (k = 0; k < oseqs->size; k++)
                 ds_vector_append(expanded_hits, ds_vector_get(oseqs, k));
             ds_vector_free_no_data(oseqs);
@@ -291,6 +290,7 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
         free(current_hit);
     }
     ds_vector_free_no_data(hits);
+
     return expanded_hits;
 }
 
@@ -377,10 +377,8 @@ int main(int argc, char **argv){
           coarse BLAST.*/
         expanded_hits = expand_blast_hits(iterations, i, db);
 
-continue;
-
         query = (struct fasta_seq *)ds_vector_get(queries, i);
-
+/******************************************************************************/
         /*If the current query sequence had hits in the call to coarse BLAST,
          *make a FASTA file of the expanded hits and run BLAST with the current
          *query sequence against the expanded hits file.
@@ -388,6 +386,7 @@ continue;
         if (expanded_hits->size > 0) {
             write_fine_fasta(expanded_hits);
             blast_fine("CaBLAST_fine.fasta", dbsize, query);
+
             /*Delete the expanded hits file if the --no-cleanup flag is not
               being used.*/
             if (!search_flags.no_cleanup)
@@ -438,6 +437,7 @@ continue;
                 xmlFreeDoc(test_doc);
             }
         }
+/******************************************************************************/
         for (j = 0; j < expanded_hits->size; j++)
             cb_hit_expansion_free(ds_vector_get(expanded_hits, j));
         ds_vector_free_no_data(expanded_hits);
