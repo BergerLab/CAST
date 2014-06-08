@@ -84,16 +84,16 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
     db->name = basename(dir);
 
     ffasta                    = open_db_file(pfasta, "r+");
-    fseeds                    = open_db_file(pseeds, "r+");
-    flinks                    = open_db_file(plinks, "r+");
-    findex_coarse_links       = open_db_file(pindex_coarse_links, "r+");
-    findex_coarse_links_base  = open_db_file(pindex_coarse_links_base, "r+");
-    findex_coarse_links_count = open_db_file(pindex_coarse_links_count, "r+");
-    findex_coarse_fasta       = open_db_file(pindex_coarse_fasta, "r+");
-    findex_coarse_fasta_base  = open_db_file(pindex_coarse_fasta_base, "r+");
-    fcompressed               = open_db_file(pcompressed, "r+");
-    findex_compressed         = open_db_file(pindex_compressed, "r+");
-    findex_params             = open_db_file(pindex_params, "r+");
+    fseeds                    = open_db_file(pseeds, "rb+");
+    flinks                    = open_db_file(plinks, "rb+");
+    findex_coarse_links       = open_db_file(pindex_coarse_links, "rb+");
+    findex_coarse_links_base  = open_db_file(pindex_coarse_links_base, "rb+");
+    findex_coarse_links_count = open_db_file(pindex_coarse_links_count, "rb+");
+    findex_coarse_fasta       = open_db_file(pindex_coarse_fasta, "rb+");
+    findex_coarse_fasta_base  = open_db_file(pindex_coarse_fasta_base, "rb+");
+    fcompressed               = open_db_file(pcompressed, "rb+");
+    findex_compressed         = open_db_file(pindex_compressed, "rb+");
+    findex_params             = open_db_file(pindex_params, "rb+");
 
     db->coarse_db = cb_coarse_init(seed_size, ffasta, fseeds, flinks,
                                  findex_coarse_links, findex_coarse_links_base,
@@ -156,16 +156,16 @@ cb_database_read_init(char *dir, int32_t seed_size,
     db->name = basename(dir);
 
     ffasta                    = open_db_file(pfasta, "r");
-    fseeds                    = open_db_file(pseeds, "r");
-    flinks                    = open_db_file(plinks, "r");
-    findex_coarse_links       = open_db_file(pindex_coarse_links, "r");
-    findex_coarse_links_base  = open_db_file(pindex_coarse_links_base, "r");
-    findex_coarse_links_count = open_db_file(pindex_coarse_links_count, "r");
-    findex_coarse_fasta       = open_db_file(pindex_coarse_fasta, "r");
-    findex_coarse_fasta_base  = open_db_file(pindex_coarse_fasta_base, "r");
-    fcompressed               = open_db_file(pcompressed, "r");
-    findex_compressed         = open_db_file(pindex_compressed, "r");
-    findex_params             = open_db_file(pindex_params, "r");
+    fseeds                    = open_db_file(pseeds, "rb");
+    flinks                    = open_db_file(plinks, "rb");
+    findex_coarse_links       = open_db_file(pindex_coarse_links, "rb");
+    findex_coarse_links_base  = open_db_file(pindex_coarse_links_base, "rb");
+    findex_coarse_links_count = open_db_file(pindex_coarse_links_count, "rb");
+    findex_coarse_fasta       = open_db_file(pindex_coarse_fasta, "rb");
+    findex_coarse_fasta_base  = open_db_file(pindex_coarse_fasta_base, "rb");
+    fcompressed               = open_db_file(pcompressed, "rb");
+    findex_compressed         = open_db_file(pindex_compressed, "rb");
+    findex_params             = open_db_file(pindex_params, "rb");
 
     db->coarse_db = cb_coarse_read_init(seed_size, ffasta, fseeds, flinks,
                                         findex_coarse_links,
@@ -180,13 +180,6 @@ cb_database_read_init(char *dir, int32_t seed_size,
                                     load_compressed_db);
 
     return db;
-}
-
-void cb_database_populate(struct cb_database *db, const char *pfasta,
-                           const char *plinks){
-    struct fasta_seq_gen *fsg = fasta_generator_start(pfasta, "", 100);
-    FILE *flinks = fopen(plinks, "r");
-    fclose(flinks);
 }
 
 void cb_database_free(struct cb_database *db){

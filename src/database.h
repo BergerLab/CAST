@@ -37,9 +37,6 @@ cb_database_read_init(char *dir, int32_t seed_size,
                       bool load_coarse_residues, bool load_coarse_links,
                       bool load_compressed_db, int32_t link_block_size);
 
-void cb_database_populate(struct cb_database *db, const char *pfasta,
-                          const char *plinks);
-
 void cb_database_free(struct cb_database *db);
 
 void cb_database_read_free(struct cb_database_r *db);
