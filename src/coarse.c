@@ -364,15 +364,17 @@ void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
         FILE *fasta = coarse_db->db->file_fasta;
         if (0 == readline(fasta, &line)) {
             free(line);
-            return NULL;
+            return;
         }
         else
             free(line);
         if (0 == readline(fasta, &line)) {
             free(line);
-            return NULL;
+            return;
         }
         strcat(coarse_db->all_residues, line);
+        for (j = 0; line[j] != '\0' && line[j] != '\n'; j++)
+            coarse_db->all_residues[bases_copied++] = line[j];
         free(line);
     }
 
