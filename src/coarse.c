@@ -143,9 +143,7 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
 
         /*At the start of outputting each sequence, output the indices for the
           coarse links and FASTA files to their index files.*/
-        output_int_to_file(link_index, 8, coarse_db->file_links_index);
-        /*output_int_to_file(base_index, 8, coarse_db->file_fasta_base_index);*/
-        /*output_int_to_file(coarse_fasta_index, 8, coarse_db->file_fasta_index);*/
+        fwrite(&link_index, sizeof(link_index), 1, coarse_db->file_links_index);
         fwrite(&base_index, sizeof(base_index), 1,
                coarse_db->file_fasta_base_index);
         fwrite(&coarse_fasta_index, sizeof(coarse_fasta_index), 1,
@@ -641,12 +639,8 @@ cb_coarse_read_init(int32_t seed_size,
     for (i = 0; i < coarsedb->num_coarse_seqs; i++) {
         link_count += read_int_from_file(8, file_links_count_index);
         coarsedb->seq_link_counts[i] = link_count;
-
-        /*coarsedb->seq_base_indices[i] =
-          read_int_from_file(8, file_fasta_base_index);*/
     }
-    /*coarsedb->seq_base_indices[coarsedb->num_coarse_seqs] =
-      read_int_from_file(8, file_fasta_base_index);*/
+
     fread(coarsedb->seq_base_indices,sizeof(*(coarsedb->seq_base_indices)),
           (coarsedb->num_coarse_seqs+1),file_fasta_base_index);
 
