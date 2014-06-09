@@ -123,7 +123,7 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
 
     /*Keeps track of the indices to be printed to coarse.links.index and
       coarse_fasta_base_index.*/
-    uint64_t link_index = (uint64_t)0, base_index = (uint64_t)0;
+    uint64_t /**/link_index/**/ = (uint64_t)0, base_index = (uint64_t)0;
     int16_t mask = (int16_t)0xff;
     int32_t j;
 
@@ -141,6 +141,7 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
 
         coarse_fasta_index = ftell(coarse_db->file_fasta);
 
+        link_index = ftell(coarse_db->file_links);
         /*At the start of outputting each sequence, output the indices for the
           coarse links and FASTA files to their index files.*/
         fwrite(&link_index, sizeof(link_index), 1, coarse_db->file_links_index);
@@ -151,17 +152,11 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
 
         /*Output the FASTA sequence to the coarse FASTA file*/
         sprintf(fasta_output, ">%ld\n%s\n", i, seq->seq->residues);
-        for (j = 0; fasta_output[j] != '\0'; j++)
-            putc(fasta_output[j], coarse_db->file_fasta);
+        fputs(fasta_output, coarse_db->file_fasta);
 
         /*Output the link header for the sequence to the coarse links file*/
         sprintf(link_header, "> %ld\n", i);
-        for (j = 0; link_header[j] != '\0'; j++)
-            putc(link_header[j], coarse_db->file_links);
-
-        /*For each character outputted to the coarse links file, increment
-          "index"*/
-        link_index += strlen(link_header);
+        fputs(link_header, coarse_db->file_links);
 
         free(fasta_output);
         free(link_header);
@@ -174,38 +169,26 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
               characters.*/
             int16_t coarse_start = (int16_t)link->coarse_start,
                     coarse_end   = (int16_t)link->coarse_end;
-            char *id_bytes          = read_int_to_bytes(link->org_seq_id, 8),
-                 coarse_start_left  = (coarse_start >> 8) & mask,
-                 coarse_start_right = coarse_start & mask,
-                 coarse_end_left    = (coarse_end >> 8) & mask,
-                 coarse_end_right   = coarse_end & mask;
 
-            for (j = 0; j < 8; j++)
-                putc(id_bytes[j], coarse_db->file_links);
+            fwrite(&(link->org_seq_id), sizeof(link->org_seq_id),
+                   1, coarse_db->file_links);
 
             /*Prints the binary representations of the indices and the
               direction of the link to the links file*/
-            putc(coarse_start_left, coarse_db->file_links);
-            putc(coarse_start_right, coarse_db->file_links);
-            putc(coarse_end_left, coarse_db->file_links);
-            putc(coarse_end_right, coarse_db->file_links);
-            output_int_to_file(link->original_start, 8, coarse_db->file_links);
-            output_int_to_file(link->original_end, 8, coarse_db->file_links);
+            fwrite(&coarse_start,sizeof(coarse_start),1,coarse_db->file_links);
+            fwrite(&coarse_end, sizeof(coarse_end), 1, coarse_db->file_links);
+            fwrite(&(link->original_start), sizeof(link->original_start),
+                   1, coarse_db->file_links);
+            fwrite(&(link->original_end), sizeof(link->original_end),
+                   1, coarse_db->file_links);
             putc((link->dir?'0':'1'), coarse_db->file_links);
 
-            link_index += 29;
 
             /*0 is used as a delimiter to signify that there are more links
               for this sequence*/
-            if (link->next != NULL) {
+            if (link->next != NULL)
                 putc(0, coarse_db->file_links);
-                link_index++;
-            }
 
-            /*output_int_to_file(link->coarse_start + base_index, 8,
-                               coarse_db->file_links_base_index);
-            output_int_to_file(link->coarse_end + base_index, 8,
-                               coarse_db->file_links_base_index);*/
             uint64_t coarse_base_start = link->coarse_start + base_index;
             uint64_t coarse_base_end   = link->coarse_end + base_index;
             fwrite(&coarse_base_start, sizeof(coarse_base_start),
@@ -216,10 +199,8 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
             link_count++;
         }
         /*'#' is used as a delimiter to signify the last link of the sequence*/
-        if (i+1 < coarse_db->seqs->size) {
+        if (i+1 < coarse_db->seqs->size)
             putc('#', coarse_db->file_links);
-            link_index++;
-        }
         output_int_to_file(link_count, 8, coarse_db->file_links_count_index);
         base_index += strlen(seq->seq->residues);
     }
@@ -363,8 +344,6 @@ void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
       fseek(coarse_db->db->file_fasta_base_index, -8, SEEK_END) == 0;
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA index file\n");
-    /*num_bases =
-      (int64_t)read_int_from_file(8, coarse_db->db->file_fasta_base_index);*/
     fread(&num_bases, sizeof(num_bases), 1,
           coarse_db->db->file_fasta_base_index);
     fseek(coarse_db->db->file_fasta_base_index, 0, SEEK_SET);
@@ -492,18 +471,12 @@ struct cb_link_to_compressed *read_coarse_link(FILE *f){
     char *link_bytes = malloc(29*sizeof(link_bytes));
     assert(link_bytes);
 
-    fread(link_bytes, 1, 29, f);
-    if (feof(f)) {
-        free(link);
-        return NULL;
-    }
-
-    link->org_seq_id     = (uint64_t)bytes_to_int(link_bytes, 0, 8);
-    link->coarse_start   = (uint16_t)bytes_to_int(link_bytes, 8, 2);
-    link->coarse_end     = (uint16_t)bytes_to_int(link_bytes, 10, 2);
-    link->original_start = (uint64_t)bytes_to_int(link_bytes, 12, 8);
-    link->original_end   = (uint64_t)bytes_to_int(link_bytes, 20, 8);
-    link->dir            = link_bytes[28] == '0';
+    fread(&(link->org_seq_id), sizeof(link->org_seq_id), 1, f);
+    fread(&(link->coarse_start), sizeof(link->coarse_start), 1, f);
+    fread(&(link->coarse_end), sizeof(link->coarse_end), 1, f);
+    fread(&(link->original_start), sizeof(link->original_start), 1, f);
+    fread(&(link->original_end), sizeof(link->original_end), 1, f);
+    link->dir = getc(f) == '0';
     link->next = NULL;
 
     return link;
@@ -573,11 +546,8 @@ int64_t cb_coarse_find_offset(FILE *index_file, int id){
         fprintf(stderr, "Error in seeking to offset %ld\n", try_off);
         return (int64_t)(-1);
     }
-    for (i = 0; i < 8; i++) {
-        int64_t current_byte = ((int64_t)(getc(index_file))&mask);
-        offset <<= 8;
-        offset |= current_byte;
-    }
+    fread(&offset, sizeof(offset), 1, index_file);
+
     return offset;
 }
 
@@ -611,7 +581,7 @@ cb_coarse_read_init(int32_t seed_size,
                     FILE *file_fasta_base_index, FILE *file_params,
                     bool load_coarse_residues, bool load_coarse_links,
                     int32_t link_block_size){
-    int64_t link_count = (int64_t)0;
+    int64_t link_count = (int64_t)0, links_in_sequence;
     int32_t i;
     bool fseek_success;
 
@@ -643,7 +613,9 @@ cb_coarse_read_init(int32_t seed_size,
     assert(coarsedb->seq_base_indices);
 
     for (i = 0; i < coarsedb->num_coarse_seqs; i++) {
-        link_count += read_int_from_file(8, file_links_count_index);
+        fread(&links_in_sequence, sizeof(links_in_sequence),
+              1, file_links_count_index);
+        link_count += links_in_sequence;
         coarsedb->seq_link_counts[i] = link_count;
     }
 
@@ -712,8 +684,6 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db){
     fseek_success = (fseek(file_fasta_base_index, -8, SEEK_END)) == 0;
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA base index file\n");
-    /*num_link_blocks =
-      read_int_from_file(8, file_fasta_base_index) / block_size + 1;*/
     fread(&num_link_blocks, sizeof(num_link_blocks), 1, file_fasta_base_index);
     num_link_blocks = num_link_blocks / block_size + 1;
     fseek(file_fasta_base_index, 0, SEEK_SET);
