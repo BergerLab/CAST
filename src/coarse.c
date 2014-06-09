@@ -506,7 +506,7 @@ struct DSVector *get_coarse_sequence_links(FILE *f){
             break;
         ds_vector_append(links, (void *)current_link);
         c = getc(f);
-        if (c == '#')
+        if (feof(f) || c == '#')
             break;
     }
     return links;
@@ -725,15 +725,17 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db){
 struct DSVector *cb_coarse_get_block(struct cb_coarse_db_read *coarse_db,
                                      int32_t index){
     struct DSVector *links = ds_vector_create(),
-                    *block = ds_vector_get(coarse_db->link_inds_by_block,
-                                           index);
+                    *block = (struct DSVector *)ds_vector_get(
+                               coarse_db->link_inds_by_block,
+                               index);
     int32_t i;
 
     if (coarse_db->links != NULL)
         for (i = 0; i < block->size; i++) {
             int32_t link_index = *(int32_t *)ds_vector_get(block, i);
             struct cb_link_to_compressed *link =
-              ds_vector_get(coarse_db->links, link_index);
+              (struct cb_link_to_compressed *)ds_vector_get(coarse_db->links,
+                                                            link_index);
             ds_vector_append(links, link);
         }
     return links;

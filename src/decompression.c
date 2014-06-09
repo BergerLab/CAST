@@ -122,12 +122,13 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
         /*Indices in the current block*/
         struct DSVector *ind_block =
           (struct DSVector *)ds_vector_get(coarse_db->link_inds_by_block, i);
-printf("\n");
+
         for (j = 0; j < link_block->size; j++){
             struct cb_link_to_compressed *link =
               (struct cb_link_to_compressed *)ds_vector_get(link_block, j);
-            int64_t link_ind = *(int64_t *)ds_vector_get(ind_block, j);
-            int64_t coarse_start = link->coarse_start, coarse_end = link->coarse_end;
+            int64_t link_ind     = *(int64_t *)ds_vector_get(ind_block, j),
+                    coarse_start = link->coarse_start,
+                    coarse_end   = link->coarse_end;
 
             /*Determine which sequence the link belongs to*/
             for (k = 0; k <= coarse_db->num_coarse_seqs; k++)
@@ -138,6 +139,7 @@ printf("\n");
             coarse_end += seq_base_indices[k];
             /*Only expand the link if it overlaps the range for the BLAST Hsp we
               are expanding from.*/
+printf("%ld %ld %ld %ld\n", coarse_start, hit_to_ind, coarse_end, hit_from_ind);
             if (coarse_start <= hit_to_ind && coarse_end >= hit_from_ind) {
                 struct cb_link_to_coarse *current = NULL;
                 struct cb_compressed_seq *seq;
@@ -233,7 +235,7 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
     struct fasta_seq *fasta = NULL;
     struct edit_info *edit = NULL;
     int i = 0, i0 = 0, i1 = 0, coarse_pos, last_edit_str_len, script_pos;
-    char *diff = link->diff, *residues;/* = fasta->seq;*/
+    char *diff = link->diff, *residues;
     bool fwd = (diff[0] & ((char)0x7f)) == '0';
 
     if (coarsedb->all_residues == NULL) {
