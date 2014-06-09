@@ -199,8 +199,10 @@ cb_database_read_init(char *dir, int32_t seed_size,
                                         findex_params,
                                         load_coarse_residues,
                                         load_coarse_links, link_block_size);
+fprintf(stderr, "!\n");
     db->com_db = cb_compressed_init(fcompressed, findex_compressed,
                                     load_compressed_db);
+fprintf(stderr, "!!\n");
 
     return db;
 }

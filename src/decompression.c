@@ -122,7 +122,6 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
         /*Indices in the current block*/
         struct DSVector *ind_block =
           (struct DSVector *)ds_vector_get(coarse_db->link_inds_by_block, i);
-fprintf(stderr, "%d\n", link_block->size);
 
         for (j = 0; j < link_block->size; j++){
             struct cb_link_to_compressed *link =
@@ -151,6 +150,7 @@ fprintf(stderr, "%d\n", link_block->size);
                  *of the original sequence we want to re-create with this
                  *expansion.
                  */
+fprintf(stderr, "%ld %ld %d %d %ld\n", link->original_start, link->original_end, link->coarse_start, link->coarse_end, seq_lengths[link->org_seq_id]);
                 original_start =
                   get_max(0, (dir ? get_min(hit_from + (link->original_start -
                                                         link->coarse_start),
