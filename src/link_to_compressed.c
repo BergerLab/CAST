@@ -6,6 +6,7 @@
 
 #include "link_to_compressed.h"
 
+/*Initializes a link to a sequence in the compressed database*/
 struct cb_link_to_compressed *
 cb_link_to_compressed_init(int32_t org_seq_id, int16_t coarse_start,
                            int16_t coarse_end, uint64_t original_start,
@@ -24,6 +25,7 @@ cb_link_to_compressed_init(int32_t org_seq_id, int16_t coarse_start,
     return link;
 }
 
+/*Freeing function for a cb_link_to_compressed*/
 void cb_link_to_compressed_free(struct cb_link_to_compressed *link){
     if (link != NULL) {
         cb_link_to_compressed_free(link->next);

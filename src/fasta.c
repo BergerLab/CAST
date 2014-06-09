@@ -7,18 +7,13 @@
 #include "fasta.h"
 #include "util.h"
 
-static bool
-is_new_sequence_start(FILE *f);
+static bool is_new_sequence_start(FILE *f);
 
-static void
-exclude_residues(char *seq, const char *exclude);
+static void exclude_residues(char *seq, const char *exclude);
 
-static void *
-fasta_generator(void *gen);
+static void *fasta_generator(void *gen);
 
-struct fasta_file *
-fasta_read_all(const char *file_name, const char *exclude)
-{
+struct fasta_file *fasta_read_all(const char *file_name, const char *exclude){
     FILE *f;
     struct fasta_file *ff;
     struct fasta_seq *new_seq;
@@ -57,9 +52,7 @@ fasta_read_all(const char *file_name, const char *exclude)
     return ff;
 }
 
-void
-fasta_free_all(struct fasta_file *ff)
-{
+void fasta_free_all(struct fasta_file *ff){
     int i;
 
     for (i = 0; i < ff->length; i++)
@@ -68,9 +61,7 @@ fasta_free_all(struct fasta_file *ff)
     free(ff);
 }
 
-struct fasta_seq *
-fasta_read_next(FILE *f, const char *exclude)
-{
+struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     struct fasta_seq *fs;
     char *line = NULL;
 
@@ -121,9 +112,7 @@ fasta_read_next(FILE *f, const char *exclude)
     return fs;
 }
 
-void
-fasta_free_seq(struct fasta_seq *seq)
-{
+void fasta_free_seq(struct fasta_seq *seq){
     free(seq->name);
     free(seq->seq);
     free(seq);
@@ -131,8 +120,7 @@ fasta_free_seq(struct fasta_seq *seq)
 
 struct fasta_seq_gen *
 fasta_generator_start(const char *file_name, const char *exclude,
-                      int buffer_capacity)
-{
+                      int buffer_capacity){
     FILE *fp;
     struct fasta_seq_gen *fsg;
     int errno;
@@ -160,9 +148,7 @@ fasta_generator_start(const char *file_name, const char *exclude,
     return fsg;
 }
 
-void
-fasta_generator_free(struct fasta_seq_gen *fsg)
-{
+void fasta_generator_free(struct fasta_seq_gen *fsg){
     int errno;
 
     if (0 != (errno = pthread_join(fsg->thread, NULL))) {
@@ -174,9 +160,7 @@ fasta_generator_free(struct fasta_seq_gen *fsg)
     free(fsg);
 }
 
-static void *
-fasta_generator(void *gen)
-{
+static void *fasta_generator(void *gen){
     struct fasta_seq_gen *fsg;
     struct fasta_seq *seq;
 
@@ -190,18 +174,14 @@ fasta_generator(void *gen)
     return NULL;
 }
 
-struct fasta_seq *
-fasta_generator_next(struct fasta_seq_gen *fsg)
-{
+struct fasta_seq *fasta_generator_next(struct fasta_seq_gen *fsg){
     struct fasta_seq *seq;
 
     seq = (struct fasta_seq *) ds_queue_get(fsg->seqs);
     return seq;
 }
 
-static bool
-is_new_sequence_start(FILE *f)
-{
+static bool is_new_sequence_start(FILE *f){
     char next;
     bool is_new_seq;
 
@@ -216,9 +196,7 @@ is_new_sequence_start(FILE *f)
     return is_new_seq;
 }
 
-static void
-exclude_residues(char *seq, const char *exclude)
-{
+static void exclude_residues(char *seq, const char *exclude){
     int i, j;
 
     for (i = 0; seq[i] != '\0'; i++)
