@@ -18,6 +18,12 @@ static char * path_join(char *a, char *b);
 
 static char * basename(char *path);
 
+/*@param dir: The name of the directory to store the database in
+ *@param seed_size: The size of the k-mers in the database
+ *@param add: Whether or not we are adding to a database
+ *
+ *Initializes a new CaBLAST database and its coarse and compressed databases.
+ */
 struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
     struct cb_database *db;
     struct stat buf;
@@ -26,6 +32,7 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
          *findex_coarse_fasta, *findex_coarse_fasta_base, *findex_compressed,
          *findex_params;
 
+    /*Get the file paths for the new database's file*/
     char *pfasta                    = path_join(dir, CABLAST_COARSE_FASTA),
          *pseeds                    = path_join(dir, CABLAST_COARSE_SEEDS),
          *plinks                    = path_join(dir, CABLAST_COARSE_LINKS),
@@ -83,6 +90,8 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
 
     db->name = basename(dir);
 
+    /*Open the files for the database for binary output (except for the coarse
+      FASTA file, which prints ASCII output).*/
     ffasta                    = open_db_file(pfasta, "r+");
     fseeds                    = open_db_file(pseeds, "rb+");
     flinks                    = open_db_file(plinks, "rb+");
@@ -95,6 +104,7 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
     findex_compressed         = open_db_file(pindex_compressed, "rb+");
     findex_params             = open_db_file(pindex_params, "rb+");
 
+    /*Initialize the coarse and compressed databases*/
     db->coarse_db = cb_coarse_init(seed_size, ffasta, fseeds, flinks,
                                  findex_coarse_links, findex_coarse_links_base,
                                  findex_coarse_links_count, findex_coarse_fasta,
@@ -116,6 +126,19 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
     return db;
 }
 
+/*@param dir: The name of the directory where the database is stored
+ *@param seed_size: The size of the k-mers in the database
+ *@param load_coarse_residues: Whether or not to load all of the residues in
+ *  the database's coarse FASTA file into memory.
+ *@param load_coarse_links: Whether or not to load all of the links in the
+ *  database's coarse links file into memory.
+ *@param load_compressed_db: Whether or not to load the compressed database
+ *  into memory.
+ *@param link_block_size: The number of residues of the coarse FASTA file
+ *  each "block" of links represents.
+ *
+ *Loads a CaBLAST database for reading
+ */
 struct cb_database_r *
 cb_database_read_init(char *dir, int32_t seed_size,
                       bool load_coarse_residues, bool load_coarse_links,
@@ -182,16 +205,18 @@ cb_database_read_init(char *dir, int32_t seed_size,
     return db;
 }
 
+/*Freeing function for a cb_database*/
 void cb_database_free(struct cb_database *db){
-    /* All files opened in cb_database_init are close in subsequent frees. */
+    /* All files opened in cb_database_init are closed in subsequent frees. */
     cb_coarse_free(db->coarse_db);
     cb_compressed_free(db->com_db);
     free(db->name);
     free(db);
 }
 
+/*Freeing function for a cb_database_r*/
 void cb_database_read_free(struct cb_database_r *db){
-    /* All files opened in cb_database_init are close in subsequent frees. */
+    /* All files opened in cb_database_init are closed in subsequent frees. */
     cb_coarse_db_read_free(db->coarse_db);
     cb_compressed_free(db->com_db);
     free(db->name);

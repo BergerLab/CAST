@@ -113,7 +113,8 @@ void cb_compressed_save_binary(struct cb_compressed *com_db){
             /*Convert the start and end indices for the link to two
               characters.*/
             uint64_t org_start = link->original_start,
-                     org_end   = link->original_end;
+                     org_end   = link->original_end,
+                     coarse_seq_id;
             int16_t cor_start = (int16_t)link->coarse_start,
                     cor_end   = (int16_t)link->coarse_end;
             char cor_start_left  = (cor_start >> 8) & mask,
@@ -124,7 +125,7 @@ void cb_compressed_save_binary(struct cb_compressed *com_db){
             char script_left, script_right,
                  *script, *edit_script = link->diff;
             int16_t script_length = (int16_t)0;
-            int32_t j, coarse_seq_id;
+            int32_t j;
 
             /*Output the ID of the current chunk as 8 characters*/
             coarse_seq_id = link->coarse_seq_id;
@@ -190,7 +191,7 @@ void cb_compressed_save_plain(struct cb_compressed *com_db){
         fprintf(com_db->file_compressed, "> %ld; %s\n", seq->id, seq->name);
         for (link = seq->links; link != NULL; link = link->next)
             fprintf(com_db->file_compressed,
-              "reference sequence id: %d, reference range: (%d, %d), "
+              "reference sequence id: %ld, reference range: (%d, %d), "
               "original sequence range: (%ld %ld)\n%s\n",
               link->coarse_seq_id, link->coarse_start, link->coarse_end,
               link->original_start, link->original_end,
@@ -205,7 +206,7 @@ void cb_compressed_write(struct cb_compressed *com_db,
     fprintf(com_db->file_compressed, "> %ld; %s\n", seq->id, seq->name);
     for (link = seq->links; link != NULL; link = link->next) {
         fprintf(com_db->file_compressed,
-          "reference sequence id: %d, reference range: (%d, %d)\n%s\n",
+          "reference sequence id: %ld, reference range: (%d, %d)\n%s\n",
           link->coarse_seq_id, link->coarse_start, link->coarse_end,
           link->diff);
     }
@@ -250,17 +251,17 @@ void cb_compressed_write_binary(struct cb_compressed *com_db,
         /*Convert the start and end indices for the link to two
           characters.*/
         uint64_t org_start = link->original_start,
-                 org_end   = link->original_end;
-        int16_t cor_start = (int16_t)link->coarse_start,
-                cor_end   = (int16_t)link->coarse_end;
+                 org_end   = link->original_end,
+                 coarse_seq_id;
+        int32_t odd;
+        int16_t cor_start     = (int16_t)link->coarse_start,
+                cor_end       = (int16_t)link->coarse_end,
+                script_length = (int16_t)0;
         char cor_start_left  = (cor_start >> 8) & mask,
              cor_start_right = cor_start & mask,
              cor_end_left    = (cor_end >> 8) & mask,
              cor_end_right   = cor_end & mask;
 
-        uint64_t coarse_seq_id;
-        int32_t odd;
-        int16_t script_length = (int16_t)0;
         char *edit_script = link->diff,
              *script = edit_script_to_half_bytes(edit_script),
              script_left, script_right;

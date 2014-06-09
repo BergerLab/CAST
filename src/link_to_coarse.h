@@ -8,7 +8,7 @@
 
 struct cb_link_to_coarse {
     char *diff;
-    uint16_t coarse_seq_id;
+    uint64_t coarse_seq_id;
     uint64_t original_start;
     uint64_t original_end;
     uint16_t coarse_start;
@@ -17,13 +17,13 @@ struct cb_link_to_coarse {
 };
 
 struct cb_link_to_coarse *
-cb_link_to_coarse_init(int32_t coarse_seq_id,
+cb_link_to_coarse_init(uint64_t coarse_seq_id,
                        uint64_t original_start, uint64_t original_end,
                        uint16_t coarse_start, uint16_t coarse_end,
                        struct cb_alignment alignment, bool dir);
 
 struct cb_link_to_coarse *
-cb_link_to_coarse_init_nodiff(int32_t coarse_seq_id,
+cb_link_to_coarse_init_nodiff(uint64_t coarse_seq_id,
                               uint64_t original_start, uint64_t original_end,
                               uint16_t coarse_start, uint16_t coarse_end,
                               bool dir);

@@ -5,10 +5,16 @@
 
 #include "seq.h"
 
+/*Calls cb_seq_init_range to initialize a sequence with the data passed in
+  that copies all of the residues passed in.*/
 struct cb_seq *cb_seq_init(int32_t id, char *name, char *residues){
     return cb_seq_init_range(id, name, residues, 0, strlen(residues));
 }
 
+/*Takes in the ID number, name, and residues of a sequence and starting and
+ *ending indices of the part of the sequence to copy and returns
+ *a new sequence data structure for the sequence copied.
+ */
 struct cb_seq *cb_seq_init_range(int32_t id, char *name, char *residues,
                                  int32_t start, int32_t end){
     int len;
@@ -46,12 +52,14 @@ struct cb_seq *cb_seq_init_range(int32_t id, char *name, char *residues,
     return seq;
 }
 
+/*Freeing function for a cb_seq struct*/
 void cb_seq_free(struct cb_seq *seq){
     free(seq->name);
     free(seq->residues);
     free(seq);
 }
 
+/*Freeing function for a hit expansion*/
 void cb_hit_expansion_free(struct cb_hit_expansion *expansion){
     cb_seq_free(expansion->seq);
     free(expansion);
