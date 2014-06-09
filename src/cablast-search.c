@@ -411,7 +411,6 @@ int main(int argc, char **argv){
         /*Expand any BLAST hits we got from the current query sequence during
           coarse BLAST.*/
         expanded_hits = expand_blast_hits(iterations, i, db);
-
         query = (struct fasta_seq *)ds_vector_get(queries, i);
 /******************************************************************************/
         /*If the current query sequence had hits in the call to coarse BLAST,

@@ -117,12 +117,12 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
             i = 0, j = 0, k = 0;
 
     for (i = first_block; i <= last_block; i++) {
-printf("\n");
         /*Current block of links*/
         struct DSVector *link_block = cb_coarse_get_block(coarse_db, i);
         /*Indices in the current block*/
         struct DSVector *ind_block =
           (struct DSVector *)ds_vector_get(coarse_db->link_inds_by_block, i);
+fprintf(stderr, "%d\n", link_block->size);
 
         for (j = 0; j < link_block->size; j++){
             struct cb_link_to_compressed *link =
@@ -137,7 +137,6 @@ printf("\n");
 
             coarse_start += seq_base_indices[k];
             coarse_end += seq_base_indices[k];
-
             /*Only expand the link if it overlaps the range for the BLAST Hsp we
               are expanding from.*/
             if (coarse_start <= hit_to_ind && coarse_end >= hit_from_ind) {

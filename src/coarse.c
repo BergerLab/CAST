@@ -202,10 +202,16 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
                 link_index++;
             }
 
-            output_int_to_file(link->coarse_start + base_index, 8,
+            /*output_int_to_file(link->coarse_start + base_index, 8,
                                coarse_db->file_links_base_index);
             output_int_to_file(link->coarse_end + base_index, 8,
-                               coarse_db->file_links_base_index);
+                               coarse_db->file_links_base_index);*/
+            uint64_t coarse_base_start = link->coarse_start + base_index;
+            uint64_t coarse_base_end   = link->coarse_end + base_index;
+            fwrite(&coarse_base_start, sizeof(coarse_base_start),
+                   1, coarse_db->file_links_base_index);
+            fwrite(&coarse_base_end, sizeof(coarse_base_end),
+                   1, coarse_db->file_links_base_index);
 
             link_count++;
         }
@@ -708,7 +714,7 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db){
         fprintf(stderr, "Error in seeking to end of FASTA base index file\n");
     /*num_link_blocks =
       read_int_from_file(8, file_fasta_base_index) / block_size + 1;*/
-    fread(&num_link_blocks,sizeof(num_link_blocks),1,file_fasta_base_index);
+    fread(&num_link_blocks, sizeof(num_link_blocks), 1, file_fasta_base_index);
     num_link_blocks = num_link_blocks / block_size + 1;
     fseek(file_fasta_base_index, 0, SEEK_SET);
 
@@ -722,10 +728,9 @@ void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db){
     current_link = 0;
 
     while (!feof(file_links_base_index)) {
-        int64_t current_start =
-                  read_int_from_file(8, file_links_base_index),
-                current_end =
-                  read_int_from_file(8, file_links_base_index);
+        int64_t current_start, current_end;
+        fread(&current_start, sizeof(current_start), 1, file_links_base_index);
+        fread(&current_end, sizeof(current_end), 1, file_links_base_index);
 
         if (feof(file_links_base_index))
             break;
