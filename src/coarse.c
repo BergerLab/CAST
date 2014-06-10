@@ -354,6 +354,8 @@ void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
     assert(coarse_db->all_residues);
 
     for (i = 0; i < num_fasta_entries; i++) {
+        int32_t line_length = coarse_db->seq_base_indices[i+1] -
+                              coarse_db->seq_base_indices[i];
         FILE *fasta = coarse_db->db->file_fasta;
         if (0 == readline(fasta, &line)) {
             free(line);
@@ -361,11 +363,9 @@ void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db){
         }
         else
             free(line);
-        if (0 == readline(fasta, &line)) {
-            free(line);
-            return;
-        }
-        strcat(coarse_db->all_residues, line);
+        line = malloc((line_length+1)*sizeof(*line));
+        fread(line, sizeof(*line), line_length+1, coarse_db->db->file_fasta);
+        /*strcat(coarse_db->all_residues, line);*/
         for (j = 0; line[j] != '\0' && line[j] != '\n'; j++)
             coarse_db->all_residues[bases_copied++] = line[j];
         free(line);
@@ -620,8 +620,8 @@ cb_coarse_read_init(int32_t seed_size,
         coarsedb->seq_link_counts[i] = link_count;
     }
 
-    fread(coarsedb->seq_base_indices,sizeof(*(coarsedb->seq_base_indices)),
-          (coarsedb->num_coarse_seqs+1),file_fasta_base_index);
+    fread(coarsedb->seq_base_indices, sizeof(*(coarsedb->seq_base_indices)),
+          (coarsedb->num_coarse_seqs+1), file_fasta_base_index);
 
     coarsedb->link_block_size = link_block_size;
 
