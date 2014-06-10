@@ -212,6 +212,8 @@ printf("%s\n", orig_str);
                     cb_compressed_seq_free(seq);
             }
         }
+
+        ds_vector_free_no_data(link_block);
     }
 
     /*if (!coarse_db->links)

@@ -323,6 +323,7 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
 
             ds_vector_free_no_data(oseqs);
         }
+
         ds_vector_free(current_hit->hsps);
         free(current_hit);
     }

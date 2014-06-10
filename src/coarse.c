@@ -607,7 +607,7 @@ cb_coarse_read_init(int32_t seed_size,
                                        *sizeof(*(coarsedb->seq_link_counts)));
     assert(coarsedb->seq_link_counts);
 
-    coarsedb->seq_base_indices = malloc(coarsedb->num_coarse_seqs
+    coarsedb->seq_base_indices = malloc((coarsedb->num_coarse_seqs+1)
                                         *sizeof(*(coarsedb->seq_base_indices)));
     assert(coarsedb->seq_base_indices);
 
