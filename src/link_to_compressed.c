@@ -33,3 +33,19 @@ void cb_link_to_compressed_free(struct cb_link_to_compressed *link){
     }
 }
 
+/*Gets the data in a link in a cb_link_to_compressed_data struct*/
+struct cb_link_to_compressed_data *
+cb_link_to_compressed_get_data(struct cb_link_to_compressed *link){
+    struct cb_link_to_compressed_data *data = malloc(sizeof(*data));
+    assert(data);
+
+    data->org_seq_id     = link->org_seq_id;
+    data->coarse_start   = link->coarse_start;
+    data->coarse_end     = link->coarse_end;
+    data->original_start = link->original_start;
+    data->original_end   = link->original_end;
+    data->dir            = link->dir;
+
+    return data;
+}
+
