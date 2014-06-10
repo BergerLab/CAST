@@ -3,19 +3,19 @@
 
 #ifndef __CABLAST_SEARCH_XML_H__
 #define __CABLAST_SEARCH_XML_H__
-struct blast{
+struct blast {
     char *xml_name;
     struct DSVector *hits;
 };
 
-struct hit{
+struct hit {
     char *xml_name;
     int32_t num;
     int32_t accession;
     struct DSVector *hsps; 
 };
 
-struct hsp{
+struct hsp {
     char *xml_name;
     int32_t num;
     double evalue;

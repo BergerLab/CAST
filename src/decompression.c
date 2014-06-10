@@ -208,8 +208,8 @@ printf("%s\n", orig_str);
 
                 /*Free the compressed sequence if it was loaded using
                   cb_compressed_read_seq_at*/
-                /*if (comdb->seqs->size == 0)
-                    cb_compressed_seq_free(seq);*/
+                if (comdb->seqs->size == 0)
+                    cb_compressed_seq_free(seq);
             }
         }
     }

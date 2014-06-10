@@ -365,13 +365,10 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
     struct cb_link_to_coarse *link;
     int32_t chars_to_read;
     uint16_t script_length = (uint16_t)0;
-    char *link_bytes, *half_bytes;
+    char *half_bytes;
 
     link = malloc(sizeof(*link));
     assert(link);
-
-    link_bytes = malloc(30*sizeof(link_bytes));
-    assert(link_bytes);
 
     fread(&(link->coarse_seq_id), sizeof(link->coarse_seq_id), 1, f);
     fread(&(link->original_start), sizeof(link->original_start), 1, f);

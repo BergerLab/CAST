@@ -470,9 +470,6 @@ struct cb_link_to_compressed *read_coarse_link(FILE *f){
     struct cb_link_to_compressed *link = malloc(sizeof(*link));
     assert(link);
 
-    char *link_bytes = malloc(29*sizeof(link_bytes));
-    assert(link_bytes);
-
     fread(&(link->org_seq_id), sizeof(link->org_seq_id), 1, f);
     fread(&(link->coarse_start), sizeof(link->coarse_start), 1, f);
     fread(&(link->coarse_end), sizeof(link->coarse_end), 1, f);
@@ -650,9 +647,9 @@ void cb_coarse_db_read_free(struct cb_coarse_db_read *coarsedb){
 
     cb_coarse_free(coarsedb->db);
 
-    /*for (i = 0; i < coarsedb->link_inds_by_block->size; i++)
+    for (i = 0; i < coarsedb->link_inds_by_block->size; i++)
         ds_vector_free(ds_vector_get(coarsedb->link_inds_by_block, i));
-    ds_vector_free_no_data(coarsedb->link_inds_by_block);*/
+    ds_vector_free_no_data(coarsedb->link_inds_by_block);
 
     free(coarsedb->seq_base_indices);
     free(coarsedb->seq_link_counts);

@@ -320,6 +320,7 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
                                      coarse_start, coarse_end, 50);
             for (k = 0; k < oseqs->size; k++)
                 ds_vector_append(expanded_hits, ds_vector_get(oseqs, k));
+
             ds_vector_free_no_data(oseqs);
         }
         ds_vector_free(current_hit->hsps);
