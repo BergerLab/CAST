@@ -123,7 +123,7 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
 
     /*Keeps track of the indices to be printed to coarse.links.index and
       coarse_fasta_base_index.*/
-    uint64_t /**/link_index/**/ = (uint64_t)0, base_index = (uint64_t)0;
+    uint64_t link_index = (uint64_t)0, base_index = (uint64_t)0;
     int16_t mask = (int16_t)0xff;
     int32_t j;
 
@@ -201,7 +201,8 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
         /*'#' is used as a delimiter to signify the last link of the sequence*/
         if (i+1 < coarse_db->seqs->size)
             putc('#', coarse_db->file_links);
-        output_int_to_file(link_count, 8, coarse_db->file_links_count_index);
+        fwrite(&link_count, sizeof(link_count), 1,
+               coarse_db->file_links_count_index);
         base_index += strlen(seq->seq->residues);
     }
     /*output_int_to_file(base_index, 8, coarse_db->file_fasta_base_index);*/

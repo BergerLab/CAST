@@ -137,9 +137,9 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
 
             coarse_start += seq_base_indices[k];
             coarse_end += seq_base_indices[k];
+
             /*Only expand the link if it overlaps the range for the BLAST Hsp we
               are expanding from.*/
-printf("%ld %ld %ld %ld\n", coarse_start, hit_to_ind, coarse_end, hit_from_ind);
             if (coarse_start <= hit_to_ind && coarse_end >= hit_from_ind) {
                 struct cb_link_to_coarse *current = NULL;
                 struct cb_compressed_seq *seq;
