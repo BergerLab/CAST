@@ -135,7 +135,7 @@ void traverse_blast_xml_until(xmlNode *root, void (*f)(xmlNode *,void *),
     for (; root; root = root->next) {
         f(root, acc);
         if (strcmp((char *)root->name, stop) != 0)
-            traverse_blast_xml(root->children, f, acc);
+            traverse_blast_xml_until(root->children, f, acc, stop);
     }
 }
 
@@ -148,7 +148,7 @@ void traverse_blast_xml_until_r(xmlNode *r, void (*f)(xmlNode *, void *),
                                 void *acc, char *stop){
     f(r, acc);
     if (strcmp((char *)r->name, stop) != 0)
-        traverse_blast_xml(r->children, f, acc);
+        traverse_blast_xml_until(r->children, f, acc, stop);
 }
 
 
@@ -201,8 +201,8 @@ struct hit *populate_blast_hit(xmlNode *node){
         if (!strcmp((char *)node->name, "Hit_hsps")){
             struct DSVector *hsps = ds_vector_create();
             xmlNode *hsp_node = node->children;
-            for(; hsp_node; hsp_node = hsp_node->next)
-                if(!strcmp((char *)hsp_node->name, "Hsp"))
+            for (; hsp_node; hsp_node = hsp_node->next)
+                if (!strcmp((char *)hsp_node->name, "Hsp"))
                     ds_vector_append(hsps,
                            (void *)populate_blast_hsp(hsp_node->children));
             h->hsps = hsps;

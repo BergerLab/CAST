@@ -243,7 +243,8 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
         residues = fasta->seq;
     }
     else
-        residues = cb_coarse_get_seq_residues(coarsedb, link->coarse_seq_id);
+        residues = coarsedb->all_residues +
+                   coarsedb->seq_base_indices[link->coarse_seq_id];
 
     /*The link represents an exact match so there are no edits to make*/
     if (diff[1] == '\0' && fwd) {
@@ -260,8 +261,6 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
           string to its reverse complement.*/
         if (fasta != NULL)
             fasta_free_seq(fasta);
-        else
-            free(residues);
 
         return;
     }
@@ -300,8 +299,6 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
                 free(edit);
                 if (fasta != NULL)
                     fasta_free_seq(fasta);
-                else
-                    free(residues);
 
                 return;
             }
@@ -334,8 +331,6 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
                 free(edit);
                 if (fasta != NULL)
                     fasta_free_seq(fasta);
-                else
-                    free(residues);
 
                 return;
             }
@@ -352,7 +347,5 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
     free(edit);
     if (fasta != NULL)
         fasta_free_seq(fasta);
-    else
-        free(residues);
 }
 

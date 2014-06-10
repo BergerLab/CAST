@@ -21,14 +21,14 @@ cb_coarse_init(int32_t seed_size,
                FILE *file_fasta, FILE *file_seeds, FILE *file_links,
                FILE *file_links_index, FILE *file_links_base_index,
                FILE *file_links_count_index, FILE *file_fasta_index,
-               FILE *file_fasta_base_index, FILE *file_params){
+               FILE *file_fasta_base_index, FILE *file_params, bool read){
     int32_t errno;
 
     struct cb_coarse *coarse_db = malloc(sizeof(*coarse_db));
     assert(coarse_db);
 
     coarse_db->seqs   = ds_vector_create_capacity(10000000);
-    coarse_db->seeds  = cb_seeds_init(seed_size);
+    coarse_db->seeds  = read ? NULL : cb_seeds_init(seed_size);
     coarse_db->dbsize = (uint64_t)0;
 
     /*Initialize the file pointers*/
@@ -75,7 +75,8 @@ void cb_coarse_free(struct cb_coarse *coarse_db){
             (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i));
 
     ds_vector_free_no_data(coarse_db->seqs);
-    cb_seeds_free(coarse_db->seeds);
+    if (coarse_db->seeds != NULL)
+        cb_seeds_free(coarse_db->seeds);
 
     free(coarse_db);
 }
@@ -594,7 +595,7 @@ cb_coarse_read_init(int32_t seed_size,
                                   file_links, file_links_index,
                                   file_links_base_index, file_links_count_index,
                                   file_fasta_index, file_fasta_base_index,
-                                  file_params);
+                                  file_params, true);
 
     /*Get the number of sequences in the coarse database and get the base index
       for each sequence.*/

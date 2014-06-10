@@ -108,7 +108,8 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
     db->coarse_db = cb_coarse_init(seed_size, ffasta, fseeds, flinks,
                                  findex_coarse_links, findex_coarse_links_base,
                                  findex_coarse_links_count, findex_coarse_fasta,
-                                 findex_coarse_fasta_base, findex_params);
+                                 findex_coarse_fasta_base, findex_params,
+                                 false);
     db->com_db    = cb_compressed_init(fcompressed, findex_compressed, false);
 
     free(pfasta);
