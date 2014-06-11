@@ -191,15 +191,14 @@ cb_database_read_init(char *dir, int32_t seed_size,
     findex_compressed         = open_db_file(pindex_compressed, "rb");
     findex_params             = open_db_file(pindex_params, "rb");
 
-    db->coarse_db = cb_coarse_read_init(seed_size, ffasta, fseeds, flinks,
-                                        findex_coarse_links,
-                                        findex_coarse_links_base,
-                                        findex_coarse_links_count,
-                                        findex_coarse_fasta,
-                                        findex_coarse_fasta_base,
-                                        findex_params,
-                                        load_coarse_residues,
-                                        load_coarse_links, link_block_size);
+    db->coarse_db = cb_coarse_r_init(seed_size, ffasta, fseeds, flinks,
+                                     findex_coarse_links,
+                                     findex_coarse_links_base,
+                                     findex_coarse_links_count,
+                                     findex_coarse_fasta,
+                                     findex_coarse_fasta_base,
+                                     findex_params, load_coarse_residues,
+                                     load_coarse_links, link_block_size);
     db->com_db = cb_compressed_init(fcompressed, findex_compressed,
                                     load_compressed_db);
 

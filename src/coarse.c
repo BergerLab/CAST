@@ -277,7 +277,7 @@ void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db){
 
 /*Loads all of the residues in the coarse database's links file into the coarse
   database's links vector.*/
-void cb_coarse_get_all_links(struct cb_coarse_r *coarse_db){
+void cb_coarse_r_read_all_links(struct cb_coarse_r *coarse_db){
     struct DSVector *link_vectors = ds_vector_create();
     int32_t num_link_vectors = 0, i = 0, j = 0;
 
@@ -301,7 +301,7 @@ void cb_coarse_get_all_links(struct cb_coarse_r *coarse_db){
 
 /*Loads all of the residues in the coarse database's FASTA file into the coarse
   database's all_residues string*/
-void cb_coarse_get_all_residues(struct cb_coarse_r *coarse_db){
+void cb_coarse_r_read_all_residues(struct cb_coarse_r *coarse_db){
     int64_t num_bases = 0, i = 0;
     int32_t num_fasta_entries = 0, bases_copied = 0, j = 0;
     char *line = NULL;
@@ -527,13 +527,13 @@ struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
 /*Loads a cb_coarse_r struct, which includes a coarse database as well
   as data from the files being read*/
 struct cb_coarse_r *
-cb_coarse_read_init(int32_t seed_size,
-                    FILE *file_fasta, FILE *file_seeds, FILE *file_links,
-                    FILE *file_links_index, FILE *file_links_base_index,
-                    FILE *file_links_count_index, FILE *file_fasta_index,
-                    FILE *file_fasta_base_index, FILE *file_params,
-                    bool load_coarse_residues, bool load_coarse_links,
-                    int32_t link_block_size){
+cb_coarse_r_init(int32_t seed_size,
+                 FILE *file_fasta, FILE *file_seeds, FILE *file_links,
+                 FILE *file_links_index, FILE *file_links_base_index,
+                 FILE *file_links_count_index, FILE *file_fasta_index,
+                 FILE *file_fasta_base_index, FILE *file_params,
+                 bool load_coarse_residues, bool load_coarse_links,
+                 int32_t link_block_size){
     int64_t link_count = (int64_t)0, links_in_sequence;
     int32_t i;
     bool fseek_success;
@@ -586,11 +586,11 @@ cb_coarse_read_init(int32_t seed_size,
     /*If the --load-coarse-residues or --load-coarse-db search flag was passed
       in, load the coarse residues into coarse_db->all_residues.*/
     if (load_coarse_residues)
-        cb_coarse_get_all_residues(coarsedb);
+        cb_coarse_r_read_all_residues(coarsedb);
     /*If the --load-coarse-links or --load-coarse-db search flag was passed in,
       load the coarse residues into coarse_db->all_residues.*/
     if (load_coarse_links)
-        cb_coarse_get_all_links(coarsedb);
+        cb_coarse_r_read_all_links(coarsedb);
 
     return coarsedb;
 }
@@ -675,8 +675,8 @@ void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
     }
 }
 
-struct DSVector *cb_coarse_get_block(struct cb_coarse_r *coarse_db,
-                                     int32_t index){
+struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
+                                       int32_t index){
     struct DSVector *links = ds_vector_create(),
                     *block = (struct DSVector *)ds_vector_get(
                                coarse_db->link_inds_by_block,
@@ -694,15 +694,15 @@ struct DSVector *cb_coarse_get_block(struct cb_coarse_r *coarse_db,
     return links;
 }
 
-char *cb_coarse_get_seq_residues(struct cb_coarse_r *coarse_db,
-                                 int64_t id){
+char *cb_coarse_r_get_seq_residues(struct cb_coarse_r *coarse_db,
+                                   int64_t id){
     int64_t start = coarse_db->seq_base_indices[id],
             end   = coarse_db->seq_base_indices[id+1], i;
     char *residues     = malloc((end-start+1)*sizeof(*residues)),
          *all_residues = coarse_db->all_residues;
 
     if (all_residues == NULL) {
-        fprintf(stderr, "cb_coarse_get_seq_residues only works if "
+        fprintf(stderr, "cb_coarse_r_get_seq_residues only works if "
                         "all_residues was initialized in "
                         "cb_coarse_read_init.\n");
         return NULL;

@@ -107,24 +107,24 @@ struct cb_coarse_r {
 };
 
 struct cb_coarse_r *
-cb_coarse_read_init(int32_t seed_size,
-                    FILE *file_fasta, FILE *file_seeds, FILE *file_links,
-                    FILE *file_links_index, FILE *file_links_base_index,
-                    FILE *file_links_count_index, FILE *file_fasta_index,
-                    FILE *file_fasta_base_index, FILE *file_params,
-                    bool load_coarse_residues, bool load_coarse_links,
-                    int32_t link_block_size);
+cb_coarse_r_init(int32_t seed_size,
+                 FILE *file_fasta, FILE *file_seeds, FILE *file_links,
+                 FILE *file_links_index, FILE *file_links_base_index,
+                 FILE *file_links_count_index, FILE *file_fasta_index,
+                 FILE *file_fasta_base_index, FILE *file_params,
+                 bool load_coarse_residues, bool load_coarse_links,
+                 int32_t link_block_size);
 
 void cb_coarse_r_free(struct cb_coarse_r *coarse_db);
 void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db);
-struct DSVector *cb_coarse_get_block(struct cb_coarse_r *coarse_db,
-                                     int32_t index);
+struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
+                                       int32_t index);
 
-void cb_coarse_get_all_residues(struct cb_coarse_r *coarse_db);
-void cb_coarse_get_all_links(struct cb_coarse_r *coarse_db);
+void cb_coarse_r_read_all_residues(struct cb_coarse_r *coarse_db);
+void cb_coarse_r_read_all_links(struct cb_coarse_r *coarse_db);
 
-char *cb_coarse_get_seq_residues(struct cb_coarse_r *coarse_db,
-                                 int64_t id);
+char *cb_coarse_r_get_seq_residues(struct cb_coarse_r *coarse_db,
+                                   int64_t id);
 
 /*Coarse database functions ending in _r are used on cb_coarse_r structs
  *and are used as wrapper functions for the regular coarse database functions

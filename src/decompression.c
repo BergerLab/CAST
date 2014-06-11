@@ -118,7 +118,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
 
     for (i = first_block; i <= last_block; i++) {
         /*Current block of links*/
-        struct DSVector *link_block = cb_coarse_get_block(coarse_db, i);
+        struct DSVector *link_block = cb_coarse_r_get_block(coarse_db, i);
         /*Indices in the current block*/
         struct DSVector *ind_block =
           (struct DSVector *)ds_vector_get(coarse_db->link_inds_by_block, i);
