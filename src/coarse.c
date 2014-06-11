@@ -274,23 +274,23 @@ void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db){
   database's links vector.*/
 void cb_coarse_r_read_all_links(struct cb_coarse_r *coarse_db){
     FILE *links_file        = coarse_db->db->file_links,
-         *links_index       = coarse_db->db->file_links_index,
-         *links_count_index = coarse_db->db->file_links_count_index;
+         *links_index       = coarse_db->db->file_links_index;
     struct DSVector *link_vectors = ds_vector_create();
-    int64_t links_count;
+    int64_t *seq_link_counts = coarse_db->seq_link_counts, links_count;
     int32_t num_link_vectors = 0, i = 0, j = 0;
 
     bool fseek_success =
-      fseek(coarse_db->db->file_links_index, 0, SEEK_END) == 0;
+      fseek(links_index, 0, SEEK_END) == 0;
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA index file\n");
-    num_link_vectors = ftell(coarse_db->db->file_links_index)/8;
-    fseek(coarse_db->db->file_links_index, 0, SEEK_SET);
+    num_link_vectors = ftell(links_index)/8;
+    fseek(links_index, 0, SEEK_SET);
 
     coarse_db->links = ds_vector_create();
 
     for (i = 0; i < num_link_vectors; i++) {
-        fread(&links_count, sizeof(links_count), 1, links_count_index);
+        links_count = i == 0 ? seq_link_counts[i] :
+                               seq_link_counts[i] - seq_link_counts[i-1];
         
         struct DSVector *links = read_coarse_links(links_file, links_count);
         for (j = 0; j < links->size; j++)
