@@ -18,7 +18,7 @@ cb_link_to_compressed_init(int32_t org_seq_id, int16_t coarse_start,
                                                  coarse_start, coarse_end,
                                                  original_start, original_end,
                                                  dir);
-    link->next           = NULL;
+    link->next = NULL;
 
     return link;
 }

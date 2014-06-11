@@ -130,13 +130,10 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
 
     for (i = 0; i < coarse_db->seqs->size; i++) {
         uint64_t coarse_fasta_index, link_count = 0;
-        char *fasta_output, *link_header;
+        char *fasta_output;
 
         fasta_output = malloc(30000*sizeof(*fasta_output));
         assert(fasta_output);
-
-        link_header = malloc(30*sizeof(*fasta_output));
-        assert(link_header);
 
         seq = (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i);
 
@@ -154,44 +151,24 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
         /*Output the FASTA sequence to the coarse FASTA file*/
         sprintf(fasta_output, ">%ld\n%s\n", i, seq->seq->residues);
         fputs(fasta_output, coarse_db->file_fasta);
-
-        /*Output the link header for the sequence to the coarse links file*/
-        sprintf(link_header, "> %ld\n", i);
-        fputs(link_header, coarse_db->file_links);
-
         free(fasta_output);
-        free(link_header);
 
         /*Output all links for the current sequence to the coarse links file*/
         for (link = seq->links; link != NULL; link = link->next) {
-            uint64_t start_base = base_index + (uint64_t)link->data->coarse_start,
-                     end_base   = base_index + (uint64_t)link->data->coarse_end;
+            uint64_t start_base        = base_index +
+                                           (uint64_t)link->data->coarse_start,
+                     end_base          = base_index +
+                                           (uint64_t)link->data->coarse_end,
+                     coarse_base_start = link->data->coarse_start + base_index,
+                     coarse_base_end   = link->data->coarse_end + base_index;
+
             /*Convert the start and end indices for the link to two
               characters.*/
             int16_t coarse_start = (int16_t)link->data->coarse_start,
                     coarse_end   = (int16_t)link->data->coarse_end;
 
-            fwrite(&(link->data->org_seq_id), sizeof(link->data->org_seq_id),
-                   1, coarse_db->file_links);
+            fwrite(link->data, sizeof(link->data), 1, coarse_db->file_links);
 
-            /*Prints the binary representations of the indices and the
-              direction of the link to the links file*/
-            fwrite(&coarse_start,sizeof(coarse_start),1,coarse_db->file_links);
-            fwrite(&coarse_end, sizeof(coarse_end), 1, coarse_db->file_links);
-            fwrite(&(link->data->original_start), sizeof(link->data->original_start),
-                   1, coarse_db->file_links);
-            fwrite(&(link->data->original_end), sizeof(link->data->original_end),
-                   1, coarse_db->file_links);
-            putc((link->data->dir?'0':'1'), coarse_db->file_links);
-
-
-            /*0 is used as a delimiter to signify that there are more links
-              for this sequence*/
-            if (link->next != NULL)
-                putc(0, coarse_db->file_links);
-
-            uint64_t coarse_base_start = link->data->coarse_start + base_index;
-            uint64_t coarse_base_end   = link->data->coarse_end + base_index;
             fwrite(&coarse_base_start, sizeof(coarse_base_start),
                    1, coarse_db->file_links_base_index);
             fwrite(&coarse_base_end, sizeof(coarse_base_end),
@@ -199,20 +176,17 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
 
             link_count++;
         }
-        /*'#' is used as a delimiter to signify the last link of the sequence*/
-        if (i+1 < coarse_db->seqs->size)
-            putc('#', coarse_db->file_links);
+
         fwrite(&link_count, sizeof(link_count), 1,
                coarse_db->file_links_count_index);
         base_index += strlen(seq->seq->residues);
     }
-    /*output_int_to_file(base_index, 8, coarse_db->file_fasta_base_index);*/
+
     fwrite(&base_index, sizeof(base_index), 1,
            coarse_db->file_fasta_base_index);
 
     output_int_to_file(coarse_db->dbsize, 8, coarse_db->file_params);
     putc('\n', coarse_db->file_params);
-    putc('\n', coarse_db->file_links);
 }
 
 /*Output the coarse database's sequences and links in a human-readable format.
