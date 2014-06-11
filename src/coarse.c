@@ -162,11 +162,6 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
                      coarse_base_start = link->data->coarse_start + base_index,
                      coarse_base_end   = link->data->coarse_end + base_index;
 
-            /*Convert the start and end indices for the link to two
-              characters.*/
-            int16_t coarse_start = (int16_t)link->data->coarse_start,
-                    coarse_end   = (int16_t)link->data->coarse_end;
-
             fwrite(link->data, sizeof(link->data), 1, coarse_db->file_links);
 
             fwrite(&coarse_base_start, sizeof(coarse_base_start),
@@ -205,8 +200,8 @@ void cb_coarse_save_plain(struct cb_coarse *coarse_db){
             fprintf(coarse_db->file_links,
               "    original sequence id: %d, reference range: (%d, %d), "
               "direction: %c\n",
-              link->data->org_seq_id, link->data->coarse_start, link->data->coarse_end,
-              (link->data->dir?'0':'1'));
+              link->data->org_seq_id, link->data->coarse_start,
+              link->data->coarse_end, (link->data->dir?'0':'1'));
         }
     }
 }
@@ -278,7 +273,11 @@ void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db){
 /*Loads all of the residues in the coarse database's links file into the coarse
   database's links vector.*/
 void cb_coarse_r_read_all_links(struct cb_coarse_r *coarse_db){
+    FILE *links_file        = coarse_db->db->file_links,
+         *links_index       = coarse_db->db->file_links_index,
+         *links_count_index = coarse_db->db->file_links_count_index;
     struct DSVector *link_vectors = ds_vector_create();
+    int64_t links_count;
     int32_t num_link_vectors = 0, i = 0, j = 0;
 
     bool fseek_success =
@@ -291,8 +290,9 @@ void cb_coarse_r_read_all_links(struct cb_coarse_r *coarse_db){
     coarse_db->links = ds_vector_create();
 
     for (i = 0; i < num_link_vectors; i++) {
-        struct DSVector *links =
-          get_coarse_sequence_links(coarse_db->db->file_links);
+        fread(&links_count, sizeof(links_count), 1, links_count_index);
+        
+        struct DSVector *links = read_coarse_links(links_file, links_count);
         for (j = 0; j < links->size; j++)
             ds_vector_append(coarse_db->links, ds_vector_get(links, j));
         ds_vector_free_no_data(links);
@@ -425,35 +425,10 @@ struct DSVector *read_coarse_links(FILE *f, int64_t num_links){
 
     for (i = 0; i < num_links; i++) {
         struct cb_link_to_compressed_data *link = read_coarse_link_data(f);
-
-        if (current_link == NULL)
-            break;
-        ds_vector_append(links, (void *)current_link);
+        ds_vector_append(links, (void *)link);
     }
     return links;
 }
-
-/*A wrapper function for get_coarse_sequence_links that handles fseek calls;
- *seeks to the index in the coarse.links file for the sequence at index id
- *and then calls get_coarse_sequence_links.  If fseek is successful, then
- *return the coarse sequence links for the coarse sequence at index id.
- *Otherwise, return NULL.
- */
-struct DSVector *read_coarse_sequence_links_at(FILE *links, FILE *index,
-                                               int32_t id){
-    int64_t offset = cb_coarse_find_offset(index, id);
-    bool fseek_success;
-
-    if (offset < 0)
-        return NULL;
-    fseek_success = fseek(links, offset, SEEK_SET) == 0;
-    if (!fseek_success) { 
-        fprintf(stderr, "Error in seeking to offset %lu\n", offset);
-        return NULL;
-    }
-    return get_coarse_sequence_links(links);
-}
-
 
 /*Takes in an index file from a coarse database and the ID number of the
   sequence in the corresponding database file that the user wants to seek to
@@ -590,8 +565,7 @@ void cb_coarse_r_free(struct cb_coarse_r *coarsedb){
   of link indices for each block of bases in the coarse FASTA file.*/
 void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
     FILE *file_fasta_base_index  = coarse_db->db->file_fasta_base_index,
-         *file_links_base_index  = coarse_db->db->file_links_base_index,
-         *file_links_count_index = coarse_db->db->file_links_count_index;
+         *file_links_base_index  = coarse_db->db->file_links_base_index;
     int64_t num_link_blocks, current_link, *current_link_ptr = NULL;
     int32_t current_seq = 0, link_count = 0, i = 0,
             block_size = coarse_db->link_block_size;

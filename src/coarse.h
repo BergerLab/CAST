@@ -87,8 +87,6 @@ void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db);
 
 struct cb_link_to_compressed_data *read_coarse_link_data(FILE *f);
 struct DSVector *read_coarse_links(FILE *f, int64_t num_links);
-struct DSVector *read_coarse_sequence_links_at(FILE *links, FILE *index,
-                                               int32_t id);
 int64_t cb_coarse_find_offset(FILE *index_file, int id);
 struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
                                            int id);
