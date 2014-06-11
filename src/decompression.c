@@ -98,7 +98,7 @@ int get_max(int a, int b){return a>b?a:b;}
  *sequence section for each link_to_compressed from the coarse sequence that is
  *in the range between the indices hit_from and hit_to.
  */
-struct DSVector *cb_coarse_expand(struct cb_coarse_db_read *coarse_db,
+struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
                                   struct cb_compressed *comdb,
                                   int32_t id, int32_t hit_from, int32_t hit_to,
                                   int32_t hit_pad_length){
@@ -232,7 +232,7 @@ printf("%s\n", orig_str);
  *all of the section of the original sequence.
  */
 void decode_edit_script(char *orig, int dest_len, int original_start,
-                        struct cb_coarse_db_read *coarsedb,
+                        struct cb_coarse_r *coarsedb,
                         struct cb_link_to_coarse *link){
     struct fasta_seq *fasta = NULL;
     struct edit_info *edit = NULL;

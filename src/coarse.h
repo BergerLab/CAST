@@ -94,7 +94,7 @@ int64_t cb_coarse_find_offset(FILE *index_file, int id);
 struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
                                            int id);
 
-struct cb_coarse_db_read {
+struct cb_coarse_r {
     struct cb_coarse *db;
     struct DSVector *links;
     struct DSVector *link_inds_by_block;
@@ -106,7 +106,7 @@ struct cb_coarse_db_read {
     char *all_residues;
 };
 
-struct cb_coarse_db_read *
+struct cb_coarse_r *
 cb_coarse_read_init(int32_t seed_size,
                     FILE *file_fasta, FILE *file_seeds, FILE *file_links,
                     FILE *file_links_index, FILE *file_links_base_index,
@@ -115,25 +115,25 @@ cb_coarse_read_init(int32_t seed_size,
                     bool load_coarse_residues, bool load_coarse_links,
                     int32_t link_block_size);
 
-void cb_coarse_db_read_free(struct cb_coarse_db_read *coarse_db);
-void cb_coarse_db_read_init_blocks(struct cb_coarse_db_read *coarse_db);
-struct DSVector *cb_coarse_get_block(struct cb_coarse_db_read *coarse_db,
+void cb_coarse_r_free(struct cb_coarse_r *coarse_db);
+void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db);
+struct DSVector *cb_coarse_get_block(struct cb_coarse_r *coarse_db,
                                      int32_t index);
 
-void cb_coarse_get_all_residues(struct cb_coarse_db_read *coarse_db);
-void cb_coarse_get_all_links(struct cb_coarse_db_read *coarse_db);
+void cb_coarse_get_all_residues(struct cb_coarse_r *coarse_db);
+void cb_coarse_get_all_links(struct cb_coarse_r *coarse_db);
 
-char *cb_coarse_get_seq_residues(struct cb_coarse_db_read *coarse_db,
+char *cb_coarse_get_seq_residues(struct cb_coarse_r *coarse_db,
                                  int64_t id);
 
-/*Coarse database functions ending in _r are used on cb_coarse_db_read structs
+/*Coarse database functions ending in _r are used on cb_coarse_r structs
  *and are used as wrapper functions for the regular coarse database functions
- *being called on the cb_coarse_db_read struct's coarsedb.
+ *being called on the cb_coarse_r struct's coarsedb.
  */
-struct cb_coarse_seq *cb_coarse_get_r(struct cb_coarse_db_read *coarse_db,
+struct cb_coarse_seq *cb_coarse_get_r(struct cb_coarse_r *coarse_db,
                                       int32_t i);
 
-struct fasta_seq *cb_coarse_read_fasta_seq_r(struct cb_coarse_db_read *coarsedb,
+struct fasta_seq *cb_coarse_read_fasta_seq_r(struct cb_coarse_r *coarsedb,
                                              int64_t id);
 
 #endif

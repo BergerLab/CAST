@@ -26,7 +26,7 @@ struct cb_database {
 
 struct cb_database_r {
     char *name;
-    struct cb_coarse_db_read *coarse_db;
+    struct cb_coarse_r *coarse_db;
     struct cb_compressed *com_db;
 };
 

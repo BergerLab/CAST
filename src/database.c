@@ -218,7 +218,7 @@ void cb_database_free(struct cb_database *db){
 /*Freeing function for a cb_database_r*/
 void cb_database_read_free(struct cb_database_r *db){
     /* All files opened in cb_database_init are closed in subsequent frees. */
-    cb_coarse_db_read_free(db->coarse_db);
+    cb_coarse_r_free(db->coarse_db);
     cb_compressed_free(db->com_db);
     free(db->name);
     free(db);
