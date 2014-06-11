@@ -164,25 +164,25 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
 
         /*Output all links for the current sequence to the coarse links file*/
         for (link = seq->links; link != NULL; link = link->next) {
-            uint64_t start_base = base_index + (uint64_t)link->coarse_start,
-                     end_base   = base_index + (uint64_t)link->coarse_end;
+            uint64_t start_base = base_index + (uint64_t)link->data->coarse_start,
+                     end_base   = base_index + (uint64_t)link->data->coarse_end;
             /*Convert the start and end indices for the link to two
               characters.*/
-            int16_t coarse_start = (int16_t)link->coarse_start,
-                    coarse_end   = (int16_t)link->coarse_end;
+            int16_t coarse_start = (int16_t)link->data->coarse_start,
+                    coarse_end   = (int16_t)link->data->coarse_end;
 
-            fwrite(&(link->org_seq_id), sizeof(link->org_seq_id),
+            fwrite(&(link->data->org_seq_id), sizeof(link->data->org_seq_id),
                    1, coarse_db->file_links);
 
             /*Prints the binary representations of the indices and the
               direction of the link to the links file*/
             fwrite(&coarse_start,sizeof(coarse_start),1,coarse_db->file_links);
             fwrite(&coarse_end, sizeof(coarse_end), 1, coarse_db->file_links);
-            fwrite(&(link->original_start), sizeof(link->original_start),
+            fwrite(&(link->data->original_start), sizeof(link->data->original_start),
                    1, coarse_db->file_links);
-            fwrite(&(link->original_end), sizeof(link->original_end),
+            fwrite(&(link->data->original_end), sizeof(link->data->original_end),
                    1, coarse_db->file_links);
-            putc((link->dir?'0':'1'), coarse_db->file_links);
+            putc((link->data->dir?'0':'1'), coarse_db->file_links);
 
 
             /*0 is used as a delimiter to signify that there are more links
@@ -190,8 +190,8 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
             if (link->next != NULL)
                 putc(0, coarse_db->file_links);
 
-            uint64_t coarse_base_start = link->coarse_start + base_index;
-            uint64_t coarse_base_end   = link->coarse_end + base_index;
+            uint64_t coarse_base_start = link->data->coarse_start + base_index;
+            uint64_t coarse_base_end   = link->data->coarse_end + base_index;
             fwrite(&coarse_base_start, sizeof(coarse_base_start),
                    1, coarse_db->file_links_base_index);
             fwrite(&coarse_base_end, sizeof(coarse_base_end),
@@ -231,8 +231,8 @@ void cb_coarse_save_plain(struct cb_coarse *coarse_db){
             fprintf(coarse_db->file_links,
               "    original sequence id: %d, reference range: (%d, %d), "
               "direction: %c\n",
-              link->org_seq_id, link->coarse_start, link->coarse_end,
-              (link->dir?'0':'1'));
+              link->data->org_seq_id, link->data->coarse_start, link->data->coarse_end,
+              (link->data->dir?'0':'1'));
         }
     }
 }
@@ -240,7 +240,6 @@ void cb_coarse_save_plain(struct cb_coarse *coarse_db){
 /*Takes in the coarse database and saves its seeds table in a binary format.*/
 void cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db){
     struct cb_coarse_seq *seq;
-    struct cb_link_to_compressed *link;
     int32_t i, j;
     uint32_t mask = (uint32_t)3;
     char *kmer;
@@ -273,7 +272,6 @@ void cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db){
   format.  Used for debugging.*/
 void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db){
     struct cb_coarse_seq *seq;
-    struct cb_link_to_compressed *link;
     int32_t i, j;
     uint32_t i2 = (uint32_t)0, mask = (uint32_t)3;
     char *kmer;
@@ -470,12 +468,15 @@ struct cb_link_to_compressed *read_coarse_link(FILE *f){
     struct cb_link_to_compressed *link = malloc(sizeof(*link));
     assert(link);
 
-    fread(&(link->org_seq_id), sizeof(link->org_seq_id), 1, f);
-    fread(&(link->coarse_start), sizeof(link->coarse_start), 1, f);
-    fread(&(link->coarse_end), sizeof(link->coarse_end), 1, f);
-    fread(&(link->original_start), sizeof(link->original_start), 1, f);
-    fread(&(link->original_end), sizeof(link->original_end), 1, f);
-    link->dir = getc(f) == '0';
+    link->data = malloc(sizeof(*(link->data)));
+    assert(link->data);
+
+    fread(&(link->data->org_seq_id), sizeof(link->data->org_seq_id), 1, f);
+    fread(&(link->data->coarse_start), sizeof(link->data->coarse_start), 1, f);
+    fread(&(link->data->coarse_end), sizeof(link->data->coarse_end), 1, f);
+    fread(&(link->data->original_start), sizeof(link->data->original_start), 1, f);
+    fread(&(link->data->original_end), sizeof(link->data->original_end), 1, f);
+    link->data->dir = getc(f) == '0';
     link->next = NULL;
 
     return link;
