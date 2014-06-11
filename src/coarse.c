@@ -405,38 +405,6 @@ void cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
     pthread_rwlock_unlock(&seq->lock_links);
 }
 
-/*A function for getting the header for an entry in the coarse links file.
-  Returns NULL if EOF is found before a newline.*/
-char *get_coarse_header(FILE *f){
-    int header_length = 30, c = 0, i = 0;
-    char *header;
-
-    header = malloc(30*sizeof(*header));
-    assert(header);
-
-    while (c != EOF && c != '\n') {
-        c = getc(f);
-        if (c != EOF) {
-            header[i] = (char)c;
-            i++;
-            if (i == header_length - 1) {
-                header_length *= 2;
-
-                header = realloc(header, header_length*sizeof(*header));
-                assert(header);
-            }
-        }
-        else
-            return NULL;
-    }
-    header[i] = '\0';
-
-    header = realloc(header, (i+1)*sizeof(*header));
-    assert(header);
-
-    return header;
-}
-
 /*Reads one link from a file with the links to the compressed database and
   converts its data to a struct cb_link_to_compressed*/
 struct cb_link_to_compressed_data *read_coarse_link_data(FILE *f){

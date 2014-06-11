@@ -85,7 +85,6 @@ void cb_coarse_save_plain(struct cb_coarse *coarse_db);
 void cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db);
 void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db);
 
-char *get_coarse_header(FILE *f);
 struct cb_link_to_compressed_data *read_coarse_link_data(FILE *f);
 struct DSVector *read_coarse_links(FILE *f, int64_t num_links);
 struct DSVector *read_coarse_sequence_links_at(FILE *links, FILE *index,
