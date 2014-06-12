@@ -269,8 +269,8 @@ void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db){
 /*Loads the data of each link in the coarse database's links file into the
   coarse database's links vector.*/
 void cb_coarse_r_read_all_links(struct cb_coarse_r *coarse_db){
-    FILE *links_file        = coarse_db->db->file_links,
-         *links_index       = coarse_db->db->file_links_index;
+    FILE *links_file  = coarse_db->db->file_links,
+         *links_index = coarse_db->db->file_links_index;
     struct DSVector *link_vectors = ds_vector_create();
     int64_t *seq_link_counts = coarse_db->seq_link_counts, links_count;
     int32_t num_link_vectors = 0, i = 0, j = 0;
@@ -613,6 +613,8 @@ void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
     }
 }
 
+int32_t lt(void *a, void *b){return *(int *)a - *(int *)b;}
+
 struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
                                        int32_t index){
     struct DSVector *links = ds_vector_create(),
@@ -629,6 +631,40 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
                 ds_vector_get(coarse_db->links, link_index);
             ds_vector_append(links, link);
         }
+    else {
+        struct DSVector *indices = ds_vector_create();
+        int32_t min_index = -1, max_index = -1, links_to_read;
+        bool fseek_success;
+
+        struct cb_link_to_compressed_data *link = malloc(sizeof(*link));
+        assert(link);
+
+        for (i = 0; i < block->size; i++) {
+            int32_t *link_index = malloc(sizeof(*link_index));
+            assert(link_index);
+
+            *link_index = *(int32_t *)ds_vector_get(block, i);
+
+            min_index = (*link_index < min_index || min_index == -1) ?
+                          *link_index : min_index;
+            max_index = (*link_index > max_index || max_index == -1) ?
+                          *link_index : max_index;
+            ds_vector_append(indices, link_index);
+        }
+        ds_vector_sort(indices, lt);
+
+        links_to_read = max_index - min_index;
+
+        fseek_success =
+          fseek(coarse_db->db->file_links, min_index*sizeof(*link), SEEK_SET) == 0;
+        if (!fseek_success)
+            fprintf(stderr, "Error in seeking to link %d\n", min_index);
+
+        for (i = 0; i < block->size; i++) {
+            fread(link, sizeof(*link), 1, coarse_db->db->file_links);
+            free(link);
+        }
+    }
     return links;
 }
 
