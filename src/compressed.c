@@ -376,16 +376,33 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
     int32_t chars_to_read;
     uint16_t script_length = (uint16_t)0;
     char *half_bytes;
+    bool fread_success;
 
     link = malloc(sizeof(*link));
     assert(link);
 
-    fread(&(link->coarse_seq_id), sizeof(link->coarse_seq_id), 1, f);
-    fread(&(link->original_start), sizeof(link->original_start), 1, f);
-    fread(&(link->original_end), sizeof(link->original_end), 1, f);
-    fread(&(link->coarse_start), sizeof(link->coarse_start), 1, f);
-    fread(&(link->coarse_end), sizeof(link->coarse_end), 1, f);
-    fread(&script_length, sizeof(script_length), 1, f);
+    fread_success =
+      fread(&(link->coarse_seq_id), sizeof(link->coarse_seq_id), 1, f) == 1;
+    assert(fread_success);
+
+    fread_success =
+      fread(&(link->original_start), sizeof(link->original_start), 1, f) == 1;
+    assert(fread_success);
+
+    fread_success =
+      fread(&(link->original_end), sizeof(link->original_end), 1, f) == 1;
+    assert(fread_success);
+
+    fread_success =
+      fread(&(link->coarse_start), sizeof(link->coarse_start), 1, f) == 1;
+    assert(fread_success);
+
+    fread_success =
+      fread(&(link->coarse_end), sizeof(link->coarse_end), 1, f) == 1;
+    assert(fread_success);
+
+    fread_success = fread(&script_length, sizeof(script_length), 1, f) == 1;
+    assert(fread_success);
 
     chars_to_read = script_length / 2;
     if (script_length % 2 == 1)
@@ -394,7 +411,8 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
     half_bytes = malloc(chars_to_read*sizeof(*half_bytes));
     assert(half_bytes);
 
-    fread(half_bytes, sizeof(*half_bytes), chars_to_read, f);
+    fread_success = fread(half_bytes, sizeof(*half_bytes), chars_to_read, f) == chars_to_read;
+    assert(fread_success);
 
     link->diff = half_bytes_to_ASCII(half_bytes, script_length);
     link->next = NULL;
@@ -415,6 +433,7 @@ struct cb_compressed_seq *get_compressed_seq(FILE *f, int id){
     struct cb_compressed_seq *seq;
     int64_t l;
     char *h = get_compressed_header(f);
+    bool fread_success;
 
     seq = cb_compressed_seq_init(id, h);
 
@@ -424,7 +443,8 @@ struct cb_compressed_seq *get_compressed_seq(FILE *f, int id){
     }
     free(h);
 
-    fread(&l, sizeof(l), 1, f);
+    fread_success = fread(&l, sizeof(l), 1, f) == 1;
+    assert(fread_success);
 
     while (true) {
         struct cb_link_to_coarse *current_link = read_compressed_link(f);
@@ -478,13 +498,15 @@ struct cb_compressed_seq *cb_compressed_read_seq_at(struct cb_compressed *comdb,
 int64_t cb_compressed_get_seq_length(FILE *f){
     int64_t length;
     char *h = get_compressed_header(f);
+    bool fread_success;
+
     if (h == NULL) {
         fprintf(stderr, "Could not get sequence length\n");
         return -1;
     }
     free(h);
 
-    fread(&length, sizeof(length), 1, f);
+    fread_success = fread(&length, sizeof(length), 1, f) == 1;
     return length;
 }
 
@@ -598,13 +620,14 @@ struct cb_compressed_seq **read_compressed(FILE *f){
 int64_t cb_compressed_link_offset(struct cb_compressed *comdb, int id){
     int64_t offset;
     int32_t try_off = id * 8;
-    bool fseek_success = fseek(comdb->file_index, try_off, SEEK_SET) == 0;
+    bool fread_success,
+         fseek_success = fseek(comdb->file_index, try_off, SEEK_SET) == 0;
 
     if (!fseek_success) {
         fprintf(stderr, "Error in seeking to offset %d", try_off);
         return (int64_t)(-1);
     }
 
-    fread(&offset, sizeof(offset), 1, comdb->file_index);
+    fread_success = fread(&offset, sizeof(offset), 1, comdb->file_index) == 1;
     return offset;
 }
