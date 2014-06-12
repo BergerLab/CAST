@@ -621,7 +621,7 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
                     *block = (struct DSVector *)ds_vector_get(
                                coarse_db->link_inds_by_block,
                                index);
-    int32_t i;
+    int32_t i, j;
 
     if (coarse_db->links != NULL)
         for (i = 0; i < block->size; i++) {
@@ -633,11 +633,9 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
         }
     else {
         struct DSVector *indices = ds_vector_create();
+        struct cb_link_to_compressed_data *link;
         int32_t min_index = -1, max_index = -1, links_to_read;
         bool fseek_success;
-
-        struct cb_link_to_compressed_data *link = malloc(sizeof(*link));
-        assert(link);
 
         for (i = 0; i < block->size; i++) {
             int32_t *link_index = malloc(sizeof(*link_index));
@@ -660,9 +658,19 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
         if (!fseek_success)
             fprintf(stderr, "Error in seeking to link %d\n", min_index);
 
-        for (i = 0; i < block->size; i++) {
+        for (i = j = 0; i < indices->size && j < block->size; i++) {
+            link = malloc(sizeof(*link));
+            assert(link);
+
             fread(link, sizeof(*link), 1, coarse_db->db->file_links);
-            free(link);
+
+            if (*(int32_t*)ds_vector_get(indices, i) ==
+                  *(int32_t*)ds_vector_get(block, j)) {
+                ds_vector_append(links, link);
+                j++;
+            }
+            else
+                free(link);
         }
     }
     return links;
