@@ -155,14 +155,10 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
 
         /*Output all links for the current sequence to the coarse links file*/
         for (link = seq->links; link != NULL; link = link->next) {
-            uint64_t start_base        = base_index +
-                                           (uint64_t)link->data->coarse_start,
-                     end_base          = base_index +
-                                           (uint64_t)link->data->coarse_end,
-                     coarse_base_start = link->data->coarse_start + base_index,
+            uint64_t coarse_base_start = link->data->coarse_start + base_index,
                      coarse_base_end   = link->data->coarse_end + base_index;
 
-            fwrite(link->data, sizeof(link->data), 1, coarse_db->file_links);
+            fwrite(link->data, sizeof(*(link->data)), 1, coarse_db->file_links);
 
             fwrite(&coarse_base_start, sizeof(coarse_base_start),
                    1, coarse_db->file_links_base_index);
@@ -270,8 +266,8 @@ void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db){
     }
 }
 
-/*Loads all of the residues in the coarse database's links file into the coarse
-  database's links vector.*/
+/*Loads the data of each link in the coarse database's links file into the
+  coarse database's links vector.*/
 void cb_coarse_r_read_all_links(struct cb_coarse_r *coarse_db){
     FILE *links_file        = coarse_db->db->file_links,
          *links_index       = coarse_db->db->file_links_index;
@@ -628,9 +624,9 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
     if (coarse_db->links != NULL)
         for (i = 0; i < block->size; i++) {
             int32_t link_index = *(int32_t *)ds_vector_get(block, i);
-            struct cb_link_to_compressed *link =
-              (struct cb_link_to_compressed *)ds_vector_get(coarse_db->links,
-                                                            link_index);
+            struct cb_link_to_compressed_data *link =
+              (struct cb_link_to_compressed_data *)
+                ds_vector_get(coarse_db->links, link_index);
             ds_vector_append(links, link);
         }
     return links;
