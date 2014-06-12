@@ -133,9 +133,7 @@ cb_compress_worker(void *data)
 
 struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
-             struct cb_align_nw_memory *mem)
-{
-    /*fprintf(stderr, "Starting compression      %d\n", org_seq->id);*/
+             struct cb_align_nw_memory *mem){
     struct extend_match_with_res mseqs_fwd, mseqs_rev;
     struct cb_coarse_seq *coarse_seq;
     struct cb_compressed_seq *cseq =
@@ -181,7 +179,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
          */
         if (current == 0 && coarse_db->seqs->size == 0) {
             new_coarse_seq_id = add_without_match(coarse_db, org_seq, 0,
-                                                  max_chunk_size);
+                                                  minimum(org_seq->length, max_chunk_size));
             cb_compressed_seq_addlink(cseq, cb_link_to_coarse_init_nodiff(
                                                new_coarse_seq_id, 0,
                                                end_of_chunk - 1, 0,
@@ -561,8 +559,7 @@ struct extend_match_with_res
 extend_match_with_res(struct cb_align_nw_memory *mem,
                 char *rseq, int32_t rstart, int32_t rend, int32_t resind,
                 int32_t dir1, char *oseq, int32_t ostart, int32_t oend,
-                int32_t current, int32_t dir2)
-{
+                int32_t current, int32_t dir2){
     struct DSVector *rseq_segments = ds_vector_create(),
                     *oseq_segments = ds_vector_create();
     struct cb_alignment alignment;
@@ -742,8 +739,7 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
  */
 static int32_t add_without_match(struct cb_coarse *coarse_db,
                                  struct cb_seq *org_seq,
-                                 int32_t ostart, int32_t oend)
-{
+                                 int32_t ostart, int32_t oend){
     struct cb_link_to_compressed *link = NULL;
     struct cb_coarse_seq *coarse_seq =
       cb_coarse_add(coarse_db, org_seq->residues, ostart, oend);

@@ -92,8 +92,9 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
     char *kmer;
 
     pthread_rwlock_wrlock(&seeds->lock);
-
     for (i = 0; i < seq->seq->length - seeds->seed_size+1; i++) {
+
+fprintf(stderr, "%d/%d %s\n", i, seq->seq->length - seeds->seed_size+1, kmer);
         kmer = seq->seq->residues + i;
         sl1 = cb_seed_loc_init(seq->id, i);
         hash = hash_kmer(seeds, kmer);
@@ -158,7 +159,7 @@ static int32_t residue_value(char residue){
     int32_t i = residue - 'A', val;
 
     if (i < 0 || i >= 26) {
-        fprintf(stderr, "Invalid nucleotide residue: %c\n", residue);
+        fprintf(stderr, "Invalid nucleotide residue: %d\n", residue);
         exit(1);
     }
     if (-1 == (val = cb_seeds_alpha_size[i])) {
