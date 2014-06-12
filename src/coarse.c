@@ -301,9 +301,10 @@ void cb_coarse_r_read_all_residues(struct cb_coarse_r *coarse_db){
     int64_t num_bases = 0, i = 0;
     int32_t num_fasta_entries = 0, bases_copied = 0, j = 0;
     char *line = NULL;
+    bool fread_success, fseek_success;
 
     /*Get the number of entries in the coarse FASTA file*/
-    bool fseek_success = fseek(coarse_db->db->file_fasta_index,0,SEEK_END) == 0;
+    fseek_success = fseek(coarse_db->db->file_fasta_index, 0, SEEK_END) == 0;
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA index file\n");
     num_fasta_entries = ftell(coarse_db->db->file_fasta_index)/8;
@@ -314,8 +315,12 @@ void cb_coarse_r_read_all_residues(struct cb_coarse_r *coarse_db){
       fseek(coarse_db->db->file_fasta_base_index, -8, SEEK_END) == 0;
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA index file\n");
-    fread(&num_bases, sizeof(num_bases), 1,
-          coarse_db->db->file_fasta_base_index);
+
+    fread_success =
+      fread(&num_bases, sizeof(num_bases), 1,
+            coarse_db->db->file_fasta_base_index) == 1;
+    assert(fread_success);
+
     fseek(coarse_db->db->file_fasta_base_index, 0, SEEK_SET);
 
     coarse_db->all_residues =
@@ -335,7 +340,11 @@ void cb_coarse_r_read_all_residues(struct cb_coarse_r *coarse_db){
         line = malloc((line_length+1)*sizeof(*line));
         assert(line);
 
-        fread(line, sizeof(*line), line_length+1, coarse_db->db->file_fasta);
+        fread_success =
+          fread(line, sizeof(*line), line_length + 1,
+                coarse_db->db->file_fasta) == line_length + 1;
+        assert(fread_success);
+
         for (j = 0; line[j] != '\0' && line[j] != '\n'; j++)
             coarse_db->all_residues[bases_copied++] = line[j];
         free(line);
@@ -404,10 +413,14 @@ void cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
 /*Reads one link from a file with the links to the compressed database and
   converts its data to a struct cb_link_to_compressed*/
 struct cb_link_to_compressed_data *read_coarse_link_data(FILE *f){
+    bool fread_success;
+
     struct cb_link_to_compressed_data *link = malloc(sizeof(*link));
     assert(link);
 
-    fread(link, sizeof(*link), 1, f);
+    fread_success = fread(link, sizeof(*link), 1, f) == 1;
+    assert(fread_success);
+
     return link;
 }
 
@@ -432,13 +445,16 @@ struct DSVector *read_coarse_links(FILE *f, int64_t num_links){
 int64_t cb_coarse_find_offset(FILE *index_file, int id){
     int64_t mask = make_mask(8), offset = (int64_t)(-1), try_off = id * 8;
     int32_t i;
-    bool fseek_success = fseek(index_file, try_off, SEEK_SET) == 0;
+    bool fread_success, fseek_success = fseek(index_file,try_off,SEEK_SET) == 0;
 
     if (!fseek_success) {
         fprintf(stderr, "Error in seeking to offset %ld\n", try_off);
         return (int64_t)(-1);
     }
-    fread(&offset, sizeof(offset), 1, index_file);
+
+    fread_success =
+      fread(&offset, sizeof(offset), 1, index_file) == 1;
+    assert(fread_success);
 
     return offset;
 }
@@ -475,7 +491,7 @@ cb_coarse_r_init(int32_t seed_size,
                  int32_t link_block_size){
     int64_t link_count = (int64_t)0, links_in_sequence;
     int32_t i;
-    bool fseek_success;
+    bool fseek_success, fread_success;
 
     struct cb_coarse_r *coarsedb = malloc(sizeof(*coarsedb));
     assert(coarsedb);
@@ -505,14 +521,20 @@ cb_coarse_r_init(int32_t seed_size,
     assert(coarsedb->seq_base_indices);
 
     for (i = 0; i < coarsedb->num_coarse_seqs; i++) {
-        fread(&links_in_sequence, sizeof(links_in_sequence),
-              1, file_links_count_index);
+        fread_success =
+          fread(&links_in_sequence, sizeof(links_in_sequence),
+                1, file_links_count_index) == 1;
+        assert(fread_success);
+
         link_count += links_in_sequence;
         coarsedb->seq_link_counts[i] = link_count;
     }
 
-    fread(coarsedb->seq_base_indices, sizeof(*(coarsedb->seq_base_indices)),
-          (coarsedb->num_coarse_seqs+1), file_fasta_base_index);
+    fread_success =
+      fread(coarsedb->seq_base_indices, sizeof(*(coarsedb->seq_base_indices)),
+            (coarsedb->num_coarse_seqs+1), file_fasta_base_index) ==
+        coarsedb->num_coarse_seqs + 1;
+    assert(fread_success);
 
     coarsedb->link_block_size = link_block_size;
 
@@ -565,7 +587,7 @@ void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
     int64_t num_link_blocks, current_link, *current_link_ptr = NULL;
     int32_t current_seq = 0, link_count = 0, i = 0,
             block_size = coarse_db->link_block_size;
-    bool fseek_success;
+    bool fseek_success, fread_success;
 
     /*Initialize link_inds_by_block*/
     coarse_db->link_inds_by_block = ds_vector_create();
@@ -575,7 +597,12 @@ void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
     fseek_success = (fseek(file_fasta_base_index, -8, SEEK_END)) == 0;
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA base index file\n");
-    fread(&num_link_blocks, sizeof(num_link_blocks), 1, file_fasta_base_index);
+
+    fread_success =
+      fread(&num_link_blocks, sizeof(num_link_blocks),
+            1, file_fasta_base_index) == 1;
+    assert(fread_success);
+
     num_link_blocks = num_link_blocks / block_size + 1;
     fseek(file_fasta_base_index, 0, SEEK_SET);
 
@@ -590,8 +617,15 @@ void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
 
     while (!feof(file_links_base_index)) {
         int64_t current_start, current_end;
-        fread(&current_start, sizeof(current_start), 1, file_links_base_index);
-        fread(&current_end, sizeof(current_end), 1, file_links_base_index);
+        fread_success =
+          fread(&current_start, sizeof(current_start),
+                1, file_links_base_index) == 1;
+        assert(fread_success || feof(file_links_base_index));
+
+        fread_success =
+          fread(&current_end, sizeof(current_end),
+                1, file_links_base_index) == 1;
+        assert(fread_success || feof(file_links_base_index));
 
         if (feof(file_links_base_index))
             break;
@@ -622,6 +656,7 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
                                coarse_db->link_inds_by_block,
                                index);
     int32_t i, j;
+    bool fread_success;
 
     if (coarse_db->links != NULL)
         for (i = 0; i < block->size; i++) {
@@ -662,7 +697,9 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
             link = malloc(sizeof(*link));
             assert(link);
 
-            fread(link, sizeof(*link), 1, coarse_db->db->file_links);
+            fread_success = fread(link, sizeof(*link),
+                                  1, coarse_db->db->file_links) == 1;
+            assert(fread_success);
 
             if (*(int32_t*)ds_vector_get(indices, i) ==
                   *(int32_t*)ds_vector_get(block, j)) {
