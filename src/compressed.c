@@ -256,7 +256,6 @@ void cb_compressed_write_binary(struct cb_compressed *com_db,
         /*Output link_data in binary format*/        
         fwrite(link_data, sizeof(*link_data), 1, com_db->file_compressed);
 
-printf("-%d %s\n", script_length, edit_script);
         /*Output all of the characters of the edit script as half-bytes*/
         fwrite(script, sizeof(*script),
                script_length/2+odd, com_db->file_compressed);
@@ -378,7 +377,6 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
     assert(half_bytes);
 
     int32_t chars_read = fread(half_bytes, sizeof(*half_bytes), chars_to_read, f); 
-    fprintf(stderr, "%d %d\n", chars_read, chars_to_read);
 
     fread_success = chars_read == chars_to_read;
     assert(fread_success);

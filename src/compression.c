@@ -14,18 +14,18 @@ struct worker_args {
     struct DSQueue *jobs;
 };
 
-struct extend_match_with_res {
+struct extend_match {
     char *rseq;
     char *oseq;
     int32_t rlen;
     int32_t olen;
 };
 
-struct extend_match_with_res
-extend_match_with_res(struct cb_align_nw_memory *mem,
-                char *rseq, int32_t rstart, int32_t rend, int32_t resind,
-                int32_t dir1, char *oseq, int32_t ostart, int32_t oend,
-                int32_t current, int32_t dir2);
+struct extend_match
+extend_match(struct cb_align_nw_memory *mem,
+             char *rseq, int32_t rstart, int32_t rend, int32_t resind,
+             int32_t dir1, char *oseq, int32_t ostart, int32_t oend,
+             int32_t current, int32_t dir2);
 
 static int32_t add_without_match(struct cb_coarse *coarse_db,
                                  struct cb_seq *org_seq,
@@ -128,7 +128,7 @@ static void *cb_compress_worker(void *data){
 struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             struct cb_align_nw_memory *mem){
-    struct extend_match_with_res mseqs_fwd, mseqs_rev;
+    struct extend_match mseqs_fwd, mseqs_rev;
     struct cb_coarse_seq *coarse_seq;
     struct cb_compressed_seq *cseq =
              cb_compressed_seq_init(org_seq->id, org_seq->name);
@@ -225,13 +225,13 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                              coarse_seq->seq->residues,
                              coarse_seq->seq->length, 0)) >
                  compress_flags.attempt_ext_len) {
-                mseqs_rev = extend_match_with_res(mem,
+                mseqs_rev = extend_match(mem,
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length, resind, -1,
                                          org_seq->residues, start_of_section,
                                          end_of_section, current, -1);
 
-                mseqs_fwd = extend_match_with_res(mem,
+                mseqs_fwd = extend_match(mem,
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length,
                                          resind + seed_size - 1, 1,
@@ -382,14 +382,14 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                              coarse_seq->seq->residues,
                              coarse_seq->seq->length, 0)) >
                  compress_flags.attempt_ext_len) {
-                mseqs_rev = extend_match_with_res(mem,
+                mseqs_rev = extend_match(mem,
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length, resind, -1,
                                          org_seq->residues, start_of_section,
                                          end_of_section,
                                          current + seed_size - 1, 1);
 
-                mseqs_fwd = extend_match_with_res(mem,
+                mseqs_fwd = extend_match(mem,
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length,
                                          resind+seed_size-1, 1,
@@ -552,15 +552,15 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
     return cseq;
 }
 
-struct extend_match_with_res
-extend_match_with_res(struct cb_align_nw_memory *mem,
-                char *rseq, int32_t rstart, int32_t rend, int32_t resind,
-                int32_t dir1, char *oseq, int32_t ostart, int32_t oend,
-                int32_t current, int32_t dir2){
+struct extend_match
+extend_match(struct cb_align_nw_memory *mem,
+             char *rseq, int32_t rstart, int32_t rend, int32_t resind,
+             int32_t dir1, char *oseq, int32_t ostart, int32_t oend,
+             int32_t current, int32_t dir2){
     struct DSVector *rseq_segments = ds_vector_create(),
                     *oseq_segments = ds_vector_create();
     struct cb_alignment alignment;
-    struct extend_match_with_res mseqs;
+    struct extend_match mseqs;
     struct ungapped_alignment ungapped;
     int32_t rlen, olen, i, j, m, matches_count, matches_index, max_section_size,
             rseq_len = 0, oseq_len = 0, dir_prod = dir1 * dir2;
