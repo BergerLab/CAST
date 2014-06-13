@@ -90,25 +90,19 @@ void cb_compress_join_workers(struct cb_compress_workers *workers){
     }
 }
 
-void
-cb_compress_free_workers(struct cb_compress_workers *workers)
-{
+void cb_compress_free_workers(struct cb_compress_workers *workers){
     ds_queue_free(workers->jobs);
     free(workers->args);
     free(workers->threads);
     free(workers);
 }
 
-void
-cb_compress_send_job(struct cb_compress_workers *workers,
-                      struct cb_seq *org_seq)
-{
+void cb_compress_send_job(struct cb_compress_workers *workers,
+                          struct cb_seq *org_seq){
     ds_queue_put(workers->jobs, (void*) org_seq);
 }
 
-static void *
-cb_compress_worker(void *data)
-{
+static void *cb_compress_worker(void *data){
     struct worker_args *args;
     struct cb_align_nw_memory *mem;
     struct cb_seq *s;
@@ -137,14 +131,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
     struct extend_match_with_res mseqs_fwd, mseqs_rev;
     struct cb_coarse_seq *coarse_seq;
     struct cb_compressed_seq *cseq =
-               cb_compressed_seq_init(org_seq->id, org_seq->name);
+             cb_compressed_seq_init(org_seq->id, org_seq->name);
     struct cb_seed_loc *seeds, *seeds_r, *seedLoc;
     struct cb_alignment alignment;
     int32_t seed_size = coarse_db->seeds->seed_size,
             ext_seed  = compress_flags.ext_seed_size,
-            resind = -1, last_match = 0, current = 0, i = 0,
-            new_coarse_seq_id = -1,
-            min_progress = compress_flags.min_progress,
+            resind = -1, current = 0, i = 0, new_coarse_seq_id = -1,
             fwd_rlen, rev_rlen, fwd_olen, rev_olen, index,
             chunks           = 0,
             max_chunk_size   = compress_flags.max_chunk_size,
@@ -154,8 +146,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             end_of_chunk     = start_of_section + max_chunk_size,
             end_of_section   = start_of_section + max_section_size;
     char *kmer, *revcomp;
-    bool *matches, *matches_temp,
-         found_match;
+    bool *matches, *matches_temp, found_match;
 
     /*Initialize the matches and matches_temp arrays*/
     matches = malloc(max_section_size*sizeof(*matches));
@@ -178,8 +169,10 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
          *the second chunk.
          */
         if (current == 0 && coarse_db->seqs->size == 0) {
-            new_coarse_seq_id = add_without_match(coarse_db, org_seq, 0,
-                                                  minimum(org_seq->length, max_chunk_size));
+            new_coarse_seq_id =
+              add_without_match(coarse_db, org_seq, 0,
+                                minimum(org_seq->length, max_chunk_size));
+
             cb_compressed_seq_addlink(cseq, cb_link_to_coarse_init_nodiff(
                                                new_coarse_seq_id, 0,
                                                end_of_chunk - 1, 0,
@@ -255,6 +248,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                     free(mseqs_fwd.oseq);
                     free(mseqs_rev.rseq);
                     free(mseqs_rev.oseq);
+
                     continue;
                 }
 
