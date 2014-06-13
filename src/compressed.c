@@ -242,7 +242,8 @@ void cb_compressed_write_binary(struct cb_compressed *com_db,
     fwrite(&original_length,sizeof(original_length),1,com_db->file_compressed);
 
     for (link = seq->links; link != NULL; link = link->next){
-        /*Convert the start and end indices for the link to two characters.*/
+        struct cb_link_to_coarse_data *link_data =
+          cb_link_to_coarse_get_data(link);
         uint64_t org_start     = link->original_start,
                  org_end       = link->original_end,
                  coarse_seq_id = link->coarse_seq_id;;
@@ -253,18 +254,12 @@ void cb_compressed_write_binary(struct cb_compressed *com_db,
         char *edit_script = link->diff,
              *script      = edit_script_to_half_bytes(edit_script);
 
-        /*Represent the length of the edit script as two characters and get
-          the edit script as a sequence of half-bytes*/
         while (edit_script[script_length] != '\0')
             script_length++;
         odd = script_length % 2 == 1 ? 1 : 0;
 
-        fwrite(&coarse_seq_id,sizeof(coarse_seq_id),1,com_db->file_compressed);
-        fwrite(&org_start, sizeof(org_start), 1, com_db->file_compressed);
-        fwrite(&org_end, sizeof(org_end), 1, com_db->file_compressed);
-        fwrite(&cor_start, sizeof(cor_start), 1, com_db->file_compressed);
-        fwrite(&cor_end, sizeof(cor_end), 1, com_db->file_compressed);
-        fwrite(&script_length,sizeof(script_length),1,com_db->file_compressed);
+        /*Output link_data in binary format*/        
+        fwrite(link_data, sizeof(*link_data), 1, com_db->file_compressed);
 
         /*Output all of the characters of the edit script as half-bytes*/
         fwrite(script, sizeof(*script),
@@ -278,6 +273,7 @@ void cb_compressed_write_binary(struct cb_compressed *com_db,
         if (link->next)
             putc(' ', com_db->file_compressed);
 
+        free(link_data);
         free(script);
     }
     putc('\n', com_db->file_compressed);
@@ -598,8 +594,8 @@ struct cb_compressed_seq **read_compressed(FILE *f){
         compressed_seqs[length] = malloc(sizeof(*(compressed_seqs[length])));
         assert(compressed_seqs[length]);
 
-        (compressed_seqs[length])->name = header;
-        (compressed_seqs[length]->links) = links;
+        compressed_seqs[length]->name  = header;
+        compressed_seqs[length]->links = links;
         length++;
     }
 

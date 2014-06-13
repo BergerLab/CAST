@@ -42,4 +42,7 @@ void cb_link_to_coarse_free(struct cb_link_to_coarse *link);
 struct cb_link_to_coarse_data *
 cb_link_to_coarse_get_data(struct cb_link_to_coarse *link);
 
+struct cb_link_to_coarse *
+cb_link_to_coarse_from_data(struct cb_link_to_coarse_data *data, char *diff){
+
 #endif
