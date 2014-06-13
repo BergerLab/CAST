@@ -65,7 +65,8 @@ int main(int argc, char **argv){
             fasta_free_seq(seq);
 
             org_seq_id++;
-            if (org_seq_id % 1000 == 0) {
+            if (compress_flags.notify_every > 0 &&
+                org_seq_id % compress_flags.notify_every == 0) {
                 gettimeofday(&current, NULL);
                 elapsed = (long double)(current.tv_sec - start.tv_sec);
                 printf("%d sequences compressed (%0.4Lf seqs/sec)\n",

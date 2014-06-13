@@ -84,7 +84,8 @@ struct opt_config *load_compress_args(){
     opt_flag_int(conf,
         &compress_flags.notify_every, "notify-every", 1000,
         "Sets how many sequences to compress for each notification of how many "
-        "sequences have been compressed so far.");
+        "sequences have been compressed so far.  Pass in 0 to disable "
+        "notifications entirely.");
 
     return conf;
 }

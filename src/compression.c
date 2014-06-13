@@ -543,9 +543,10 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             chunks++;
         }
     }
-    fprintf(stderr, "Compress finished       %d\n", org_seq->id);
+
     free(matches);
     free(matches_temp);
+
     return cseq;
 }
 
@@ -644,8 +645,8 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
         dp_len2 = max_dp_len(current-ostart, dir2, oend-ostart);
 
         alignment = cb_align_nw(mem, rseq, dp_len1, resind, dir1,
-                                      oseq, dp_len2, current, dir2,
-                                 matches, &matches_index);
+                                oseq, dp_len2, current, dir2,
+                                matches, &matches_index);
 
         if (alignment.length == -1)
             break;
@@ -744,8 +745,7 @@ static int32_t add_without_match(struct cb_coarse *coarse_db,
     return coarse_seq->id;
 }
 
-static int32_t min(int32_t a, int32_t b)
-{
+static int32_t min(int32_t a, int32_t b){
     if (a < b)
         return a;
     return b;
