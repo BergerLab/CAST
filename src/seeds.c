@@ -52,7 +52,7 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     seeds->seed_size = seed_size;
     seeds->powers_length = seed_size + 1;
     
-    seeds->powers = malloc((seeds->powers_length) * sizeof(*seeds->powers));
+    seeds->powers = malloc((seeds->powers_length)*sizeof(*seeds->powers));
     assert(seeds->powers);
 
     p = 1;
@@ -63,7 +63,7 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
 
     seeds->locs_length = seeds->powers[seed_size];
 
-    seeds->locs = malloc(seeds->locs_length * sizeof(*seeds->locs));
+    seeds->locs = malloc(seeds->locs_length*sizeof(*seeds->locs));
     assert(seeds->locs);
 
     for (i = 0; i < seeds->locs_length; i++)
@@ -93,8 +93,6 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
 
     pthread_rwlock_wrlock(&seeds->lock);
     for (i = 0; i < seq->seq->length - seeds->seed_size+1; i++) {
-
-fprintf(stderr, "%d/%d %s\n", i, seq->seq->length - seeds->seed_size+1, kmer);
         kmer = seq->seq->residues + i;
         sl1 = cb_seed_loc_init(seq->id, i);
         hash = hash_kmer(seeds, kmer);
@@ -140,7 +138,7 @@ struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
 
     seedLoc->coarse_seq_id = coarse_seq_id;
     seedLoc->residue_index = residue_index;
-    seedLoc->next = NULL;
+    seedLoc->next          = NULL;
 
     return seedLoc;
 }
@@ -148,7 +146,7 @@ struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
 void cb_seed_loc_free(struct cb_seed_loc *seedLoc){
     struct cb_seed_loc *seed1, *seed2;
 
-    for (seed1 = seedLoc; seed1 != NULL; ) {
+    for (seed1 = seedLoc; seed1 != NULL;) {
         seed2 = seed1->next;
         free(seed1);
         seed1 = seed2;
@@ -159,7 +157,7 @@ static int32_t residue_value(char residue){
     int32_t i = residue - 'A', val;
 
     if (i < 0 || i >= 26) {
-        fprintf(stderr, "Invalid nucleotide residue: %d\n", residue);
+        fprintf(stderr, "Invalid nucleotide residue: %c\n", residue);
         exit(1);
     }
     if (-1 == (val = cb_seeds_alpha_size[i])) {
