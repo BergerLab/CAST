@@ -71,15 +71,20 @@ void cb_link_to_coarse_free(struct cb_link_to_coarse *link){
     }
 }
 
-struct cb_link_to_coarse_indices *
-cb_link_to_coarse_get_indices(struct cb_link_to_coarse *link){
-    struct cb_link_to_coarse_indices *indices = malloc(sizeof(*indices));
+struct cb_link_to_coarse_data *
+cb_link_to_coarse_get_data(struct cb_link_to_coarse *link){
+    struct cb_link_to_coarse_data *data = malloc(sizeof(*data));
+    assert(data);
 
-    indices->coarse_seq_id  = link->coarse_seq_id;
-    indices->original_start = link->original_start;
-    indices->original_end   = link->original_end;
-    indices->coarse_start   = link->coarse_start;
-    indices->coarse_end     = link->coarse_end;
+    data->coarse_seq_id  = link->coarse_seq_id;
+    data->original_start = link->original_start;
+    data->original_end   = link->original_end;
+    data->coarse_start   = link->coarse_start;
+    data->coarse_end     = link->coarse_end;
 
-    return indices;
+    data->script_length = (uint16_t)0;
+    while (link->diff[data->script_length] != '\0')
+        data->script_length++;
+
+    return data;
 }
