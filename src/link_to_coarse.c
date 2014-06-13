@@ -71,3 +71,15 @@ void cb_link_to_coarse_free(struct cb_link_to_coarse *link){
     }
 }
 
+struct cb_link_to_coarse_indices *
+cb_link_to_coarse_get_indices(struct cb_link_to_coarse *link){
+    struct cb_link_to_coarse_indices *indices = malloc(sizeof(*indices));
+
+    indices->coarse_seq_id  = link->coarse_seq_id;
+    indices->original_start = link->original_start;
+    indices->original_end   = link->original_end;
+    indices->coarse_start   = link->coarse_start;
+    indices->coarse_end     = link->coarse_end;
+
+    return indices;
+}
