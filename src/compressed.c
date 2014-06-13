@@ -243,9 +243,9 @@ void cb_compressed_write_binary(struct cb_compressed *com_db,
 
     for (link = seq->links; link != NULL; link = link->next){
         /*Convert the start and end indices for the link to two characters.*/
-        uint64_t org_start = link->original_start,
-                 org_end   = link->original_end,
-                 coarse_seq_id;
+        uint64_t org_start     = link->original_start,
+                 org_end       = link->original_end,
+                 coarse_seq_id = link->coarse_seq_id;;
         int32_t odd;
         uint16_t cor_start     = link->coarse_start,
                  cor_end       = link->coarse_end,
@@ -253,20 +253,13 @@ void cb_compressed_write_binary(struct cb_compressed *com_db,
         char *edit_script = link->diff,
              *script      = edit_script_to_half_bytes(edit_script);
 
-        /*Output the ID of the current chunk as 8 characters*/
-        coarse_seq_id = link->coarse_seq_id;
-        fwrite(&coarse_seq_id,sizeof(coarse_seq_id),1,com_db->file_compressed);
-
         /*Represent the length of the edit script as two characters and get
           the edit script as a sequence of half-bytes*/
         while (edit_script[script_length] != '\0')
             script_length++;
         odd = script_length % 2 == 1 ? 1 : 0;
 
-        /*Output the indices of the start and end of the sequence being
-         *linked to and the length of the edit script represented in 16
-         *bits, and the length of the edit script.
-         */
+        fwrite(&coarse_seq_id,sizeof(coarse_seq_id),1,com_db->file_compressed);
         fwrite(&org_start, sizeof(org_start), 1, com_db->file_compressed);
         fwrite(&org_end, sizeof(org_end), 1, com_db->file_compressed);
         fwrite(&cor_start, sizeof(cor_start), 1, com_db->file_compressed);
@@ -411,7 +404,9 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
     half_bytes = malloc(chars_to_read*sizeof(*half_bytes));
     assert(half_bytes);
 
-    fread_success = fread(half_bytes, sizeof(*half_bytes), chars_to_read, f) == chars_to_read;
+    int32_t chars_read = fread(half_bytes, sizeof(*half_bytes), chars_to_read, f); 
+fprintf(stderr, "%d %d\n", chars_read, chars_to_read);
+    /*fread_success = fread(half_bytes, sizeof(*half_bytes), chars_to_read, f)*/fread_success = chars_read == chars_to_read;
     assert(fread_success);
 
     link->diff = half_bytes_to_ASCII(half_bytes, script_length);
@@ -441,14 +436,16 @@ struct cb_compressed_seq *get_compressed_seq(FILE *f, int id){
         fprintf(stderr, "Could not get compressed sequence\n");
         return NULL;
     }
+
     free(h);
 
     fread_success = fread(&l, sizeof(l), 1, f) == 1;
     assert(fread_success);
 
     while (true) {
-        struct cb_link_to_coarse *current_link = read_compressed_link(f);
         char c = 1;
+        struct cb_link_to_coarse *current_link = read_compressed_link(f);
+
         if (current_link == NULL)
             break;
 

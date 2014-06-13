@@ -16,8 +16,7 @@
 #include "fasta.h"
 #include "seq.h"
 
-static char *path_join(char *a, char *b)
-{
+static char *path_join(char *a, char *b){
     char *joined;
 
     joined = malloc((1 + strlen(a) + 1 + strlen(b)) * sizeof(*joined));
@@ -27,9 +26,7 @@ static char *path_join(char *a, char *b)
     return joined;
 }
 
-int
-main(int argc, char **argv)
-{ 
+int main(int argc, char **argv){ 
     struct cb_database_r *db;
     struct fasta_seq_gen *fsg;
     struct fasta_seq *seq;
@@ -41,7 +38,6 @@ main(int argc, char **argv)
     uint64_t last_end;
     int overlap;
     struct cb_link_to_coarse *link;
-
 
     FILE *compressed_file;
     struct cb_compressed_seq **compressed;
@@ -68,7 +64,7 @@ main(int argc, char **argv)
     coarse_sequences = malloc(10000*sizeof(*coarse_sequences));
     assert(coarse_sequences);
 
-    fsg = fasta_generator_start(path_join(args->args[0],CABLAST_COARSE_FASTA),
+    fsg = fasta_generator_start(path_join(args->args[0], CABLAST_COARSE_FASTA),
                                 FASTA_EXCLUDE_NCBI_BLOSUM62, 100);
     while (NULL != (seq = fasta_generator_next(fsg)))
         coarse_sequences[num_coarse_sequences++] = seq;
@@ -97,7 +93,6 @@ main(int argc, char **argv)
             /*Print all characters of the decompressed chunk past the index
               "overlap" unless overlap is greater than the length of the
               decompressed chunk.*/
-
             decompressed += overlap;
             if (overlap < link->original_end - link->original_start)
                 printf("%s", decompressed);
@@ -115,7 +110,7 @@ main(int argc, char **argv)
     }
 
     fasta_generator_free(fsg);
-    for(i = 0; i < num_coarse_sequences; i++)
+    for (i = 0; i < num_coarse_sequences; i++)
         free(coarse_sequences[i]);
     free(coarse_sequences);
 

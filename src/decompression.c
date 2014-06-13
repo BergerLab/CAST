@@ -28,8 +28,8 @@ struct cb_seq *cb_decompress_seq(struct cb_compressed_seq *cseq,
     char *residues = NULL;
 
     for (link = cseq->links; link != NULL; link = link->next) {
-        struct fasta_seq *chunk = cb_coarse_read_fasta_seq(coarsedb,
-                                                           link->coarse_seq_id);
+        struct fasta_seq *chunk =
+          cb_coarse_read_fasta_seq(coarsedb, link->coarse_seq_id);
         int length, coarse_len = link->coarse_end - link->coarse_start;
         char *dec_chunk;
 
@@ -84,8 +84,10 @@ struct cb_seq *cb_decompress_seq(struct cb_compressed_seq *cseq,
     }
     residues[copied] = '\0';
     seq = cb_seq_init(cseq->id, cseq->name, residues);
+
     ds_vector_free(decompressed_chunks);
     free(residues);
+
     return seq;
 }
 
