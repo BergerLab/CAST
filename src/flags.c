@@ -82,7 +82,7 @@ struct opt_config *load_compress_args(){
         "The minimum total length of an extension after running attempt_ext in "
         "both directions needed to call extend_match.");
     opt_flag_int(conf,
-        &compress_flags.attempt_ext_len, "notify-every", 1000,
+        &compress_flags.notify_every, "notify-every", 1000,
         "Sets how many sequences to compress for each notification of how many "
         "sequences have been compressed so far.");
 
