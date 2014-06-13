@@ -67,6 +67,10 @@ void cb_link_to_coarse_free(struct cb_link_to_coarse *link){
     }
 }
 
+/*Takes in a link_to_coarse and gets its coarse sequence ID, its indices, and
+ *the length of its edit script, which are returned in a
+ *cb_link_to_coarse_get_data struct.
+ */
 struct cb_link_to_coarse_data *
 cb_link_to_coarse_get_data(struct cb_link_to_coarse *link){
     struct cb_link_to_coarse_data *data = malloc(sizeof(*data));
@@ -85,6 +89,8 @@ cb_link_to_coarse_get_data(struct cb_link_to_coarse *link){
     return data;
 }
 
+/*Takes in a cb_link_to_coarse_get_data struct and an edit script and uses them
+  to create a new cb_link_to_coarse struct.*/
 struct cb_link_to_coarse *
 cb_link_to_coarse_from_data(struct cb_link_to_coarse_data *data, char *diff){
     struct cb_link_to_coarse *link = malloc(sizeof(*link));
