@@ -137,9 +137,8 @@ char *half_bytes_to_ASCII(char *half_bytes, int length){
 char *make_edit_script(char *str, char *ref, bool dir, int length){
     /*direction has its first bit set to 1 to indicate that the edit script
       was made from a match*/
-    int last_edit = 0, current = 1, i, j;
-    char *edit_script, *octal,
-         direction = (dir ? '0' : '1');
+    int i, j, last_edit = 0, current = 1;
+    char *edit_script, *octal, direction = dir ? '0' : '1';
     bool insert_open = false, subdel_open = false;
 
     edit_script = malloc(3*length*sizeof(*edit_script));

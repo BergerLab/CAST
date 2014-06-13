@@ -256,6 +256,7 @@ void cb_compressed_write_binary(struct cb_compressed *com_db,
         /*Output link_data in binary format*/        
         fwrite(link_data, sizeof(*link_data), 1, com_db->file_compressed);
 
+printf("-%d %s\n", script_length, edit_script);
         /*Output all of the characters of the edit script as half-bytes*/
         fwrite(script, sizeof(*script),
                script_length/2+odd, com_db->file_compressed);

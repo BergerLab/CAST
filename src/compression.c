@@ -127,7 +127,7 @@ static void *cb_compress_worker(void *data){
 
 struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
-             struct cb_align_nw_memory *mem){
+            struct cb_align_nw_memory *mem){
     struct extend_match_with_res mseqs_fwd, mseqs_rev;
     struct cb_coarse_seq *coarse_seq;
     struct cb_compressed_seq *cseq =
@@ -143,8 +143,10 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             max_section_size = max_chunk_size * 2,
             overlap          = compress_flags.overlap,
             start_of_section = 0,
-            end_of_chunk     = start_of_section + max_chunk_size,
-            end_of_section   = start_of_section + max_section_size;
+            end_of_chunk     = min(start_of_section + max_chunk_size,
+                                   org_seq->length - ext_seed),
+            end_of_section   = min(start_of_section + max_section_size,
+                                   org_seq->length - ext_seed);
     char *kmer, *revcomp;
     bool *matches, *matches_temp, found_match;
 
@@ -525,12 +527,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                                   end_of_chunk);
 
             cb_compressed_seq_addlink(cseq, cb_link_to_coarse_init_nodiff(
-                                               new_coarse_seq_id,
-                                               start_of_section,
-                                               end_of_chunk - 1, 0,
-                                               end_of_chunk -
-                                                 start_of_section - 1,
-                                               true));
+                                              new_coarse_seq_id,
+                                              start_of_section,
+                                              end_of_chunk - 1, 0,
+                                              end_of_chunk -
+                                                start_of_section - 1,
+                                              true));
 
             if (end_of_chunk < org_seq->length - seed_size - ext_seed - 1) {
                 start_of_section = end_of_chunk - overlap;
@@ -560,10 +562,8 @@ extend_match_with_res(struct cb_align_nw_memory *mem,
     struct cb_alignment alignment;
     struct extend_match_with_res mseqs;
     struct ungapped_alignment ungapped;
-    int32_t rlen, olen, i, j, m,
-            matches_count, matches_index, max_section_size,
-            rseq_len = 0, oseq_len = 0,
-            dir_prod = dir1 * dir2;
+    int32_t rlen, olen, i, j, m, matches_count, matches_index, max_section_size,
+            rseq_len = 0, oseq_len = 0, dir_prod = dir1 * dir2;
     bool *matches, *matches_past_clump;
     bool found_bad_window;
 

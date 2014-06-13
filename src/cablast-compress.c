@@ -69,7 +69,7 @@ int main(int argc, char **argv){
                 org_seq_id % compress_flags.notify_every == 0) {
                 gettimeofday(&current, NULL);
                 elapsed = (long double)(current.tv_sec - start.tv_sec);
-                printf("%d sequences compressed (%0.4Lf seqs/sec)\n",
+                fprintf(stderr, "%d sequences compressed (%0.4Lf seqs/sec)\n",
                   org_seq_id, ((long double) org_seq_id) / elapsed);
             }
         }

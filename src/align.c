@@ -39,8 +39,7 @@ struct ungapped_alignment
 cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
                   int32_t i1, char *oseq, int32_t ostart, int32_t oend,
                   int32_t dir2, int32_t i2, bool *matches,
-                  bool *matches_past_clump, int *matches_index)
-{
+                  bool *matches_past_clump, int *matches_index){
     int32_t i;
     int32_t dir_prod = dir1 * dir2;
     int32_t rlen = rend - rstart, olen = oend - ostart;
@@ -102,9 +101,7 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
 }
 
 /*Initialization function for creating a cb_align_nw_memory data structure*/
-struct cb_align_nw_memory *
-cb_align_nw_memory_init()
-{
+struct cb_align_nw_memory *cb_align_nw_memory_init(){
     struct cb_align_nw_memory *mem;
     int seq_size = CABLAST_ALIGN_SEQ_SIZE;
 
@@ -127,8 +124,7 @@ cb_align_nw_memory_init()
 }
 
 /*Function for freeing a cb_align_nw_memory data structure*/
-void
-cb_align_nw_memory_free(struct cb_align_nw_memory *mem)
+void cb_align_nw_memory_free(struct cb_align_nw_memory *mem)
 {
     free(mem->zeroes);
     free(mem->table);
@@ -143,10 +139,8 @@ cb_align_nw_memory_free(struct cb_align_nw_memory *mem)
  *struct containing a table of the scores in the alignment and a table of
  *directions for backtracking to the start of the alignment.
  */
-struct cb_nw_tables
-make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
-               char *oseq, int dp_len2, int i2, int dir2)
-{
+struct cb_nw_tables make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
+                                   char *oseq, int dp_len2, int i2, int dir2){
     struct cb_nw_tables tables;
     int i, j1, j2;
     int dir_prod = dir1*dir2;
@@ -204,8 +198,7 @@ make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
  *table with the best score, returning it as an array of two ints.
  */
 int *best_edge(int **dp_score, int dp_len1, int dp_len2){
-    int j1, j2;
-    int max_dp_score = -1000;
+    int j1, j2, max_dp_score = -1000;
 
     int *best = malloc(2*sizeof(*best));
     assert(best);
@@ -226,10 +219,10 @@ int *best_edge(int **dp_score, int dp_len1, int dp_len2){
 }
 
 int *backtrack_to_clump(struct cb_nw_tables tables, int *pos){
-    int consec_matches = 0;
-    int **dp_score = tables.dp_score;
-    int **dp_from = tables.dp_from;
-    int consec_match_clump_size = compress_flags.consec_match_clump_size;
+    int consec_matches = 0,
+        **dp_score = tables.dp_score,
+        **dp_from  = tables.dp_from,
+        consec_match_clump_size = compress_flags.consec_match_clump_size;
 
     while (!(pos[0] == 0 && pos[1] == 0)) {
         int prev_j1, prev_j2;
@@ -279,12 +272,10 @@ int *backtrack_to_clump(struct cb_nw_tables tables, int *pos){
  *@return: The aligned sequences from a Needleman-Wunsch alignment of the two
  *  sequences and the length of the alignment in a cb_alignment struct.
  */
-struct cb_alignment
-cb_align_nw(struct cb_align_nw_memory *mem,
-             char *rseq, int dp_len1, int i1, int dir1,
-             char *oseq, int dp_len2, int i2, int dir2,
-             bool *matches, int *matches_index)
-{
+struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
+                                char *rseq, int dp_len1, int i1, int dir1,
+                                char *oseq, int dp_len2, int i2, int dir2,
+                                bool *matches, int *matches_index){
     struct cb_alignment align;
     int cur_j1, cur_j2;
     bool *matches_to_add;
