@@ -128,6 +128,7 @@ static void *cb_compress_worker(void *data){
 struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             struct cb_align_nw_memory *mem){
+printf("\nsequence #%d\n", org_seq->id+1);
     struct extend_match mseqs_fwd, mseqs_rev;
     struct cb_coarse_seq *coarse_seq;
     struct cb_compressed_seq *cseq =
@@ -186,7 +187,9 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                      org_seq->length - ext_seed);
                 end_of_section = min(start_of_section + max_section_size,
                                      org_seq->length - ext_seed);
+/*printf("%d->", current);*/
                 current        = start_of_section-1;
+/*printf("%d\n", current);*/
             }
             chunks++;
             continue;
@@ -334,17 +337,19 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                         true));
 
                 /*Update the current position in the sequence*/
-                if (current + fwd_olen < org_seq->length-seed_size-ext_seed-1)
+                if (current + fwd_olen <= org_seq->length-seed_size-ext_seed-1)
                     start_of_section = current + fwd_olen -
                                        compress_flags.overlap + seed_size;
                 else
                     start_of_section = current + fwd_olen + seed_size;
 
+/*printf("%d, fwd_olen = %d->", current, fwd_olen);*/
                 current        = start_of_section - 1;
                 end_of_chunk   = min(start_of_section + max_chunk_size,
                                      org_seq->length-ext_seed);
                 end_of_section = min(start_of_section + max_section_size,
                                      org_seq->length-ext_seed);
+/*printf("%d\n", current);*/
 
                 chunks++;
 
@@ -490,16 +495,18 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                         false));
 
                 /*Update the current position in the sequence*/
-                if (current + rev_olen < org_seq->length-seed_size-ext_seed-1)
+                if (current + rev_olen <= org_seq->length-seed_size-ext_seed-1)
                     start_of_section = current + rev_olen -
                                        compress_flags.overlap + seed_size;
                 else
                     start_of_section = current + rev_olen + seed_size;
+/*printf("%d, rev_olen = %d->", current, rev_olen);*/
                 current        = start_of_section - 1;
                 end_of_chunk   = min(start_of_section + max_chunk_size,
                                      org_seq->length-ext_seed);
                 end_of_section = min(start_of_section + max_section_size,
                                      org_seq->length-ext_seed);
+/*printf("%d\n", current);*/
 
                 chunks++;
 
@@ -540,11 +547,14 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                        org_seq->length - ext_seed);
                 end_of_section   = min(start_of_section + max_section_size,
                                        org_seq->length - ext_seed);
+/*printf("%d->", current);*/
                 current          = start_of_section - 1;
+/*printf("%d\n", current);*/
             }
             chunks++;
         }
     }
+/*printf("index at end: %d\n", current);*/
 
     free(matches);
     free(matches_temp);
@@ -738,6 +748,7 @@ static int32_t add_without_match(struct cb_coarse *coarse_db,
     struct cb_link_to_compressed *link = NULL;
     struct cb_coarse_seq *coarse_seq =
       cb_coarse_add(coarse_db, org_seq->residues, ostart, oend);
+/*printf("%s\n", coarse_seq->seq->residues);*/
     cb_coarse_seq_addlink(coarse_seq,
       cb_link_to_compressed_init(org_seq->id, 0, oend - ostart - 1,
                                  ostart, oend - 1, true));
