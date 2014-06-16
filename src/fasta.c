@@ -76,7 +76,6 @@ struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     }
 
     line = trim(line, "> \n\r\t");
-
     fs = malloc(sizeof(*fs));
     assert(fs);
 

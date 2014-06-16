@@ -231,7 +231,7 @@ void cb_compressed_write_binary(struct cb_compressed *com_db,
     fwrite(&index, sizeof(index), 1, com_db->file_index);
 
     /*Output the header for the sequence*/
-    sprintf(id_string, "> %ld; %s\n", seq->id, seq->name);
+    sprintf(id_string, ">%s\n", seq->name);
     fputs(id_string, com_db->file_compressed);
 
     free(id_string);
@@ -333,7 +333,7 @@ char *get_compressed_header(FILE *f){
     while (c != EOF && (char)c != '\n') {
         chars_read++;
         c = getc(f);
-        if (c != EOF && (char)c != '\n' && chars_read > 2) {
+        if (c != EOF && (char)c != '\n' && chars_read > 1) {
             header[i] = (char)c;
             i++;
             if (i == header_length-1) {

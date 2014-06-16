@@ -70,7 +70,7 @@ int main(int argc, char **argv){
     for (i = 0; compressed[i] != NULL; i++) {
         int current_chunk = 0;
         last_end = 0;
-        printf("> %s\n", compressed[i]->name);
+        printf(">%s\n", compressed[i]->name);
         for (link = (compressed[i])->links; link != NULL; link = link->next) {
             struct cb_seq *chunk =
               cb_seq_init_range(-1, "",
