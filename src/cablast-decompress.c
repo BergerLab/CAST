@@ -19,7 +19,7 @@
 static char *path_join(char *a, char *b){
     char *joined;
 
-    joined = malloc((1 + strlen(a) + 1 + strlen(b)) * sizeof(*joined));
+    joined = malloc((1+strlen(a)+1+strlen(b))*sizeof(*joined));
     assert(joined);
 
     sprintf(joined, "%s/%s", a, b);
@@ -45,9 +45,8 @@ int main(int argc, char **argv){
 
     struct opt_args *args = opt_config_parse(conf, argc, argv);
     if (args->nargs < 2) {
-        fprintf(stderr, 
-            "Usage: %s [flags] database-dir output-fasta-file\n",
-            argv[0]);
+        fprintf(stderr, "Usage: %s [flags] database-dir output-fasta-file\n",
+                argv[0]);
         exit(1);
     }
 
@@ -80,11 +79,16 @@ int main(int argc, char **argv){
             int length;
             char *decompressed;
 
-
             /*overlap represents the length of the overlap of the parts of the
               decompressed sequence that has been printed and the parts of the
               decompressed sequence currently being decompressed.*/
             overlap = last_end - link->original_start;
+
+/*printf("\n%ld %ld...%d %d, last_end = %lu, overlap = %d\n-%s\n=%s\n\n",
+       link->original_start, link->original_end,
+       link->coarse_start, link->coarse_end, last_end, overlap,
+       coarse_sequences[link->coarse_seq_id]->seq, chunk->residues);*/
+
 
             for (length = 0; chunk->residues[length] != '\0'; length++);
 
@@ -94,7 +98,8 @@ int main(int argc, char **argv){
               "overlap" unless overlap is greater than the length of the
               decompressed chunk.*/
             decompressed += overlap;
-            if (overlap < link->original_end - link->original_start)
+            if (overlap < link->original_end - link->original_start ||
+                overlap == link->original_end - link->original_start && !link->next)
                 printf("%s", decompressed);
             decompressed -= overlap;
             free(decompressed);
