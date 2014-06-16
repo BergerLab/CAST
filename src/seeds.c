@@ -209,7 +209,7 @@ char *unhash_kmer(struct cb_seeds *seeds, int hash){
 void print_seeds(struct cb_seeds *seeds){
     int32_t i, j;
 
-    char *kmer = malloc(seeds->seed_size * sizeof(*kmer));
+    char *kmer = malloc(seeds->seed_size*sizeof(*kmer));
     assert(kmer);
 
     for (i = 0; i < seeds->locs_length; i++) {

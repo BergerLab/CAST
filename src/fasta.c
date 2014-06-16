@@ -34,14 +34,14 @@ struct fasta_file *fasta_read_all(const char *file_name, const char *exclude){
 
     allocated = FASTA_INITIAL_SEQUENCE_LENGTH;
 
-    ff->seqs = malloc(allocated * sizeof(*ff->seqs));
+    ff->seqs = malloc(allocated*sizeof(*ff->seqs));
     assert(ff->seqs);
 
     while (NULL != (new_seq = fasta_read_next(f, exclude))) {
         if (ff->length == allocated) {
             allocated *= 1.5;
 
-            ff->seqs = realloc(ff->seqs, allocated * sizeof(*ff->seqs));
+            ff->seqs = realloc(ff->seqs, allocated*sizeof(*ff->seqs));
             assert(ff->seqs);
         }
         ff->seqs[ff->length++] = new_seq;
@@ -80,7 +80,7 @@ struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     fs = malloc(sizeof(*fs));
     assert(fs);
 
-    fs->name = malloc((strlen(line) + 1) * sizeof(*fs->name));
+    fs->name = malloc((strlen(line)+1)*sizeof(*fs->name));
     assert(fs->name);
 
     strcpy(fs->name, line);

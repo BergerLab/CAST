@@ -28,7 +28,11 @@ cb_coarse_init(int32_t seed_size,
     assert(coarse_db);
 
     coarse_db->seqs   = ds_vector_create_capacity(10000000);
+
+    /*Only create a seeds table if we are using this coarse database for
+      compression.*/
     coarse_db->seeds  = read ? NULL : cb_seeds_init(seed_size);
+
     coarse_db->dbsize = (uint64_t)0;
 
     /*Initialize the file pointers*/
@@ -173,8 +177,7 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
         base_index += strlen(seq->seq->residues);
     }
 
-    fwrite(&base_index, sizeof(base_index), 1,
-           coarse_db->file_fasta_base_index);
+    fwrite(&base_index,sizeof(base_index),1,coarse_db->file_fasta_base_index);
 
     output_int_to_file(coarse_db->dbsize, 8, coarse_db->file_params);
     putc('\n', coarse_db->file_params);
@@ -444,7 +447,6 @@ struct DSVector *read_coarse_links(FILE *f, int64_t num_links){
   and returns the byte offset of the sequence in its database file.*/
 int64_t cb_coarse_find_offset(FILE *index_file, int id){
     int64_t mask = make_mask(8), offset = (int64_t)(-1), try_off = id * 8;
-    int32_t i;
     bool fread_success, fseek_success = fseek(index_file,try_off,SEEK_SET) == 0;
 
     if (!fseek_success) {

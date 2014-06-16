@@ -12,9 +12,7 @@ char *trim_space(char *s){
 }
 
 char *trim(char *s, const char *totrim){
-    int32_t i, j,
-            start, end,
-            slen, totrimlen, newlen;
+    int32_t i, j, start, end, slen, totrimlen, newlen;
     char *news;
     bool trimmed;
 
@@ -34,7 +32,7 @@ char *trim(char *s, const char *totrim){
             break;
     }
 
-    end = slen - start;
+    /*end = slen - 1;*/
     for (i = slen - 1; i >= 0; i--) {
         trimmed = false;
         for (j = 0; j < totrimlen; j++)
@@ -45,6 +43,7 @@ char *trim(char *s, const char *totrim){
         if (!trimmed)
             break;
     }
+    end = i+1;
 
     newlen = (end >= start) ? (end - start) : 0;
 

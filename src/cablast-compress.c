@@ -17,11 +17,10 @@
 #include "seq.h"
 #include "util.h"
 
-static char *path_join(char *a, char *b)
-{
+static char *path_join(char *a, char *b){
     char *joined;
 
-    joined = malloc((1 + strlen(a) + 1 + strlen(b)) * sizeof(*joined));
+    joined = malloc((1+strlen(a)+1+strlen(b))*sizeof(*joined));
     assert(joined);
 
     sprintf(joined, "%s/%s", a, b);
