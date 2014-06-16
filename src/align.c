@@ -40,13 +40,10 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
                   int32_t i1, char *oseq, int32_t ostart, int32_t oend,
                   int32_t dir2, int32_t i2, bool *matches,
                   bool *matches_past_clump, int *matches_index){
-    int32_t i;
-    int32_t dir_prod = dir1 * dir2;
-    int32_t rlen = rend - rstart, olen = oend - ostart;
-    int32_t matches_count = 0,
+    int32_t i = 0, dir_prod = dir1 * dir2, matches_count = 0,
             consec_match_clump_size = compress_flags.consec_match_clump_size,
-            matches_since_last_consec = 0, temp_index = 0;
-    int32_t length = 0, scanned = 0, successive = consec_match_clump_size;
+            matches_since_last_consec = 0, temp_index = 0,
+            length = 0, scanned = 0, successive = consec_match_clump_size;
 
     struct ungapped_alignment ungapped;
     ungapped.length = -1;

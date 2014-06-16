@@ -54,8 +54,8 @@ int main(int argc, char **argv){
     org_seq_id = 0;
     gettimeofday(&start, NULL);
     for (i = 1; i < args->nargs; i++) {
-        fsg = fasta_generator_start(
-          args->args[i], FASTA_EXCLUDE_NCBI_BLOSUM62, 100);
+        fsg = fasta_generator_start(args->args[i],
+                                    FASTA_EXCLUDE_NCBI_BLOSUM62, 100);
 
         while (NULL != (seq = fasta_generator_next(fsg))) {
             org_seq = cb_seq_init(org_seq_id, seq->name, seq->seq);
@@ -69,7 +69,7 @@ int main(int argc, char **argv){
                 gettimeofday(&current, NULL);
                 elapsed = (long double)(current.tv_sec - start.tv_sec);
                 fprintf(stderr, "%d sequences compressed (%0.4Lf seqs/sec)\n",
-                  org_seq_id, ((long double) org_seq_id) / elapsed);
+                                org_seq_id, ((long double)org_seq_id)/elapsed);
             }
         }
 

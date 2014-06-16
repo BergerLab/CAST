@@ -12,11 +12,11 @@
 #include "database.h"
 #include "fasta.h"
 
-static FILE * open_db_file(char *path, char *fopen_mode);
+static FILE *open_db_file(char *path, char *fopen_mode);
 
-static char * path_join(char *a, char *b);
+static char *path_join(char *a, char *b);
 
-static char * basename(char *path);
+static char *basename(char *path);
 
 /*@param dir: The name of the directory to store the database in
  *@param seed_size: The size of the k-mers in the database
@@ -52,12 +52,11 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
 
     /* If we're not adding to a database, make sure `dir` does not exist. */
     if (!add && 0 == stat(dir, &buf)) {
-        /* fprintf(stderr, */
-            /* "The directory '%s' already exists. A new compressed " */
-            /* "database cannot be created in the same directory as an " */
-            /* "existing database. If you want to append to an existing " */
-            /* "database, use the '--append' flag.\n", dir); */
-        /* exit(1); */
+        fprintf(stderr,
+                "The directory '%s' already exists. A new compressed "
+                "database cannot be created in the same directory as an "
+                "existing database.\n", dir);
+        exit(1); 
 
         /* Just for testing purposes. */
         unlink(pfasta);
