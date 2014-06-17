@@ -691,11 +691,13 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
         links_to_read = max_index - min_index;
 
         fseek_success =
-          fseek(coarse_db->db->file_links, min_index*sizeof(*link), SEEK_SET) == 0;
+          fseek(coarse_db->db->file_links,
+                min_index*sizeof(*link), SEEK_SET) == 0;
         if (!fseek_success)
             fprintf(stderr, "Error in seeking to link %d\n", min_index);
 
-        for (i = j = 0; i < indices->size && j < block->size; i++) {
+        j = 0;
+        for (i = min_index; i <= max_index && j < block->size; i++) {
             link = malloc(sizeof(*link));
             assert(link);
 
@@ -703,8 +705,7 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
                                   1, coarse_db->db->file_links) == 1;
             assert(fread_success);
 
-            if (*(int32_t*)ds_vector_get(indices, i) ==
-                  *(int32_t*)ds_vector_get(block, j)) {
+            if (i == *(int32_t*)ds_vector_get(block, j)) {
                 ds_vector_append(links, link);
                 j++;
             }

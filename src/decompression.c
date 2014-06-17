@@ -124,10 +124,11 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
         /*Indices in the current block*/
         struct DSVector *ind_block =
           (struct DSVector *)ds_vector_get(coarse_db->link_inds_by_block, i);
-
+printf("block %d: %d\n", i, link_block->size);
         for (j = 0; j < link_block->size; j++){
             struct cb_link_to_compressed_data *link =
               (struct cb_link_to_compressed_data *)ds_vector_get(link_block, j);
+printf("    %d %d\n", link->coarse_start, link->coarse_end);
             int64_t link_ind     = *(int64_t *)ds_vector_get(ind_block, j),
                     coarse_start = link->coarse_start,
                     coarse_end   = link->coarse_end;
@@ -198,7 +199,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
                                            original_start, coarse_db, current);
                 }
                 orig_str[original_range] = '\0';
-printf("%s\n", orig_str);
+/*printf("%s\n", orig_str);*/
                 expansion = malloc(sizeof(*expansion));
                 assert(expansion);
 
