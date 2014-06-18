@@ -406,9 +406,7 @@ struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
 }
 
 /*Returns the number of non-gap characters in a string*/
-int32_t
-cb_align_length_nogaps(char *residues)
-{
+int32_t cb_align_length_nogaps(char *residues){
     int i = 0, len = 0, rlen = strlen(residues);
     for (i = 0; i < rlen; i++)
         if (residues[i] != '-')
@@ -417,6 +415,15 @@ cb_align_length_nogaps(char *residues)
     return len;
 }
 
+/*@param i1 and i2: Indices in two DNA sequences
+ *@param dir1 and dir2: Directions of the sequences (1 = forward, -1 = reverse)
+ *@param s1 and s2: The strings containing the DNA sequences
+ *@param len1 and len2: The lengths of the sequences
+ *@param start1 and start2: The starting indices of the sequences
+ *
+ *Determines the number of bases on the sequences that can be traversed without
+ *finding max_consec_mismatch (default 3) consecutive base mismatches
+ */
 int32_t
 attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
             int32_t start1, int32_t i2, const int32_t dir2, const char *s2,
@@ -477,6 +484,11 @@ int check_and_update(bool *matches, int *matches_index, int *num_matches,
 
 int min(int a, int b){return a<b?a:b;}
 
+/*Takes in an index in a DNA sequence, a direction, and the length of the
+ *sequence and returns either 25 or the number of residues left in the sequence
+ *in that direction for determining the number of residues in the sequence to be
+ *used in Needleman-Wunsch alignment.
+ */
 int max_dp_len(int i, int dir, int len){
     return dir == 1 ? min(25, len-i) : min(25, i+1);
 }
