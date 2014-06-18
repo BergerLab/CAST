@@ -33,12 +33,12 @@ struct cb_database_r {
 struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add);
 
 struct cb_database_r *
-cb_database_read_init(char *dir, int32_t seed_size,
-                      bool load_coarse_residues, bool load_coarse_links,
-                      bool load_compressed_db, int32_t link_block_size);
+cb_database_r_init(char *dir, int32_t seed_size,
+                   bool load_coarse_residues, bool load_coarse_links,
+                   bool load_compressed_db, int32_t link_block_size);
 
 void cb_database_free(struct cb_database *db);
 
-void cb_database_read_free(struct cb_database_r *db);
+void cb_database_r_free(struct cb_database_r *db);
 
 #endif

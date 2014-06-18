@@ -4,9 +4,9 @@ work like Po-Ru Loh's version of the code, which can be found in a prototype at
 http://cast.csail.mit.edu/.
 
 The compressed databases created by this code are not in any way compatible 
-with the compressed databases produced by the official implementation. Namely, 
-the data itself should be the same (or similar), but its representation on disk 
-is completely different. There may be other, subtler differences as well.
+with the compressed databases produced by the C++ implementation. Namely, the
+data itself should be the same (or similar), but its representation on disk is
+completely different. There may be other, subtler differences as well.
 
 **This code is currently under development.**
 
@@ -42,12 +42,3 @@ The usage of `cablast-compress` is:
 ```bash
 cablast-compress [flags] database-directory fasta-file [fasta-file ...]
 ```
-
-
-Current progress:  Can compress and decompress two same-direction matches, two reverse-complement matches,
-one same-direction match and one reverse-complement match, and two matches that are at least one chunk
-apart.  On real test data, can currently compress and decompress all 9997 Brucella sequences from the test
-file, producing as output coarse FASTA files, links tables, and seeds tables that perfectly match these data
-in Po-Ru Loh's C++ version of the code, and the order of sequences does not affect whether or not compression
-and decompression work correctly.  Hit expansion and fine BLAST currently produce coarse BLAST hit expansions
-that are identical to Po-Ru's and fine BLAST hits at the same locations as in Po-Ru's code.

@@ -79,7 +79,6 @@ int main(int argc, char **argv){
     cb_compress_join_workers(workers);
     cb_coarse_save_binary(db->coarse_db);
     cb_coarse_save_seeds_binary(db->coarse_db);
-    cb_compressed_save_binary(db->com_db);
 
     coarse_filename = path_join(args->args[0], "coarse.fasta");
     len_command = strlen("makeblastdb -dbtype nucl -in  -out") + 2

@@ -140,9 +140,9 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
  *Loads a CaBLAST database for reading
  */
 struct cb_database_r *
-cb_database_read_init(char *dir, int32_t seed_size,
-                      bool load_coarse_residues, bool load_coarse_links,
-                      bool load_compressed_db, int32_t link_block_size){
+cb_database_r_init(char *dir, int32_t seed_size,
+                   bool load_coarse_residues, bool load_coarse_links,
+                   bool load_compressed_db, int32_t link_block_size){
     struct cb_database_r *db;
     struct stat buf;
     FILE *ffasta, *fseeds, *flinks, *fcompressed, *findex_coarse_links,
@@ -216,7 +216,7 @@ void cb_database_free(struct cb_database *db){
 
 /*Freeing function for a cb_database_r.  Frees the database and its coarse and
   compressed databases and closes its files.*/
-void cb_database_read_free(struct cb_database_r *db){
+void cb_database_r_free(struct cb_database_r *db){
     /* All files opened in cb_database_init are closed in subsequent frees. */
     cb_coarse_r_free(db->coarse_db);
     cb_compressed_free(db->com_db);

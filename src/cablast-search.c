@@ -359,13 +359,13 @@ int main(int argc, char **argv){
 
     if (!search_flags.hide_progress)
         fprintf(stderr, "Loading database data\n\n");
-    db = cb_database_read_init(args->args[0], search_flags.map_seed_size,
-                               (search_flags.load_coarse_db ||
-                                search_flags.load_coarse_residues),
-                               (search_flags.load_coarse_db ||
-                                search_flags.load_coarse_links),
-                               search_flags.load_compressed_db,
-                               search_flags.link_block_size);
+    db = cb_database_r_init(args->args[0], search_flags.map_seed_size,
+                            (search_flags.load_coarse_db ||
+                             search_flags.load_coarse_residues),
+                            (search_flags.load_coarse_db ||
+                             search_flags.load_coarse_links),
+                            search_flags.load_compressed_db,
+                            search_flags.link_block_size);
     dbsize = read_int_from_file(8, db->coarse_db->db->file_params);
 
     if (!search_flags.hide_progress)
@@ -497,7 +497,7 @@ int main(int argc, char **argv){
         }
     }
 
-    cb_database_read_free(db);
+    cb_database_r_free(db);
     xmlFreeDoc(doc);
 
     /*Free the coarse BLAST results file if the --no-cleanup flag is not being
