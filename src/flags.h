@@ -28,6 +28,7 @@ struct compress_flags {
     float   btwn_match_ident_thresh;
     int32_t attempt_ext_len;
     int32_t notify_every;
+    int32_t max_consec_mismatch;
 } compress_flags;
 
 struct search_flags {

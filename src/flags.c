@@ -86,6 +86,10 @@ struct opt_config *load_compress_args(){
         "Sets how many sequences to compress for each notification of how many "
         "sequences have been compressed so far.  Pass in 0 to disable "
         "notifications entirely.");
+    opt_flag_int(conf,
+        &compress_flags.max_consec_mismatch, "max-consec-mismatch", 3,
+        "The number of consecutive mismatches to find before exiting "
+        "attempt_ext.");
 
     return conf;
 }

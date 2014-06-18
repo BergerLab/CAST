@@ -420,16 +420,14 @@ cb_align_length_nogaps(char *residues)
 int32_t
 attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
             int32_t start1, int32_t i2, const int32_t dir2, const char *s2,
-            int32_t len2, int32_t start2)
-{
+            int32_t len2, int32_t start2){
     const int32_t dir_prod = dir1*dir2;
     int32_t progress = 0, consec_mismatch = 0;
 
     i1 += dir1;
     i2 += dir2;
 
-    /*Replace this 3 with the flag for max_consec_mismatch*/
-    while (consec_mismatch < 3 &&
+    while (consec_mismatch < compress_flags.max_consec_mismatch &&
            i1 >= start1 && i1 < start1+len1 &&
            i2 >= start2 && i2 < start2+len2) {
         if (!bases_match(s1[i1], s2[i2], dir_prod))
@@ -460,14 +458,17 @@ attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
 int check_and_update(bool *matches, int *matches_index, int *num_matches,
                      bool *temp, int temp_index){
     int i;
+
     for (i = 0; i < temp_index; i++) {
         int hundred_bases_ago = *matches_index - 100;
+
         matches[(*matches_index)] = temp[i];
         if (temp[i])
             (*num_matches)++;
         if (matches[hundred_bases_ago])
             (*num_matches)--;
         (*matches_index)++;
+
         if (*num_matches < 85)
             return i;
     }
