@@ -39,9 +39,6 @@ struct cb_coarse {
     /*The FASTA file of the residues of each sequence in the coarse database*/
     FILE *file_fasta;
 
-    /*Binary representation of the seeds for each k-mer*/
-    FILE *file_seeds;
-
     /*The links to the compressed sequences in each coarse sequence*/
     FILE *file_links;
 
@@ -68,7 +65,7 @@ struct cb_coarse {
 
 struct cb_coarse *
 cb_coarse_init(int32_t seed_size,
-               FILE *file_fasta, FILE *file_seeds, FILE *file_links,
+               FILE *file_fasta, FILE *file_links,
                FILE *file_links_index, FILE *file_links_base_index,
                FILE *file_links_count_index, FILE *file_fasta_index,
                FILE *file_fasta_base_index, FILE *file_params, bool read);
@@ -82,8 +79,6 @@ struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db, int32_t i);
 
 void cb_coarse_save_binary(struct cb_coarse *coarse_db);
 void cb_coarse_save_plain(struct cb_coarse *coarse_db);
-void cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db);
-void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db);
 
 struct cb_link_to_compressed_data *read_coarse_link_data(FILE *f);
 struct DSVector *read_coarse_links(FILE *f, int64_t num_links);
@@ -105,7 +100,7 @@ struct cb_coarse_r {
 
 struct cb_coarse_r *
 cb_coarse_r_init(int32_t seed_size,
-                 FILE *file_fasta, FILE *file_seeds, FILE *file_links,
+                 FILE *file_fasta, FILE *file_links,
                  FILE *file_links_index, FILE *file_links_base_index,
                  FILE *file_links_count_index, FILE *file_fasta_index,
                  FILE *file_fasta_base_index, FILE *file_params,

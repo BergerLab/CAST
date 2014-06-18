@@ -18,7 +18,7 @@
  */
 struct cb_coarse *
 cb_coarse_init(int32_t seed_size,
-               FILE *file_fasta, FILE *file_seeds, FILE *file_links,
+               FILE *file_fasta, FILE *file_links,
                FILE *file_links_index, FILE *file_links_base_index,
                FILE *file_links_count_index, FILE *file_fasta_index,
                FILE *file_fasta_base_index, FILE *file_params, bool read){
@@ -37,7 +37,6 @@ cb_coarse_init(int32_t seed_size,
 
     /*Initialize the file pointers*/
     coarse_db->file_fasta             = file_fasta;
-    coarse_db->file_seeds             = file_seeds;
     coarse_db->file_links             = file_links;
     coarse_db->file_links_base_index  = file_links_base_index;
     coarse_db->file_links_count_index = file_links_count_index;
@@ -61,7 +60,6 @@ void cb_coarse_free(struct cb_coarse *coarse_db){
     int32_t i;
 
     fclose(coarse_db->file_fasta);
-    fclose(coarse_db->file_seeds);
     fclose(coarse_db->file_links);
     fclose(coarse_db->file_links_index);
     fclose(coarse_db->file_links_base_index);
@@ -202,70 +200,6 @@ void cb_coarse_save_plain(struct cb_coarse *coarse_db){
               link->data->org_seq_id, link->data->coarse_start,
               link->data->coarse_end, (link->data->dir?'0':'1'));
         }
-    }
-}
-
-/*Takes in the coarse database and saves its seeds table in a binary format.*/
-void cb_coarse_save_seeds_binary(struct cb_coarse *coarse_db){
-    struct cb_coarse_seq *seq;
-    int32_t i, j;
-    uint32_t mask = (uint32_t)3;
-    char *kmer;
-
-    for (i = 0; i < coarse_db->seeds->locs_length; i++) {
-        struct cb_seed_loc *loc;
-        kmer = unhash_kmer(coarse_db->seeds, i);
-
-        loc = cb_seeds_lookup(coarse_db->seeds, kmer);
-
-        if (loc) {
-            struct cb_seed_loc *loc_first = loc;
-            output_int_to_file(i, 4, coarse_db->file_seeds);    
-            while (loc) {
-                output_int_to_file(loc->coarse_seq_id,4,coarse_db->file_seeds);
-                output_int_to_file(loc->residue_index,2,coarse_db->file_seeds);
-                loc = loc->next;
-                if (loc)
-                    putc((char)0, coarse_db->file_seeds);
-            }
-            putc((char)1, coarse_db->file_seeds);
-            cb_seed_loc_free(loc_first);
-        }
-        free(kmer);
-    }
-    putc('\n', coarse_db->file_seeds);
-}
-
-/*Takes in the coarse database and saves its seeds table in a human-readable
-  format.  Used for debugging.*/
-void cb_coarse_save_seeds_plain(struct cb_coarse *coarse_db){
-    struct cb_coarse_seq *seq;
-    int32_t i, j;
-    uint32_t i2 = (uint32_t)0, mask = (uint32_t)3;
-    char *kmer;
-
-    for (i = 0; i < coarse_db->seeds->locs_length; i++) {
-        struct cb_seed_loc *loc, *loc_first = loc;
-
-        i2 = (uint32_t)0;
-        for (j = 0; j < coarse_db->seeds->seed_size; j++) {
-            i2 <<= 2;
-            i2 |= ((i >> (2*j)) & mask);
-        }
-
-        kmer = unhash_kmer(coarse_db->seeds, i2);
-        fprintf(coarse_db->file_seeds, "%s\n", kmer);
-        loc = cb_seeds_lookup(coarse_db->seeds, kmer);
-        loc_first = loc;
-
-        for (; loc; loc = loc->next)
-            if (loc->coarse_seq_id < 500)
-                fprintf(coarse_db->file_seeds,"(%d, %d) > ",
-                        loc->coarse_seq_id, loc->residue_index);
-
-        cb_seed_loc_free(loc_first);
-        fprintf(coarse_db->file_seeds, "\n");
-        free(kmer);
     }
 }
 
@@ -485,7 +419,7 @@ struct fasta_seq *cb_coarse_read_fasta_seq(struct cb_coarse *coarsedb,
   as data from the files being read*/
 struct cb_coarse_r *
 cb_coarse_r_init(int32_t seed_size,
-                 FILE *file_fasta, FILE *file_seeds, FILE *file_links,
+                 FILE *file_fasta, FILE *file_links,
                  FILE *file_links_index, FILE *file_links_base_index,
                  FILE *file_links_count_index, FILE *file_fasta_index,
                  FILE *file_fasta_base_index, FILE *file_params,
@@ -499,7 +433,7 @@ cb_coarse_r_init(int32_t seed_size,
     assert(coarsedb);
 
     /*Initialize the main cb_coarse structure*/
-    coarsedb->db = cb_coarse_init(seed_size, file_fasta, file_seeds,
+    coarsedb->db = cb_coarse_init(seed_size, file_fasta,
                                   file_links, file_links_index,
                                   file_links_base_index, file_links_count_index,
                                   file_fasta_index, file_fasta_base_index,

@@ -8,7 +8,6 @@
 
 #define CABLAST_COARSE_FASTA "coarse.fasta"
 #define CABLAST_COARSE_LINKS "coarse.links"
-#define CABLAST_COARSE_SEEDS "coarse.seeds"
 #define CABLAST_COARSE_LINKS_INDEX "coarse.links.index"
 #define CABLAST_COARSE_LINKS_COUNT_INDEX "coarse.links.count.index"
 #define CABLAST_COARSE_LINKS_BASE_INDEX "coarse.links.base.index"
