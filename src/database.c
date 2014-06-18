@@ -204,7 +204,8 @@ cb_database_read_init(char *dir, int32_t seed_size,
     return db;
 }
 
-/*Freeing function for a cb_database*/
+/*Freeing function for a cb_database.  Frees the database and its coarse and
+  compressed databases and closes its files.*/
 void cb_database_free(struct cb_database *db){
     /* All files opened in cb_database_init are closed in subsequent frees. */
     cb_coarse_free(db->coarse_db);
@@ -213,7 +214,8 @@ void cb_database_free(struct cb_database *db){
     free(db);
 }
 
-/*Freeing function for a cb_database_r*/
+/*Freeing function for a cb_database_r.  Frees the database and its coarse and
+  compressed databases and closes its files.*/
 void cb_database_read_free(struct cb_database_r *db){
     /* All files opened in cb_database_init are closed in subsequent frees. */
     cb_coarse_r_free(db->coarse_db);
@@ -222,9 +224,11 @@ void cb_database_read_free(struct cb_database_r *db){
     free(db);
 }
 
-static FILE *
-open_db_file(char *path, char *fopen_mode)
-{
+/*Takes in a file path and the mode for opening the file and either opens the
+ *file at that path or creates and opens the file if it does not exist.  The
+ *program exits if the file cannot be created or opened.
+ */
+static FILE *open_db_file(char *path, char *fopen_mode){
     struct stat buf;
     FILE *fp;
 
@@ -243,21 +247,19 @@ open_db_file(char *path, char *fopen_mode)
     return fp;
 }
 
-static char *
-path_join(char *a, char *b)
-{
+/*Joins two strings to create a new file path string.*/
+static char *path_join(char *a, char *b){
     char *joined;
 
-    joined = malloc((1 + strlen(a) + 1 + strlen(b)) * sizeof(*joined));
+    joined = malloc((1+strlen(a)+1+strlen(b))*sizeof(*joined));
     assert(joined);
 
     sprintf(joined, "%s/%s", a, b);
     return joined;
 }
 
-static char *
-basename(char *path)
-{
+/*Takes in a file path and returns a new string containing the basename.*/
+static char *basename(char *path){
     char *base;
     int i;
     int len;
@@ -267,7 +269,7 @@ basename(char *path)
     if (i > 0)
         i++;
 
-    base = malloc((1 + len - i) * sizeof(*base));
+    base = malloc((1+len-i)*sizeof(*base));
     assert(base);
 
     strncpy(base, path + i, len - i);
