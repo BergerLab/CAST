@@ -48,8 +48,6 @@ int32_t cb_compressed_size(struct cb_compressed *com_db);
 void cb_compressed_add(struct cb_compressed *com_db,
                        struct cb_compressed_seq *seq);
 
-void cb_compressed_save_binary(struct cb_compressed *com_db);
-void cb_compressed_save_plain(struct cb_compressed *com_db);
 void cb_compressed_write(struct cb_compressed *com_db,
                          struct cb_compressed_seq *seq);
 void cb_compressed_write_binary(struct cb_compressed *com_db,
