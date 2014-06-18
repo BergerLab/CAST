@@ -26,6 +26,7 @@
 #include "util.h"
 #include "xml.h"
 
+/*Joins two strings to create a new file path string.*/
 static char *path_join(char *a, char *b){
     char *joined;
 
@@ -42,16 +43,17 @@ void blast_coarse(struct opt_args *args, uint64_t dbsize){
     char *blastn,
          *input_path = path_join(args->args[0], CABLAST_COARSE_FASTA),
          *blastn_command =
-           "blastn -db  -outfmt 5 -query  -dbsize  -task blastn -evalue "
-           "%s > CaBLAST_temp_blast_results.xml";
+           "blastn -db  -outfmt 5 -query  -dbsize  -task blastn -evalue  "
+           "> CaBLAST_temp_blast_results.xml";
     int command_length = strlen(blastn_command) + strlen(input_path) +
                                                   strlen(args->args[1]) + 31;
 
     blastn = malloc(command_length*sizeof(*blastn));
     assert(blastn);
 
-    sprintf(blastn,"blastn -db %s -outfmt 5 -query %s -dbsize %lu -task blastn"
-                   " -evalue %s > CaBLAST_temp_blast_results.xml",
+    sprintf(blastn,
+            "blastn -db %s -outfmt 5 -query %s -dbsize %lu -task blastn"
+            " -evalue %s > CaBLAST_temp_blast_results.xml",
             input_path, args->args[1], dbsize, search_flags.coarse_evalue);
 
     if (!search_flags.hide_progress)
@@ -63,13 +65,10 @@ void blast_coarse(struct opt_args *args, uint64_t dbsize){
 }
 
 /*Runs BLAST on the fine FASTA file*/
-void blast_fine(uint64_t dbsize, struct fasta_seq *query){
-    /*Make a query FASTA file for the sequence we are testing*/
-    FILE *fine_blast_query = fopen("CaBLAST_fine_query.fasta", "w");
-
+void blast_fine(struct opt_args *args, uint64_t dbsize){
     char *blastn,
          *blastn_command =
-           "blastn  CaBLAST_fine.fasta -query CaBLAST_fine_query.fasta "
+           "blastn  CaBLAST_fine.fasta -query  "
            "-dbsize  -task blastn -outfmt 5 -evalue 1e-30 > "
            "CaBLAST_results.xml";
     int command_length = strlen(blastn_command) + 31;
@@ -77,33 +76,20 @@ void blast_fine(uint64_t dbsize, struct fasta_seq *query){
     blastn = malloc(command_length*sizeof(*blastn));
     assert(blastn);
 
-    if (fine_blast_query == NULL) {
-        fprintf(stderr,"Could not open CaBLAST_fine_query.fasta for writing.");
-        return;
-    }
-
-    fprintf(fine_blast_query, "> %s\n%s\n", query->name, query->seq);
-    fclose(fine_blast_query);
-
-
     sprintf(blastn,
-            "blastn %s CaBLAST_fine.fasta -query CaBLAST_fine_query.fasta "
+            "blastn %s CaBLAST_fine.fasta -query %s "
             "-dbsize %lu -task blastn -outfmt 5 -evalue 1e-30 > "
             "CaBLAST_results.xml",
-            search_flags.fine_blast_db ? "-db" : "-subject", dbsize);
+            search_flags.fine_blast_db ? "-db" : "-subject", args->args[1],
+            dbsize);
 
-    /*if (!search_flags.hide_progress)
-          fprintf(stderr, "\n%s\n", blastn);*/
+    if (!search_flags.hide_progress)
+          fprintf(stderr, "\n%s\n", blastn);
 
     system(blastn); /*Run fine BLAST*/
 
     free(blastn);
-
-    /*Delete the query FASTA file if the --no-cleanup flag is not being used*/
-    if (!search_flags.no_cleanup)
-        system("rm CaBLAST_fine_query.fasta");
 }
-
 
 /*A function for traversing a parsed XML tree.  Takes in the root node, a
  *void * accumulator, and a function that takes in an xmlNode and a void *
@@ -249,6 +235,7 @@ struct DSVector *get_blast_iterations(xmlNode *node){
 void write_fine_fasta(struct DSVector *oseqs){
     FILE *temp = fopen("CaBLAST_fine.fasta", "w");
     int i;
+
     if (!temp) {
         fprintf(stderr, "Could not open CaBLAST_fine.fasta for writing\n");
         return;
@@ -275,7 +262,7 @@ char *get_blast_args(struct opt_args *args){
 
     for (i = 0; i < args->nargs; i++)
         if (index >= 0)
-            length += (strlen(args->args[i]) + 1);
+            length += strlen(args->args[i]) + 1;
         else
             index = strcmp(args->args[i], "--blast-args") == 0 ? i : -1;
 
@@ -337,7 +324,8 @@ int main(int argc, char **argv){
     struct cb_database_r *db = NULL;
     struct opt_config *conf;
     struct opt_args *args;
-    struct DSVector *iterations = NULL, *expanded_hits = NULL, *queries = NULL;
+    struct DSVector *iterations = NULL, *expanded_hits = NULL, *queries = NULL,
+                    *oseqs = ds_vector_create();
     struct fasta_seq *query = NULL;
     xmlDoc *doc = NULL;
     xmlNode *root = NULL;
@@ -413,72 +401,13 @@ int main(int argc, char **argv){
         /*Expand any BLAST hits we got from the current query sequence during
           coarse BLAST.*/
         expanded_hits = expand_blast_hits(iterations, i, db);
-        query = (struct fasta_seq *)ds_vector_get(queries, i);
-/******************************************************************************/
-        /*If the current query sequence had hits in the call to coarse BLAST,
-         *make a FASTA file of the expanded hits and run BLAST with the current
-         *query sequence against the expanded hits file.
-         */
-        if (expanded_hits->size > 0) {
-            write_fine_fasta(expanded_hits);
-            blast_fine(dbsize, query);
 
-            /*Delete the expanded hits database if the --no-cleanup flag is not
-              being used.*/
-            if (!search_flags.no_cleanup)
-                system("rm CaBLAST_fine.fasta*");
-
-            /*Output information on each fine BLAST hit if the --show-hit-info
-              flag is set to true.*/
-            if (search_flags.show_hit_info) {
-                xmlDoc *test_doc = xmlReadFile("CaBLAST_results.xml", NULL, 0);
-                xmlNode *test_root = xmlDocGetRootElement(test_doc);
-                struct DSVector *test_iterations =
-                  get_blast_iterations(test_root);
-
-                for (j = 0; j < test_iterations->size; j++) {
-                    struct cb_hit_expansion *expansion =
-                      (struct cb_hit_expansion *)ds_vector_get(expanded_hits,j);
-                    struct DSVector *test_hits =
-                      get_blast_hits((xmlNode *)
-                        ds_vector_get(test_iterations, j));
-
-                    for (k = 0; k < test_hits->size; k++) {
-                        struct hit *current_hit =
-                          (struct hit *)ds_vector_get(test_hits, k);
-                        struct DSVector *test_hsps = current_hit->hsps;
-                        for (l = 0; l < test_hsps->size; l++) {
-                            struct hsp *current_hsp =
-                              (struct hsp *)ds_vector_get(test_hsps, l);
-                            int64_t offset = expansion->offset;
-                            int32_t hit_from = current_hsp->hit_from+offset-1,
-                                    hit_to   = current_hsp->hit_to+offset-1;
-                            fprintf(test_hits_file,
-                                    "hit from query %d: %d-%d\n",
-                                    i, hit_from, hit_to);
-                        }
-                    }
-                }
-                /*Free the XML data for the current query's expanded hits.*/
-                for (j = 0; j < test_iterations->size; j++) {
-                    struct DSVector *current_iteration =
-                      (struct DSVector *)ds_vector_get(test_iterations, j);
-                    for (k = 0; k < current_iteration->size; k++) {
-                        struct hit *h =
-                          (struct hit *)ds_vector_get(current_iteration, k);
-                        ds_vector_free(h->hsps);
-                        free(h);
-                    }
-                }
-                xmlFreeDoc(test_doc);
-            }
-        }
-/******************************************************************************/
         for (j = 0; j < expanded_hits->size; j++)
-            cb_hit_expansion_free(ds_vector_get(expanded_hits, j));
+            ds_vector_append(oseqs, ds_vector_get(expanded_hits, j));
         ds_vector_free_no_data(expanded_hits);
-        fasta_free_seq(query);
     }
+    write_fine_fasta(oseqs);
+    blast_fine(args, dbsize);
 
     if (!search_flags.hide_progress)
         fprintf(stderr, "\n"); /*Make a newline after the progress bar*/
