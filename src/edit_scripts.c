@@ -10,7 +10,7 @@
 int minimum(int a, int b){return a<b?a:b;}
 int maximum(int a, int b){return a>b?a:b;}
 
-/*Converts an integer to its octal representation*/
+/*Converts an integer to a string containing its octal representation*/
 char *to_octal_str(int i) {
     char *buf = malloc(16*sizeof(*buf));
     assert(buf);
@@ -38,14 +38,15 @@ char to_half_byte(char c){
         case '-': return (char)12;
         case 'i': return (char)13;
         case 's': return (char)14;
+
         /*For direction bytes with a 1 as the first bit to indicate that
          *the script is from a match, move the 1 to the leftmost bit of the
          *half-byte.
          */
         case '0' | (char)0x80: return (char)8;
         case '9' | (char)0x80: return (char)9;
-        /*'N' is represented as the half byte 1111*/
-        default:  return (char)15;
+
+        default:  return (char)15; /*'N' is represented as the half byte 1111*/
     }
 }
 
@@ -65,7 +66,8 @@ char half_byte_to_char(char h){
     }
 }
 
-/*Converts the ASCII string for an edit script to half-byte format*/
+/*Takes in an edit script in ASCII format and returns a new string containing
+  the edit script in half-byte format.*/
 char *edit_script_to_half_bytes(char *edit_script){
     int i = 0, length = 0, odd;
     char *half_bytes;
@@ -83,6 +85,7 @@ char *edit_script_to_half_bytes(char *edit_script){
             half_bytes[i/2] = (char)0;
         else
             half_bytes[i/2] <<= 4;
+
         /*Insert the current half byte into the current byte*/
         half_bytes[i/2] |= to_half_byte(edit_script[i]);
         i++;
@@ -98,7 +101,8 @@ char *edit_script_to_half_bytes(char *edit_script){
     return half_bytes;
 }
 
-/*Converts an edit script in half-byte format to ASCII*/
+/*Takes in an edit script in half-byte format and returns a new string
+  containing the edit script in ASCII format.*/
 char *half_bytes_to_ASCII(char *half_bytes, int length){
     int i = 0;
 
@@ -112,6 +116,7 @@ char *half_bytes_to_ASCII(char *half_bytes, int length){
             left >>= 4;
             left &= (char)15;
             edit_script[i] = half_byte_to_char(left);
+
             /*Handle the direction byte so that the match bit of the
              *half-byte is added to the direction byte separately from the
              *direction bit.
@@ -156,6 +161,7 @@ char *make_edit_script(char *str, char *ref, bool dir, int length){
             /* insertion in str relative to ref (i.e., gap in ref) */
             if (ref[i] == '-') {
                 subdel_open = false;
+
                 /* indicate start of insertion */
                 if (!insert_open) { 
                     insert_open = true;
@@ -171,6 +177,7 @@ char *make_edit_script(char *str, char *ref, bool dir, int length){
               relative to ref*/
             else {
                 insert_open = false;
+
                 /* indicate start of subdel */
                 if (!subdel_open) { 
                     subdel_open = true;
@@ -201,10 +208,12 @@ bool next_edit(char *edit_script, int *pos, struct edit_info *edit){
 
     if (isdigit(edit_script[(*pos)]) || edit_script[(*pos)] == '\0')
         return false;
-    edit->is_subdel = edit_script[(*pos)++] == 's';
-    edit->last_dist = 0;
+
+    edit->is_subdel  = edit_script[(*pos)++] == 's';
+    edit->last_dist  = 0;
     edit->str_length = 0;
-    edit->str = "";
+    edit->str        = "";
+
     while (isdigit(edit_script[(*pos)])) {
         edit->last_dist *= 8; /*octal encoding*/
         edit->last_dist += edit_script[(*pos)++] - '0';
@@ -222,9 +231,9 @@ bool next_edit(char *edit_script, int *pos, struct edit_info *edit){
     return true;
 }
 
-/*Takes in as input an edit script in ASCII format, a sequence to read, and
- *the length of the sequence and applies the edit script to the sequence to
- *produce a new sequence.
+/*Takes in as input an edit script in ASCII format, a DNA sequence to read, and
+ *the length of the sequence and returns the sequence created when the edit
+ *script is applied to the sequence passed in.
  */
 char *read_edit_script(char *edit_script, char *orig, int length){
     struct edit_info edit;
