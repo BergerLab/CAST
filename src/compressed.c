@@ -8,6 +8,11 @@
 #include "compressed.h"
 #include "edit_scripts.h"
 
+/*Takes in pointers to a compressed database file and its index file and a
+ *bool telling whether or not to populate the database with the files passed in
+ *and creates a new compressed database struct, reading in the compressed
+ *sequences if true is passed into "populate".
+ */
 struct cb_compressed *cb_compressed_init(FILE *file_compressed,
                                          FILE *file_index, bool populate){
     struct cb_compressed *com_db;
@@ -362,11 +367,14 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
     char *half_bytes, *diff;
     bool fread_success;
 
+    /*Read in the data of the current link*/
     link_data = malloc(sizeof(*link_data));
+    assert(link_data);
 
     fread_success = fread(link_data, sizeof(*link_data), 1, f) == 1;
     assert(fread_success);
 
+    /*Read in the link's edit script and convert it to ASCII format*/
     script_length = link_data->script_length;
 
     chars_to_read = script_length / 2;
@@ -376,15 +384,15 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
     half_bytes = malloc(chars_to_read*sizeof(*half_bytes));
     assert(half_bytes);
 
-    int32_t chars_read = fread(half_bytes, sizeof(*half_bytes), chars_to_read, f); 
-
-    fread_success = chars_read == chars_to_read;
+    fread_success =
+      fread(half_bytes, sizeof(*half_bytes), chars_to_read, f) == chars_to_read;
     assert(fread_success);
 
     diff = half_bytes_to_ASCII(half_bytes, script_length);
 
     free(half_bytes);
 
+    /*Create a new cb_link_to_coarse with the link's data and edit script.*/
     return cb_link_to_coarse_from_data(link_data, diff);
 }
 
