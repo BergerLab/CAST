@@ -24,7 +24,9 @@ void cb_seed_loc_free(struct cb_seed_loc *seedLoc);
 
 struct cb_seeds {
     int32_t seed_size;
+    int32_t *loc_counts;
     struct cb_seed_loc **locs;
+    struct cb_seed_loc **locs_last;
     int32_t locs_length;
     int32_t *powers;
     int32_t powers_length;

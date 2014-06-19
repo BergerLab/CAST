@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "coarse.h"
+#include "flags.h"
 #include "seeds.h"
 
 const int8_t cb_seeds_alpha_size[] = {
@@ -66,8 +67,17 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     seeds->locs = malloc(seeds->locs_length*sizeof(*seeds->locs));
     assert(seeds->locs);
 
-    for (i = 0; i < seeds->locs_length; i++)
+    seeds->locs_last = malloc(seeds->locs_length*sizeof(*seeds->locs_last));
+    assert(seeds->locs_last);
+
+    seeds->loc_counts = malloc(seeds->locs_length*sizeof(*seeds->loc_counts));
+    assert(seeds->loc_counts);
+
+    for (i = 0; i < seeds->locs_length; i++) {
         seeds->locs[i] = NULL;
+        seeds->locs_last[i] = NULL;
+        seeds->loc_counts[i] = 0;
+    }
 
     return seeds;
 }
@@ -82,6 +92,7 @@ void cb_seeds_free(struct cb_seeds *seeds){
     for (i = 0; i < seeds->locs_length; i++)
         cb_seed_loc_free(seeds->locs[i]); /* frees the whole list */
     free(seeds->locs);
+    free(seeds->loc_counts);
     free(seeds->powers);
     free(seeds);
 }
@@ -96,7 +107,8 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
         kmer = seq->seq->residues + i;
 
         hash = hash_kmer(seeds, kmer);
-        if (hash == -1)
+
+        if (hash == -1||seeds->loc_counts[hash] >= compress_flags.max_kmer_freq)
             continue;
 
         sl1 = cb_seed_loc_init(seq->id, i);
@@ -106,6 +118,7 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
             for (sl2 = seeds->locs[hash]; sl2->next != NULL; sl2 = sl2->next);
             sl2->next = sl1;
         }
+        (seeds->loc_counts[hash])++;
     }
     pthread_rwlock_unlock(&seeds->lock);
 }
