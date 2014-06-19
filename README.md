@@ -1,4 +1,4 @@
-This is an implementation of CaBLAST in ANSI C built from the C implementation
+This is an implementation of CaBLAST in C99 built from the C implementation
 of CaBLASTP found on https://github.com/BurntSushi/c_cablastp.  It is made to
 work like Po-Ru Loh's version of the code, which can be found in a prototype at
 http://cast.csail.mit.edu/.

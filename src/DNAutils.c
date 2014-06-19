@@ -5,7 +5,7 @@
 
 /*Returns the base complement for a DNA residue.  The complement for any base
   that is not A, C, G, or T in this function is N.*/
-char base_complement(char base){
+inline char base_complement(char base){
     switch (base) {
         case 'A':
             return 'T';
@@ -22,7 +22,7 @@ char base_complement(char base){
 
 /*Checks if two bases match.  If one or both bases is an N, it is an
   automatic mismatch*/
-bool bases_match(char a, char b, int dir_prod){
+inline bool bases_match(char a, char b, int dir_prod){
     return a != 'N' && a == (dir_prod > 0 ? b : base_complement(b));
 }
 

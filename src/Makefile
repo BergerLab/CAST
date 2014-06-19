@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -O3 -ansi -Wall -Wextra -pedantic -lpthread -I. -I/usr/include/libxml2
+CFLAGS=-g -pg -O3 -std=c99 -Wall -Wextra -pedantic -lpthread -I. -I/usr/include/libxml2
 LDLIBS=-lds -lpthread -lopt -lxml2
 
 COMPRESS_OBJS=align.o DNAalphabet.o DNAmatrix.o \
@@ -44,7 +44,7 @@ cablast-search: cablast-search.o $(SEARCH_HEADERS) $(SEARCH_OBJS)
 cablast-search.o: cablast-search.c database.h DNAalphabet.h fasta.h
 
 
-align.o: align.c align.h DNAalphabet.h
+align.o: DNAutils.c DNAutils.h align.c align.h DNAalphabet.h
 bitpack.o: bitpack.c bitpack.h
 coarse.o: coarse.c coarse.h link_to_compressed.h seq.h
 compressed.o: compressed.c compressed.h link_to_coarse.h
