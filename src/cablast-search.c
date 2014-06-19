@@ -71,7 +71,7 @@ void blast_fine(struct opt_args *args, uint64_t dbsize){
            "blastn  CaBLAST_fine.fasta -query  "
            "-dbsize  -task blastn -outfmt 5 -evalue 1e-30 > "
            "CaBLAST_results.xml";
-    int command_length = strlen(blastn_command) + 31;
+    int command_length = strlen(blastn_command) + 40;
 
     blastn = malloc(command_length*sizeof(*blastn));
     assert(blastn);
