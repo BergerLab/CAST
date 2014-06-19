@@ -7,7 +7,7 @@ char *base_complement = "TNGNNNCNNNNNNNNNNNNANNNNNN";
 
 /*Checks if two bases match.  If one or both bases is an N, it is an
   automatic mismatch*/
-inline bool bases_match(char a, char b, int dir_prod){
+extern inline bool bases_match(char a, char b, int dir_prod){
     return a != 'N' && a == (dir_prod > 0 ? b : base_complement[b-'A']);
 }
 

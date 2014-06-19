@@ -105,7 +105,7 @@ struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
 }
 
 /*Get the coarse sequence in the coarse database at index i.*/
-struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db, int32_t i){
+extern inline struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db, int32_t i){
     struct cb_coarse_seq *seq;
 
     pthread_rwlock_rdlock(&coarse_db->lock_seq);

@@ -41,7 +41,7 @@ struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
     struct cb_compress_workers *workers;
     struct worker_args *wargs;
     int32_t i, errno;
-
+fprintf(stderr, "!!!\n");
     jobs = ds_queue_create(20);
 
     wargs = malloc(sizeof(*wargs));
@@ -129,6 +129,8 @@ struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             struct cb_align_nw_memory *mem){
 printf("\nsequence #%d\n", org_seq->id+1);
+    struct DSVector *coarse_seqs = coarse_db->seqs;
+    struct cb_seeds *coarse_seeds = coarse_db->seeds;
     struct extend_match mseqs_fwd, mseqs_rev;
     struct cb_coarse_seq *coarse_seq;
     struct cb_compressed_seq *cseq =
@@ -144,11 +146,13 @@ printf("\nsequence #%d\n", org_seq->id+1);
             max_section_size = max_chunk_size * 2,
             overlap          = compress_flags.overlap,
             start_of_section = 0,
+            coarse_seq_count = coarse_seqs->size,
+            org_seq_len      = org_seq->length,
             end_of_chunk     = min(start_of_section + max_chunk_size,
-                                   org_seq->length - ext_seed),
+                                   org_seq_len - ext_seed),
             end_of_section   = min(start_of_section + max_section_size,
-                                   org_seq->length - ext_seed);
-    char *kmer, *revcomp;
+                                   org_seq_len - ext_seed);
+    char *kmer, *revcomp, *org_seq_residues = org_seq->residues;
     bool *matches, *matches_temp, found_match;
 
     /*Initialize the matches and matches_temp arrays*/
@@ -163,30 +167,29 @@ printf("\nsequence #%d\n", org_seq->id+1);
         matches_temp[i] = true;
     }
 
-    for (current = 0; current <= org_seq->length-seed_size - ext_seed;
-                                                             current++) {
+    for (current = 0; current <= org_seq_len-seed_size - ext_seed; current++) {
         found_match = false;
 
         /*If we are at the beginning of the first chunk of the first sequence,
          *add the first chunk without a match and skip ahead to the start of
          *the second chunk.
          */
-        if (current == 0 && coarse_db->seqs->size == 0) {
+        if (current == 0 && coarse_seqs_count == 0) {
             new_coarse_seq_id =
               add_without_match(coarse_db, org_seq, 0,
-                                minimum(org_seq->length, max_chunk_size));
+                                minimum(org_seq_len, max_chunk_size));
 
             cb_compressed_seq_addlink(cseq, cb_link_to_coarse_init_nodiff(
                                                new_coarse_seq_id, 0,
                                                end_of_chunk - 1, 0,
                                                end_of_chunk - 1, true));
 
-            if (end_of_chunk < org_seq->length - seed_size - ext_seed) {
+            if (end_of_chunk < org_seq_len - seed_size - ext_seed) {
                 start_of_section += max_chunk_size - overlap;
                 end_of_chunk   = min(start_of_section + max_chunk_size,
-                                     org_seq->length - ext_seed);
+                                     org_seq_len - ext_seed);
                 end_of_section = min(start_of_section + max_section_size,
-                                     org_seq->length - ext_seed);
+                                     org_seq_len - ext_seed);
 /*printf("%d->", current);*/
                 current        = start_of_section-1;
 /*printf("%d\n", current);*/
@@ -196,16 +199,16 @@ printf("\nsequence #%d\n", org_seq->id+1);
         }
 
         /*Get the k-mer and allocate a copy of its reverse complement*/
-        kmer    = get_kmer(org_seq->residues+current, seed_size);
+        kmer    = get_kmer(org_seq_residues+current, seed_size);
         revcomp = kmer_revcomp(kmer, seed_size);
 
         /*The locations of all seeds in the database that start with the
           current k-mer.*/
-        seeds   = cb_seeds_lookup(coarse_db->seeds, kmer);
+        seeds   = cb_seeds_lookup(coarse_seeds, kmer);
 
         /*The locations of all seeds in the database that start with the
           current k-mer's reverse complement.*/
-        seeds_r = cb_seeds_lookup(coarse_db->seeds, revcomp);
+        seeds_r = cb_seeds_lookup(coarse_seeds, revcomp);
 
         for (seedLoc = seeds; seedLoc != NULL; seedLoc = seedLoc->next) {
             if (found_match)
@@ -217,12 +220,12 @@ printf("\nsequence #%d\n", org_seq->id+1);
             if (resind + seed_size + ext_seed > coarse_seq->seq->length)
                 continue;
 
-            if ((attempt_ext(current, -1, org_seq->residues,
+            if ((attempt_ext(current, -1, org_seq_residues,
                              end_of_section - start_of_section,
                              start_of_section, resind, -1,
                              coarse_seq->seq->residues,
                              coarse_seq->seq->length, 0) +
-                 attempt_ext(current+seed_size-1, 1, org_seq->residues,
+                 attempt_ext(current+seed_size-1, 1, org_seq_residues,
                              end_of_section - start_of_section,
                              start_of_section, resind+seed_size-1, 1,
                              coarse_seq->seq->residues,
@@ -231,14 +234,14 @@ printf("\nsequence #%d\n", org_seq->id+1);
                 mseqs_rev = extend_match(mem,
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length, resind, -1,
-                                         org_seq->residues, start_of_section,
+                                         org_seq_residues, start_of_section,
                                          end_of_section, current, -1);
 
                 mseqs_fwd = extend_match(mem,
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length,
                                          resind + seed_size - 1, 1,
-                                         org_seq->residues, start_of_section,
+                                         org_seq_residues, start_of_section,
                                          end_of_section,
                                          current + seed_size - 1, 1);
 
@@ -337,7 +340,7 @@ printf("\nsequence #%d\n", org_seq->id+1);
                                         true));
 
                 /*Update the current position in the sequence*/
-                if (current + fwd_olen <= org_seq->length-seed_size-ext_seed-1)
+                if (current + fwd_olen <= org_seq_len-seed_size-ext_seed-1)
                     start_of_section = current + fwd_olen -
                                        compress_flags.overlap + seed_size;
                 else
@@ -346,9 +349,9 @@ printf("\nsequence #%d\n", org_seq->id+1);
 /*printf("%d, fwd_olen = %d->", current, fwd_olen);*/
                 current        = start_of_section - 1;
                 end_of_chunk   = min(start_of_section + max_chunk_size,
-                                     org_seq->length-ext_seed);
+                                     org_seq_len-ext_seed);
                 end_of_section = min(start_of_section + max_section_size,
-                                     org_seq->length-ext_seed);
+                                     org_seq_len-ext_seed);
 /*printf("%d\n", current);*/
 
                 chunks++;
@@ -376,12 +379,12 @@ printf("\nsequence #%d\n", org_seq->id+1);
             if (resind + seed_size + ext_seed > coarse_seq->seq->length)
                 continue;
 
-            if ((attempt_ext(current, -1, org_seq->residues,
+            if ((attempt_ext(current, -1, org_seq_residues,
                              end_of_section - start_of_section,
                              start_of_section, resind + seed_size - 1, 1,
                              coarse_seq->seq->residues,
                              coarse_seq->seq->length, 0) +
-                 attempt_ext(current+seed_size-1, 1, org_seq->residues, 
+                 attempt_ext(current+seed_size-1, 1, org_seq_residues, 
                              end_of_section - start_of_section,
                              start_of_section, resind, -1,
                              coarse_seq->seq->residues,
@@ -390,7 +393,7 @@ printf("\nsequence #%d\n", org_seq->id+1);
                 mseqs_rev = extend_match(mem,
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length, resind, -1,
-                                         org_seq->residues, start_of_section,
+                                         org_seq_residues, start_of_section,
                                          end_of_section,
                                          current + seed_size - 1, 1);
 
@@ -398,7 +401,7 @@ printf("\nsequence #%d\n", org_seq->id+1);
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length,
                                          resind+seed_size-1, 1,
-                                         org_seq->residues, start_of_section,
+                                         org_seq_residues, start_of_section,
                                          end_of_section, current, -1);
 
                 fwd_rlen = cb_align_length_nogaps(mseqs_fwd.rseq);
@@ -495,7 +498,7 @@ printf("\nsequence #%d\n", org_seq->id+1);
                                         false));
 
                 /*Update the current position in the sequence*/
-                if (current + rev_olen <= org_seq->length-seed_size-ext_seed-1)
+                if (current + rev_olen <= org_seq_len-seed_size-ext_seed-1)
                     start_of_section = current + rev_olen -
                                        compress_flags.overlap + seed_size;
                 else
@@ -503,9 +506,9 @@ printf("\nsequence #%d\n", org_seq->id+1);
 /*printf("%d, rev_olen = %d->", current, rev_olen);*/
                 current        = start_of_section - 1;
                 end_of_chunk   = min(start_of_section + max_chunk_size,
-                                     org_seq->length-ext_seed);
+                                     org_seq_len-ext_seed);
                 end_of_section = min(start_of_section + max_section_size,
-                                     org_seq->length-ext_seed);
+                                     org_seq_len-ext_seed);
 /*printf("%d\n", current);*/
 
                 chunks++;
@@ -541,12 +544,12 @@ printf("\nsequence #%d\n", org_seq->id+1);
                                                 start_of_section - 1,
                                               true));
 
-            if (end_of_chunk < org_seq->length - seed_size - ext_seed - 1) {
+            if (end_of_chunk < org_seq_len - seed_size - ext_seed - 1) {
                 start_of_section = end_of_chunk - overlap;
                 end_of_chunk     = min(start_of_section + max_chunk_size,
-                                       org_seq->length - ext_seed);
+                                       org_seq_len - ext_seed);
                 end_of_section   = min(start_of_section + max_section_size,
-                                       org_seq->length - ext_seed);
+                                       org_seq_len - ext_seed);
 /*printf("%d->", current);*/
                 current          = start_of_section - 1;
 /*printf("%d\n", current);*/

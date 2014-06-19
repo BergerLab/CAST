@@ -184,11 +184,11 @@ int *best_edge(int dp_len1, int dp_len2){
 
     best[0] = -1;
     best[1] = -1;
-    for (j2 = 0; j2 <= dp_len2; j2++){
+    for (j2 = 0; j2 <= dp_len2; j2++)
         if (dp_score[dp_len1][j2] >= max_dp_score) {
             max_dp_score = dp_score[dp_len1][j2];
             best[0] = dp_len1; best[1] = j2;
-        }}
+        }
     for (j1 = 0; j1 <= dp_len1; j1++)
         if (dp_score[j1][dp_len2] >= max_dp_score) {
             max_dp_score = dp_score[j1][dp_len2];
@@ -430,20 +430,27 @@ attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
 int check_and_update(bool *matches, int *matches_index, int *num_matches,
                      bool *temp, int temp_index){
     int i;
+    int index = *matches_index;
+    int m = *num_matches;
 
     for (i = 0; i < temp_index; i++) {
-        int hundred_bases_ago = *matches_index - 100;
+        int hundred_bases_ago = index - 100;
 
-        matches[(*matches_index)] = temp[i];
+        matches[index] = temp[i];
         if (temp[i])
-            (*num_matches)++;
+            m++;
         if (matches[hundred_bases_ago])
-            (*num_matches)--;
-        (*matches_index)++;
+            m--;
+        index++;
 
-        if (*num_matches < 85)
+        if (m < 85) {
+            *matches_index = index;
+            *num_matches = m;
             return i;
+        }
     }
+    *matches_index = index;
+    *num_matches = m;
     return temp_index;
 }
 
