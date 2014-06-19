@@ -98,7 +98,7 @@ void cb_seeds_free(struct cb_seeds *seeds){
 }
 
 void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
-    struct cb_seed_loc *sl1, *sl2;
+    struct cb_seed_loc *loc;
     int32_t hash, i;
     char *kmer;
 
@@ -108,15 +108,18 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
 
         hash = hash_kmer(seeds, kmer);
 
-        if (hash == -1||seeds->loc_counts[hash] >= compress_flags.max_kmer_freq)
+        if (hash == -1 ||
+            seeds->loc_counts[hash] >= compress_flags.max_kmer_freq)
             continue;
 
-        sl1 = cb_seed_loc_init(seq->id, i);
-        if (seeds->locs[hash] == NULL)
-            seeds->locs[hash] = sl1;
+        loc = cb_seed_loc_init(seq->id, i);
+        if (seeds->locs[hash] == NULL) {
+            seeds->locs[hash]      = loc;
+            seeds->locs_last[hash] = loc;
+        }
         else {
-            for (sl2 = seeds->locs[hash]; sl2->next != NULL; sl2 = sl2->next);
-            sl2->next = sl1;
+            seeds->locs_last[hash]->next = loc;
+            seeds->locs_last[hash]       = loc;
         }
         (seeds->loc_counts[hash])++;
     }
