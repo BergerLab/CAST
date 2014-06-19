@@ -37,11 +37,11 @@ struct cb_nw_tables {
     int **dp_from;
 };
 
-int *best_edge(int **dp_score, int dp_len1, int dp_len2);
-int *backtrack_to_clump(struct cb_nw_tables tables, int *pos);
+int *best_edge(int dp_len1, int dp_len2);
+int *backtrack_to_clump(int *pos);
 
-struct cb_nw_tables make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
-                                   char *oseq, int dp_len2, int i2, int dir2);
+void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
+                    char *oseq, int dp_len2, int i2, int dir2);
 
 struct cb_align_nw_memory *cb_align_nw_memory_init();
 

@@ -9,6 +9,8 @@
 #include "DNAalphabet.h"
 #include "flags.h"
 
+int dp_score[26][26], dp_from[26][26];
+
 /*@param rseq, oseq: The coarse and original sequences.
  *@param rstart, rend, ostart, oend: The starting and ending indices of the
  *  coarse and original sequences.
@@ -121,8 +123,7 @@ struct cb_align_nw_memory *cb_align_nw_memory_init(){
 }
 
 /*Function for freeing a cb_align_nw_memory data structure*/
-void cb_align_nw_memory_free(struct cb_align_nw_memory *mem)
-{
+void cb_align_nw_memory_free(struct cb_align_nw_memory *mem){
     free(mem->zeroes);
     free(mem->table);
     free(mem->ref);
@@ -136,26 +137,10 @@ void cb_align_nw_memory_free(struct cb_align_nw_memory *mem)
  *struct containing a table of the scores in the alignment and a table of
  *directions for backtracking to the start of the alignment.
  */
-struct cb_nw_tables make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
-                                   char *oseq, int dp_len2, int i2, int dir2){
-    struct cb_nw_tables tables;
-    int i, j1, j2;
-    int dir_prod = dir1*dir2;
-    int **dp_score, **dp_from;
+void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
+                    char *oseq, int dp_len2, int i2, int dir2){
+    int i, j1, j2, dir_prod = dir1*dir2;
 
-    dp_score = malloc((dp_len1+1)*sizeof(*dp_score));
-    assert(dp_score);
-
-    dp_from = malloc((dp_len1+1)*sizeof(*dp_from));
-    assert(dp_from);
-
-    for (i = 0; i < dp_len1+1; i++) {
-        dp_score[i] = malloc((dp_len2+1)*sizeof(**dp_score));
-        assert(dp_score[i]);
-
-        dp_from[i] = malloc((dp_len2+1)*sizeof(**dp_from));
-        assert(dp_from[i]);
-    }
     for (i = 0; i <= dp_len2; i++) {
         dp_score[0][i] = -3*i;
         dp_from[0][i] = 2;
@@ -186,15 +171,12 @@ struct cb_nw_tables make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
                 dp_from[j1][j2] = 1;
             }
         }
-    tables.dp_score = dp_score;
-    tables.dp_from = dp_from;
-    return tables;
 }
 
 /*Finds the space on the bottom and right edges of a Needleman-Wunsch score
  *table with the best score, returning it as an array of two ints.
  */
-int *best_edge(int **dp_score, int dp_len1, int dp_len2){
+int *best_edge(int dp_len1, int dp_len2){
     int j1, j2, max_dp_score = -1000;
 
     int *best = malloc(2*sizeof(*best));
@@ -215,10 +197,8 @@ int *best_edge(int **dp_score, int dp_len1, int dp_len2){
    return best; 
 }
 
-int *backtrack_to_clump(struct cb_nw_tables tables, int *pos){
+int *backtrack_to_clump(int *pos){
     int consec_matches = 0,
-        **dp_score = tables.dp_score,
-        **dp_from  = tables.dp_from,
         consec_match_clump_size = compress_flags.consec_match_clump_size;
 
     while (!(pos[0] == 0 && pos[1] == 0)) {
@@ -231,8 +211,8 @@ int *backtrack_to_clump(struct cb_nw_tables tables, int *pos){
         }
 
         switch (dp_from[pos[0]][pos[1]]) { /*backtrack to previous cell*/
-            case 0: prev_j1 = pos[0]-1; prev_j2 = pos[1]-1; break;
-            case 2: prev_j1 = pos[0]; prev_j2 = pos[1]-1;break;
+            case 0:  prev_j1 = pos[0]-1; prev_j2 = pos[1]-1; break;
+            case 2:  prev_j1 = pos[0];   prev_j2 = pos[1]-1; break;
             default: prev_j1 = pos[0]-1; prev_j2 = pos[1];
         }
         if (dp_from[pos[0]][pos[1]] == 0)
@@ -280,24 +260,16 @@ struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
     int dir_prod = dir1 * dir2;
     int num_steps = 0;
     int matches_count = 0, i = 0;
-    struct cb_nw_tables tables = make_nw_tables(rseq, dp_len1, i1, dir1,
-                                                 oseq, dp_len2, i2, dir2);
-    int **dp_score = tables.dp_score, **dp_from = tables.dp_from;
-    int *best = best_edge(tables.dp_score, dp_len1, dp_len2);
 
-    best = backtrack_to_clump(tables, best);
+    make_nw_tables(rseq, dp_len1, i1, dir1, oseq, dp_len2, i2, dir2);
+    int *best = best_edge(dp_len1, dp_len2);
+    best = backtrack_to_clump(best);
 
     if (best[0] <= 0) {
         align.ref = "\0";
         align.org = "\0";
         align.length = -1;
         free(best);
-        for (i = 0; i <= dp_len1; i++) {
-            free(tables.dp_score[i]);
-            free(tables.dp_from[i]);
-        }
-        free(tables.dp_score);
-        free(tables.dp_from);
        
         return align;
     }
@@ -391,13 +363,6 @@ struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
         align.ref[align.length] = '\0';
     }
 
-    free(best);
-    for (i = 0; i <= dp_len1; i++) {
-        free(tables.dp_score[i]);
-        free(tables.dp_from[i]);
-    }
-    free(tables.dp_score);
-    free(tables.dp_from);
     free(subs1_dp);
     free(subs2_dp);
     free(matches_to_add);
