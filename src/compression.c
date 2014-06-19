@@ -633,7 +633,7 @@ extend_match(struct cb_align_nw_memory *mem,
             for (i = 0; i < m; i++) {
                 r_segment[i] = rseq[resind+dir1*i];
                 o_segment[i] = dir_prod > 0 ? oseq[current+dir2*i] :
-                                      base_complement(oseq[current+dir2*i]);
+                                      base_complement[oseq[current+dir2*i]-'A'];
             }
 
             r_segment[m] = '\0';

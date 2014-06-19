@@ -326,13 +326,13 @@ struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
             prev_j1 = cur_j1-1; prev_j2 = cur_j2-1; /*match or substitution*/
             c1 = rseq[i1+dir1*prev_j1]; /*comp if antisense*/
             c2 = oseq[i2+dir2*prev_j2];
-            if (dir_prod == -1) c2 = base_complement(c2);
+            if (dir_prod == -1) c2 = base_complement[c2-'A'];
             subs1_dp[num_steps] = c1;
             subs2_dp[num_steps] = c2;
             break;
         case 2: prev_j1 = cur_j1; prev_j2 = cur_j2-1; /*advance 2; gap in 1*/
             c2 = oseq[i2+dir2*prev_j2];
-            if (dir_prod == -1) c2 = base_complement(c2); /*comp if antisense*/
+            if (dir_prod == -1) c2 = base_complement[c2-'A']; /*comp if antisense*/
             subs1_dp[num_steps] = '-';
             subs2_dp[num_steps] = c2;
             break;

@@ -3,27 +3,12 @@
 #include <stdlib.h>
 #include "DNAutils.h"
 
-/*Returns the base complement for a DNA residue.  The complement for any base
-  that is not A, C, G, or T in this function is N.*/
-inline char base_complement(char base){
-    switch (base) {
-        case 'A':
-            return 'T';
-        case 'C':
-            return 'G';
-        case 'G':
-            return 'C';
-        case 'T':
-            return 'A';
-        default:
-            return 'N';
-    }
-}
+char *base_complement = "TNGNNNCNNNNNNNNNNNNANNNNNN";
 
 /*Checks if two bases match.  If one or both bases is an N, it is an
   automatic mismatch*/
 inline bool bases_match(char a, char b, int dir_prod){
-    return a != 'N' && a == (dir_prod > 0 ? b : base_complement(b));
+    return a != 'N' && a == (dir_prod > 0 ? b : base_complement[b-'A']);
 }
 
 /*Takes in a pointer to the start of a k-mer in a DNA sequence and the length
@@ -48,7 +33,7 @@ char *kmer_revcomp(char *kmer, int k){
     assert(revcomp);
 
     for (i = 0; i < k; i++)
-        revcomp[i] = base_complement(kmer[k-i-1]);
+        revcomp[i] = base_complement[kmer[k-i-1]-'A'];
     revcomp[k] = '\0';
     return revcomp;
 }
@@ -70,7 +55,7 @@ char *string_revcomp(char *sequence, int length){
     assert(revcomp);
 
     for (i = 0; i < length; i++)
-        revcomp[i] = base_complement(sequence[length-i-1]);
+        revcomp[i] = base_complement[sequence[length-i-1]-'A'];
     revcomp[length] = '\0';
     return revcomp;
 }

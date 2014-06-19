@@ -316,14 +316,14 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
 
             for (x = maximum(0, xmin);
                  x < minimum(edit->last_dist-last_edit_str_len, xmax); x++)
-                orig[i0-x] = base_complement(residues[x+coarse_pos]);
+                orig[i0-x] = base_complement[residues[x+coarse_pos]-'A'];
 
             i0 -= edit->last_dist - last_edit_str_len;
             coarse_pos += edit->last_dist - last_edit_str_len;
             for (i = 0; i < edit->str_length; i++)
                 if (edit->str[i] != '-') {
                     if (0 <= i0 && i0 < dest_len)
-                        orig[i0] = base_complement(edit->str[i]);
+                        orig[i0] = base_complement[edit->str[i]-'A'];
                     i0--;
                 }
 
@@ -345,7 +345,7 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
         int dir = fwd ? 1 : -1;
         for (i1 = coarse_pos; i1 <= link->coarse_end; i1++) {
             if (0 <= i0 && i0 < dest_len)
-                orig[i0] = fwd ? residues[i1] : base_complement(residues[i1]);
+                orig[i0] = fwd ? residues[i1] : base_complement[residues[i1]-'A'];
             i0 += dir;
         }
     }
