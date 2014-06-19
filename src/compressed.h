@@ -17,6 +17,7 @@ struct cb_compressed_seq {
     uint64_t id;
     char *name;
     struct cb_link_to_coarse *links;
+    struct cb_link_to_coarse *last_link;
 };
 
 struct cb_compressed_seq *cb_compressed_seq_init(int32_t id, char *name);

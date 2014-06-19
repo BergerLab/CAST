@@ -152,8 +152,9 @@ struct cb_compressed_seq *cb_compressed_seq_init(int32_t id, char *name){
     struct cb_compressed_seq *seq = malloc(sizeof(*seq));
     assert(seq);
 
-    seq->id    = id;
-    seq->links = NULL;
+    seq->id        = id;
+    seq->links     = NULL;
+    seq->last_link = NULL;
 
     seq->name  = malloc((1+strlen(name))*sizeof(*seq->name));
     assert(seq->name);
@@ -174,17 +175,16 @@ void cb_compressed_seq_free(struct cb_compressed_seq *seq){
   the tail of the sequence's list of links*/
 void cb_compressed_seq_addlink(struct cb_compressed_seq *seq,
                                struct cb_link_to_coarse *newlink){
-    struct cb_link_to_coarse *link;
-
     assert(newlink->next == NULL);
 
     if (seq->links == NULL) {
-        seq->links = newlink;
+        seq->links     = newlink;
+        seq->last_link = newlink;
         return;
     }
 
-    for (link = seq->links; link->next != NULL; link = link->next);
-    link->next = newlink;
+    seq->last_link->next = newlink;
+    seq->last_link       = newlink;
 }
 
 /*Gets the i-th compressed sequence from the compressed database.*/
