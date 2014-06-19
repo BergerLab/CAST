@@ -19,6 +19,7 @@ struct cb_coarse_seq {
     int32_t id;
     struct cb_seq *seq;
     struct cb_link_to_compressed *links;
+    struct cb_link_to_compressed *last_link;
     pthread_rwlock_t lock_links;
 };
 

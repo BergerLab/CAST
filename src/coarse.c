@@ -302,9 +302,10 @@ struct cb_coarse_seq *cb_coarse_seq_init(int32_t id, char *residues,
     seq = malloc(sizeof(*seq));
     assert(seq);
 
-    seq->id    = id;
-    seq->seq   = cb_seq_init_range(id, "", residues, start, end);
-    seq->links = NULL;
+    seq->id        = id;
+    seq->seq       = cb_seq_init_range(id, "", residues, start, end);
+    seq->links     = NULL;
+    seq->last_link = NULL;
 
     if (0 != (errno = pthread_rwlock_init(&seq->lock_links, NULL))) {
         fprintf(stderr, "Could not create rwlock. Errno: %d\n", errno);
@@ -337,13 +338,15 @@ void cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
     assert(newlink->next == NULL);
     pthread_rwlock_wrlock(&seq->lock_links);
     if (seq->links == NULL) {
-        seq->links = newlink;
+        seq->links     = newlink;
+        seq->last_link = newlink;
         pthread_rwlock_unlock(&seq->lock_links);
         return;
     }
 
-    for (link = seq->links; link->next != NULL; link = link->next);
-    link->next = newlink;
+    seq->last_link->next = newlink;
+    seq->last_link = newlink;
+
     pthread_rwlock_unlock(&seq->lock_links);
 }
 
