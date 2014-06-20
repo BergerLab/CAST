@@ -9,8 +9,6 @@
 #include "DNAalphabet.h"
 #include "flags.h"
 
-int dp_score[676], dp_from[676];
-
 /*@param rseq, oseq: The coarse and original sequences.
  *@param rstart, rend, ostart, oend: The starting and ending indices of the
  *  coarse and original sequences.
@@ -102,32 +100,23 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
 /*Initialization function for creating a cb_align_nw_memory data structure*/
 struct cb_align_nw_memory *cb_align_nw_memory_init(){
     struct cb_align_nw_memory *mem;
-    int seq_size = CABLAST_ALIGN_SEQ_SIZE;
 
     mem = malloc(sizeof(*mem));
     assert(mem);
 
-    mem->table = malloc(seq_size*seq_size*sizeof(*mem->table));
-    assert(mem->table);
+    mem->dp_score = malloc(676*sizeof(*mem->dp_score));
+    assert(mem->dp_score);
 
-    mem->zeroes = malloc(seq_size*seq_size*sizeof(*mem->zeroes));
-    assert(mem->zeroes);
-
-    mem->ref = malloc(seq_size*sizeof(*mem->ref));
-    assert(mem->ref);
-
-    mem->org = malloc(seq_size*sizeof(*mem->org));
-    assert(mem->org);
+    mem->dp_from = malloc(676*sizeof(*mem->dp_from));
+    assert(mem->dp_from);
 
     return mem;
 }
 
 /*Function for freeing a cb_align_nw_memory data structure*/
 void cb_align_nw_memory_free(struct cb_align_nw_memory *mem){
-    free(mem->zeroes);
-    free(mem->table);
-    free(mem->ref);
-    free(mem->org);
+    free(mem->dp_score);
+    free(mem->dp_from);
     free(mem);
 }
 
@@ -138,8 +127,10 @@ void cb_align_nw_memory_free(struct cb_align_nw_memory *mem){
  *directions for backtracking to the start of the alignment.
  */
 void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
-                    char *oseq, int dp_len2, int i2, int dir2){
+                    char *oseq, int dp_len2, int i2, int dir2,
+                    struct cb_align_nw_memory *mem){
     int i, j1, j2, dir_prod = dir1*dir2;
+    int *dp_score = mem->dp_score, *dp_from = mem->dp_from;
 
     for (i = 0; i <= dp_len2; i++) {
         dp_score[i] = -3*i;
@@ -176,8 +167,9 @@ void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
 /*Finds the space on the bottom and right edges of a Needleman-Wunsch score
  *table with the best score, returning it as an array of two ints.
  */
-int *best_edge(int dp_len1, int dp_len2){
+int *best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem){
     int j1, j2, max_dp_score = -1000;
+    int *dp_score = mem->dp_score, *dp_from = mem->dp_from;
 
     int *best = malloc(2*sizeof(*best));
     assert(best);
@@ -197,9 +189,10 @@ int *best_edge(int dp_len1, int dp_len2){
    return best; 
 }
 
-int *backtrack_to_clump(int *pos){
+int *backtrack_to_clump(int *pos, struct cb_align_nw_memory *mem){
     int consec_matches = 0,
         consec_match_clump_size = compress_flags.consec_match_clump_size;
+    int *dp_score = mem->dp_score, *dp_from = mem->dp_from;
 
     while (!(pos[0] == 0 && pos[1] == 0)) {
         int prev_j1, prev_j2;
@@ -261,9 +254,11 @@ struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
     int num_steps = 0;
     int matches_count = 0, i = 0;
 
-    make_nw_tables(rseq, dp_len1, i1, dir1, oseq, dp_len2, i2, dir2);
-    int *best = best_edge(dp_len1, dp_len2);
-    best = backtrack_to_clump(best);
+    int *dp_score = mem->dp_score, *dp_from = mem->dp_from;
+
+    make_nw_tables(rseq, dp_len1, i1, dir1, oseq, dp_len2, i2, dir2, mem);
+    int *best = best_edge(dp_len1, dp_len2, mem);
+    best = backtrack_to_clump(best, mem);
 
     if (best[0] <= 0) {
         align.ref = "\0";

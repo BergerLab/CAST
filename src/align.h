@@ -12,8 +12,6 @@ type.
 
 #include <stdint.h>
 
-#define CABLAST_ALIGN_SEQ_SIZE 10000
-
 struct ungapped_alignment{
     int32_t length;
     bool found_bad_window;
@@ -26,22 +24,16 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
                   bool *matches_past_clump, int *matches_index);
 
 struct cb_align_nw_memory {
-    int32_t *table;
-    int32_t *zeroes;
-    char *ref;
-    char *org;
+    int32_t *dp_score;
+    int32_t *dp_from;
 };
 
-struct cb_nw_tables {
-    int **dp_score;
-    int **dp_from;
-};
-
-int *best_edge(int dp_len1, int dp_len2);
-int *backtrack_to_clump(int *pos);
+int *best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem);
+int *backtrack_to_clump(int *pos, struct cb_align_nw_memory *mem);
 
 void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
-                    char *oseq, int dp_len2, int i2, int dir2);
+                    char *oseq, int dp_len2, int i2, int dir2,
+                    struct cb_align_nw_memory *mem);
 
 struct cb_align_nw_memory *cb_align_nw_memory_init();
 
