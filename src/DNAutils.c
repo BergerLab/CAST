@@ -8,7 +8,7 @@ char *base_complement = "TNGNNNCNNNNNNNNNNNNANNNNNN";
 /*Checks if two bases match.  If one or both bases is an N, it is an
   automatic mismatch*/
 extern inline bool bases_match(char a, char b, int dir_prod){
-    return a != 'N' && a == (dir_prod > 0 ? b : base_complement[b-'A']);
+    return a == (dir_prod > 0 ? b : base_complement[b-'A']) && a != 'N';
 }
 
 /*Takes in a pointer to the start of a k-mer in a DNA sequence and the length
