@@ -576,6 +576,7 @@ extend_match(struct cb_align_nw_memory *mem,
             rseq_len = 0, oseq_len = 0, dir_prod = dir1 * dir2;
     bool *matches, *matches_past_clump;
     bool found_bad_window;
+    char *base_complement = "TNGNNNCNNNNNNNNNNNNANNNNNN";
 
     max_section_size = 2 * compress_flags.max_chunk_size;
 

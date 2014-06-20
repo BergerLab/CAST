@@ -104,11 +104,22 @@ struct cb_align_nw_memory *cb_align_nw_memory_init(){
     mem = malloc(sizeof(*mem));
     assert(mem);
 
-    mem->dp_score = malloc(676*sizeof(*mem->dp_score));
-    assert(mem->dp_score);
+    int *dp_score = malloc(676*sizeof(*dp_score));
+    assert(dp_score);
 
-    mem->dp_from = malloc(676*sizeof(*mem->dp_from));
-    assert(mem->dp_from);
+    int *dp_from = malloc(676*sizeof(*dp_from));
+    assert(dp_from);
+
+    for (int i = 0; i < 26; i++) {
+        dp_score[i] = -3*i;
+        dp_from[i] = 2;
+
+        dp_score[26*i] = -3*i;
+        dp_from[26*i]  = 1;
+    }
+
+    mem->dp_score = dp_score;
+    mem->dp_from  = dp_from;
 
     return mem;
 }
@@ -132,21 +143,13 @@ void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
     int i, j1, j2, dir_prod = dir1*dir2;
     int *dp_score = mem->dp_score, *dp_from = mem->dp_from;
 
-    for (i = 0; i <= dp_len2; i++) {
-        dp_score[i] = -3*i;
-        dp_from[i] = 2;
-    }
-    for (i = 1; i <= dp_len1; i++) {
-        dp_score[26*i] = -3*i;
-        dp_from[26*i]  = 1;
-    }
     for (j1 = 1; j1 <= dp_len1; j1++)
         for (j2 = 1; j2 <= dp_len2; j2++){
             int score0, score1, score2;
 
             score0 = dp_score[26*(j1-1)+j2-1] +
                      (bases_match(rseq[i1+dir1*(j1-1)], oseq[i2+dir2*(j2-1)],
-                                                         dir_prod) ? 1 : -3);
+                                                        dir_prod) ? 1 : -3);
             score1 = dp_score[26*(j1-1)+j2] - 3;
             score2 = dp_score[26*j1+j2-1] - 3;
             if (score0 >= score1 && score0 >= score2) {
