@@ -15,7 +15,6 @@ struct compress_flags {
     int32_t min_match_len;
     int32_t procs;
     int32_t map_seed_size;
-    int32_t ext_seed_size;
     int32_t ext_seq_id_threshold;
 
     int32_t max_kmer_freq;

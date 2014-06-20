@@ -138,7 +138,6 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
     struct cb_seed_loc *seeds, *seeds_r, *seedLoc;
     struct cb_alignment alignment;
     int32_t seed_size = coarse_db->seeds->seed_size,
-            ext_seed  = compress_flags.ext_seed_size,
             resind = -1, current = 0, i = 0, new_coarse_seq_id = -1,
             fwd_rlen, rev_rlen, fwd_olen, rev_olen, index,
             chunks           = 0,
@@ -149,9 +148,9 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             coarse_seq_count = coarse_seqs->size,
             org_seq_len      = org_seq->length,
             end_of_chunk     = min(start_of_section + max_chunk_size,
-                                   org_seq_len - ext_seed),
+                                   org_seq_len),
             end_of_section   = min(start_of_section + max_section_size,
-                                   org_seq_len - ext_seed);
+                                   org_seq_len);
     char *kmer, revcomp[seed_size+1], *org_seq_residues = org_seq->residues;
     bool *matches, *matches_temp, found_match;
 
@@ -167,7 +166,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
         matches_temp[i] = true;
     }
 
-    for (current = 0; current <= org_seq_len-seed_size - ext_seed; current++) {
+    for (current = 0; current <= org_seq_len-seed_size; current++) {
         found_match = false;
 
         /*If we are at the beginning of the first chunk of the first sequence,
@@ -184,12 +183,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                                end_of_chunk - 1, 0,
                                                end_of_chunk - 1, true));
 
-            if (end_of_chunk < org_seq_len - seed_size - ext_seed) {
+            if (end_of_chunk < org_seq_len - seed_size) {
                 start_of_section += max_chunk_size - overlap;
                 end_of_chunk   = min(start_of_section + max_chunk_size,
-                                     org_seq_len - ext_seed);
+                                     org_seq_len);
                 end_of_section = min(start_of_section + max_section_size,
-                                     org_seq_len - ext_seed);
+                                     org_seq_len);
 /*printf("%d->", current);*/
                 current        = start_of_section-1;
 /*printf("%d\n", current);*/
@@ -217,7 +216,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             resind = seedLoc->residue_index;
             coarse_seq = cb_coarse_get(coarse_db, seedLoc->coarse_seq_id);
 
-            if (resind + seed_size + ext_seed > coarse_seq->seq->length)
+            if (resind + seed_size > coarse_seq->seq->length)
                 continue;
 
             if ((attempt_ext(current, -1, org_seq_residues,
@@ -340,7 +339,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                         true));
 
                 /*Update the current position in the sequence*/
-                if (current + fwd_olen <= org_seq_len-seed_size-ext_seed-1)
+                if (current + fwd_olen <= org_seq_len-seed_size-1)
                     start_of_section = current + fwd_olen -
                                        compress_flags.overlap + seed_size;
                 else
@@ -349,9 +348,9 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
 /*printf("%d, fwd_olen = %d->", current, fwd_olen);*/
                 current        = start_of_section - 1;
                 end_of_chunk   = min(start_of_section + max_chunk_size,
-                                     org_seq_len-ext_seed);
+                                     org_seq_len);
                 end_of_section = min(start_of_section + max_section_size,
-                                     org_seq_len-ext_seed);
+                                     org_seq_len);
 /*printf("%d\n", current);*/
 
                 chunks++;
@@ -376,7 +375,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             resind = seedLoc->residue_index;
             coarse_seq = cb_coarse_get(coarse_db, seedLoc->coarse_seq_id);
 
-            if (resind + seed_size + ext_seed > coarse_seq->seq->length)
+            if (resind + seed_size > coarse_seq->seq->length)
                 continue;
 
             if ((attempt_ext(current, -1, org_seq_residues,
@@ -498,7 +497,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                         false));
 
                 /*Update the current position in the sequence*/
-                if (current + rev_olen <= org_seq_len-seed_size-ext_seed-1)
+                if (current + rev_olen <= org_seq_len-seed_size-1)
                     start_of_section = current + rev_olen -
                                        compress_flags.overlap + seed_size;
                 else
@@ -506,9 +505,9 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
 /*printf("%d, rev_olen = %d->", current, rev_olen);*/
                 current        = start_of_section - 1;
                 end_of_chunk   = min(start_of_section + max_chunk_size,
-                                     org_seq_len-ext_seed);
+                                     org_seq_len);
                 end_of_section = min(start_of_section + max_section_size,
-                                     org_seq_len-ext_seed);
+                                     org_seq_len);
 /*printf("%d\n", current);*/
 
                 chunks++;
@@ -542,12 +541,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                                 start_of_section - 1,
                                               true));
 
-            if (end_of_chunk < org_seq_len - seed_size - ext_seed - 1) {
+            if (end_of_chunk < org_seq_len - seed_size - 1) {
                 start_of_section = end_of_chunk - overlap;
                 end_of_chunk     = min(start_of_section + max_chunk_size,
-                                       org_seq_len - ext_seed);
+                                       org_seq_len);
                 end_of_section   = min(start_of_section + max_section_size,
-                                       org_seq_len - ext_seed);
+                                       org_seq_len);
 /*printf("%d->", current);*/
                 current          = start_of_section - 1;
 /*printf("%d\n", current);*/
