@@ -9,7 +9,7 @@
 #include "DNAalphabet.h"
 #include "flags.h"
 
-int dp_score[26][26], dp_from[26][26];
+int dp_score[676], dp_from[676];
 
 /*@param rseq, oseq: The coarse and original sequences.
  *@param rstart, rend, ostart, oend: The starting and ending indices of the
@@ -142,33 +142,33 @@ void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
     int i, j1, j2, dir_prod = dir1*dir2;
 
     for (i = 0; i <= dp_len2; i++) {
-        dp_score[0][i] = -3*i;
-        dp_from[0][i] = 2;
+        dp_score[i] = -3*i;
+        dp_from[i] = 2;
     }
     for (i = 1; i <= dp_len1; i++) {
-        dp_score[i][0] = -3*i;
-        dp_from[i][0] = 1;
+        dp_score[26*i] = -3*i;
+        dp_from[26*i]  = 1;
     }
     for (j1 = 1; j1 <= dp_len1; j1++)
         for (j2 = 1; j2 <= dp_len2; j2++){
             int score0, score1, score2;
 
-            score0 = dp_score[j1-1][j2-1] +
+            score0 = dp_score[26*(j1-1)+j2-1] +
                      (bases_match(rseq[i1+dir1*(j1-1)], oseq[i2+dir2*(j2-1)],
                                                          dir_prod) ? 1 : -3);
-            score1 = dp_score[j1-1][j2] - 3;
-            score2 = dp_score[j1][j2-1] - 3;
+            score1 = dp_score[26*(j1-1)+j2] - 3;
+            score2 = dp_score[26*j1+j2-1] - 3;
             if (score0 >= score1 && score0 >= score2) {
-                dp_score[j1][j2] = score0;
-                dp_from[j1][j2] = 0;
+                dp_score[26*j1+j2] = score0;
+                dp_from[26*j1+j2] = 0;
             }
             else if (score2 >= score1) {
-                dp_score[j1][j2] = score2;
-                dp_from[j1][j2] = 2;
+                dp_score[26*j1+j2] = score2;
+                dp_from[26*j1+j2] = 2;
             }
             else {
-                dp_score[j1][j2] = score1;
-                dp_from[j1][j2] = 1;
+                dp_score[26*j1+j2] = score1;
+                dp_from[26*j1+j2] = 1;
             }
         }
 }
@@ -185,13 +185,13 @@ int *best_edge(int dp_len1, int dp_len2){
     best[0] = -1;
     best[1] = -1;
     for (j2 = 0; j2 <= dp_len2; j2++)
-        if (dp_score[dp_len1][j2] >= max_dp_score) {
-            max_dp_score = dp_score[dp_len1][j2];
+        if (dp_score[26*dp_len1+j2] >= max_dp_score) {
+            max_dp_score = dp_score[26*dp_len1+j2];
             best[0] = dp_len1; best[1] = j2;
         }
     for (j1 = 0; j1 <= dp_len1; j1++)
-        if (dp_score[j1][dp_len2] >= max_dp_score) {
-            max_dp_score = dp_score[j1][dp_len2];
+        if (dp_score[26*j1+dp_len2] >= max_dp_score) {
+            max_dp_score = dp_score[26*j1+dp_len2];
             best[0] = j1; best[1] = dp_len2;
         }
    return best; 
@@ -210,13 +210,13 @@ int *backtrack_to_clump(int *pos){
             break;
         }
 
-        switch (dp_from[pos[0]][pos[1]]) { /*backtrack to previous cell*/
+        switch (dp_from[26*pos[0]+pos[1]]) { /*backtrack to previous cell*/
             case 0:  prev_j1 = pos[0]-1; prev_j2 = pos[1]-1; break;
             case 2:  prev_j1 = pos[0];   prev_j2 = pos[1]-1; break;
             default: prev_j1 = pos[0]-1; prev_j2 = pos[1];
         }
-        if (dp_from[pos[0]][pos[1]] == 0)
-            if (dp_score[pos[0]][pos[1]] > dp_score[prev_j1][prev_j2]) /*match*/
+        if (dp_from[26*pos[0]+pos[1]] == 0)
+            if (dp_score[26*pos[0]+pos[1]] > dp_score[26*prev_j1+prev_j2]) /*match*/
                 consec_matches++;
             else
                 consec_matches = 0;
@@ -292,7 +292,7 @@ struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
     while (!(cur_j1 == 0 && cur_j2 == 0)) {
         int prev_j1, prev_j2;
 
-        switch (dp_from[cur_j1][cur_j2]) {
+        switch (dp_from[26*cur_j1+cur_j2]) {
             char c1, c2;
         case 0:
             prev_j1 = cur_j1-1; prev_j2 = cur_j2-1; /*match or substitution*/
@@ -313,8 +313,8 @@ struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
             subs1_dp[num_steps] = c1;
             subs2_dp[num_steps] = '-';
         }
-        matches_to_add[num_steps] = dp_score[cur_j1][cur_j2] >
-                                    dp_score[prev_j1][prev_j2];
+        matches_to_add[num_steps] = dp_score[26*cur_j1+cur_j2] >
+                                    dp_score[26*prev_j1+prev_j2];
         num_steps++;
         cur_j1 = prev_j1; cur_j2 = prev_j2;
     }
