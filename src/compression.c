@@ -128,7 +128,7 @@ static void *cb_compress_worker(void *data){
 struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             struct cb_align_nw_memory *mem){
-printf("\nsequence #%d\n", org_seq->id+1);
+/*printf("\nsequence #%d\n", org_seq->id+1);*/
     struct DSVector *coarse_seqs = coarse_db->seqs;
     struct cb_seeds *coarse_seeds = coarse_db->seeds;
     struct extend_match mseqs_fwd, mseqs_rev;
@@ -174,7 +174,7 @@ printf("\nsequence #%d\n", org_seq->id+1);
          *add the first chunk without a match and skip ahead to the start of
          *the second chunk.
          */
-        if (current == 0 && coarse_seqs_count == 0) {
+        if (current == 0 && coarse_seq_count == 0) {
             new_coarse_seq_id =
               add_without_match(coarse_db, org_seq, 0,
                                 minimum(org_seq_len, max_chunk_size));

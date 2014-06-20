@@ -99,29 +99,31 @@ void cb_seeds_free(struct cb_seeds *seeds){
 
 void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
     struct cb_seed_loc *loc;
-    int32_t hash, i;
-    char *kmer;
+    int32_t hash, i, seed_size = seeds->seed_size+1,
+            seq_length = seq->seq->length, *loc_counts = seeds->loc_counts;
+    struct cb_seed_loc **locs = seeds->locs, **locs_last = seeds->locs_last;
+    char *kmer, *residues = seq->seq->residues;
 
     pthread_rwlock_wrlock(&seeds->lock);
-    for (i = 0; i < seq->seq->length - seeds->seed_size+1; i++) {
-        kmer = seq->seq->residues + i;
+    for (i = 0; i < seq_length - seed_size + 1; i++) {
+        kmer = residues + i;
 
         hash = hash_kmer(seeds, kmer);
 
         if (hash == -1 ||
-            seeds->loc_counts[hash] >= compress_flags.max_kmer_freq)
+            loc_counts[hash] >= compress_flags.max_kmer_freq)
             continue;
 
         loc = cb_seed_loc_init(seq->id, i);
-        if (seeds->locs[hash] == NULL) {
-            seeds->locs[hash]      = loc;
-            seeds->locs_last[hash] = loc;
+        if (locs[hash] == NULL) {
+            locs[hash]      = loc;
+            locs_last[hash] = loc;
         }
         else {
-            seeds->locs_last[hash]->next = loc;
-            seeds->locs_last[hash]       = loc;
+            locs_last[hash]->next = loc;
+            locs_last[hash]       = loc;
         }
-        (seeds->loc_counts[hash])++;
+        (loc_counts[hash])++;
     }
     pthread_rwlock_unlock(&seeds->lock);
 }
@@ -192,14 +194,15 @@ static int32_t residue_value(char residue){
 /*Takes in as input a seeds table and a k-mer and returns the k-mer's index
   in the seeds table*/
 static int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
-    int32_t i = 0, key = 0, val = 0;
+    int32_t i = 0, key = 0, val = 0, seed_size = seeds->seed_size,
+            *powers = seeds->powers;
 
-    for (i = 0; i < seeds->seed_size; i++) {
+    for (i = 0; i < seed_size; i++) {
         val = residue_value(kmer[i]);
         if (val == -1)
             return -1;
 
-        key += residue_value(kmer[i]) * seeds->powers[i];
+        key += residue_value(kmer[i]) * powers[i];
     }
     return key;
 }
@@ -214,7 +217,7 @@ char *unhash_kmer(struct cb_seeds *seeds, int hash){
     assert(kmer);
 
     kmer[10] = '\0';
-    for (i = 0; i < seeds -> seed_size; i++) {
+    for (i = 0; i < seeds->seed_size; i++) {
         kmer[i] = nucleotides[hash%4];
         hash /= 4;
     }
