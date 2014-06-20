@@ -26,11 +26,8 @@ char *get_kmer(char *DNA_string, int k){
 }
 
 /*Takes in a k-mer and its length and returns the k-mer's reverse complement.*/
-char *kmer_revcomp(char *kmer, int k){
+char *kmer_revcomp(char *revcomp, char *kmer, int k){
     int i = 0;
-
-    char *revcomp = malloc(k*sizeof(*revcomp));
-    assert(revcomp);
 
     for (i = 0; i < k; i++)
         revcomp[i] = base_complement[kmer[k-i-1]-'A'];

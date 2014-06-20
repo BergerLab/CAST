@@ -152,7 +152,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                    org_seq_len - ext_seed),
             end_of_section   = min(start_of_section + max_section_size,
                                    org_seq_len - ext_seed);
-    char *kmer, *revcomp, *org_seq_residues = org_seq->residues;
+    char *kmer, revcomp[seed_size+1], *org_seq_residues = org_seq->residues;
     bool *matches, *matches_temp, found_match;
 
     /*Initialize the matches and matches_temp arrays*/
@@ -199,8 +199,8 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
         }
 
         /*Get the k-mer and allocate a copy of its reverse complement*/
-        kmer    = get_kmer(org_seq_residues+current, seed_size);
-        revcomp = kmer_revcomp(kmer, seed_size);
+        kmer    = org_seq_residues+current;
+        kmer_revcomp(revcomp, kmer, seed_size);
 
         /*The locations of all seeds in the database that start with the
           current k-mer.*/
@@ -522,8 +522,6 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 free(alignment.org);
             }
         }
-        free(kmer);
-        free(revcomp);
         cb_seed_loc_free(seeds);
         cb_seed_loc_free(seeds_r);
 
