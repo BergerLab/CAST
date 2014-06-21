@@ -131,6 +131,7 @@ void cb_align_nw_memory_free(struct cb_align_nw_memory *mem){
     free(mem);
 }
 
+char *base_complements = "TNGNNNCNNNNNNNNNNNNANNNNNN";
 /*Makes the tables used in Needleman-Wunsch alignment; takes in two sequences,
  *the lengths of the sections of the sequences that we are aligning, indices
  *into these sequences, and the directions of the sequences and returns a
@@ -140,31 +141,48 @@ void cb_align_nw_memory_free(struct cb_align_nw_memory *mem){
 void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
                     char *oseq, int dp_len2, int i2, int dir2,
                     struct cb_align_nw_memory *mem){
-    int i, j1, j2, dir_prod = dir1*dir2;
+    int m, dir_prod = dir1*dir2;
     int *dp_score = mem->dp_score, *dp_from = mem->dp_from;
+    char *base_complement = base_complements;
 
-    for (j1 = 1; j1 <= dp_len1; j1++)
-        for (j2 = 1; j2 <= dp_len2; j2++){
-            int score0, score1, score2;
+    for (int j1 = 1; dp_len1 - j1 >= 0; j1++) {
+        char a = rseq[i1+dir1*(j1-1)];
+        for (int j2 = 1; dp_len2 - j2 >= 0; j2++){
+            char b = oseq[i2+dir2*(j2-1)];
+            int score0 = dp_score[26*(j1-1)+j2-1] - 3,
+                score1 = dp_score[26*(j1-1)+j2] - 3,
+                score2 = dp_score[26*j1+j2-1] - 3,
+                m = score1>score2?score1:score2;
 
-            score0 = dp_score[26*(j1-1)+j2-1] +
-                     (bases_match(rseq[i1+dir1*(j1-1)], oseq[i2+dir2*(j2-1)],
-                                                        dir_prod) ? 1 : -3);
-            score1 = dp_score[26*(j1-1)+j2] - 3;
-            score2 = dp_score[26*j1+j2-1] - 3;
-            if (score0 >= score1 && score0 >= score2) {
+            if (score0 - m >= 0) {
+                if (a == (dir_prod > 0 ? b : base_complement[b-'A']))
+                    if (a != 'N')
+                        score0 += 4;
                 dp_score[26*j1+j2] = score0;
                 dp_from[26*j1+j2] = 0;
+                continue;
             }
-            else if (score2 >= score1) {
+            else if (score0 + 4 - m >= 0) {
+                if (a == (dir_prod > 0 ? b : base_complement[b-'A']))
+                   if (a != 'N')
+                       score0 += 4;
+                if (score0 - m >= 0) {
+                    dp_score[26*j1+j2] = score0;
+                    dp_from[26*j1+j2] = 0;
+                    continue;
+                }
+            }
+
+            if (m - score2 == 0) {
                 dp_score[26*j1+j2] = score2;
                 dp_from[26*j1+j2] = 2;
+                continue;
             }
-            else {
-                dp_score[26*j1+j2] = score1;
-                dp_from[26*j1+j2] = 1;
-            }
+
+            dp_score[26*j1+j2] = score1;
+            dp_from[26*j1+j2] = 1;
         }
+    }
 }
 
 /*Finds the space on the bottom and right edges of a Needleman-Wunsch score
