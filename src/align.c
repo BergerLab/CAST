@@ -411,14 +411,16 @@ attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
             int32_t len2, int32_t start2){
     const int32_t dir_prod = dir1*dir2;
     int32_t progress = 0, consec_mismatch = 0;
+    char *base_complement = base_complements;
 
     i1 += dir1;
     i2 += dir2;
 
-    while (consec_mismatch < compress_flags.max_consec_mismatch &&
+    while (compress_flags.max_consec_mismatch - consec_mismatch > 0 &&
            i1 >= start1 && i1 < start1+len1 &&
            i2 >= start2 && i2 < start2+len2) {
-        if (!bases_match(s1[i1], s2[i2], dir_prod))
+        char a = s1[i1], b = s2[i2];
+        if (a != (dir_prod > 0 ? b : base_complement[b-'A']) && a != 'N')
             consec_mismatch++;
         else
             consec_mismatch = 0;
