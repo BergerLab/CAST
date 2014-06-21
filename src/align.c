@@ -146,12 +146,15 @@ void cb_align_nw_memory_free(struct cb_align_nw_memory *mem){
 void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
                     char *oseq, int dp_len2, int i2, int dir2,
                     struct cb_align_nw_memory *mem){
-    int m, dir_prod = dir1*dir2;
+    int dir_prod = dir1*dir2;
     int *dp_score = mem->dp_score, *dp_from = mem->dp_from;
     char *base_complement = base_complements;
 
     for (int j1 = 1; dp_len1 - j1 >= 0; j1++) {
-        char a = rseq[i1+dir1*(j1-1)];
+        char a = dir_prod > 0 ? rseq[i1+dir1*(j1-1)] :
+                                base_complement[rseq[i1+dir1*(j1-1)]-'A'];
+        if (a == 'N')
+            a = '\0';
         for (int j2 = 1; dp_len2 - j2 >= 0; j2++){
             char b = oseq[i2+dir2*(j2-1)];
             int score0 = dp_score[26*(j1-1)+j2-1] - 3,
@@ -160,17 +163,15 @@ void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
                 m = score1>score2?score1:score2;
 
             if (score0 - m >= 0) {
-                if (a == (dir_prod > 0 ? b : base_complement[b-'A']))
-                    if (a != 'N')
-                        score0 += 4;
+                if (a == b)
+                    score0 += 4;
                 dp_score[26*j1+j2] = score0;
                 dp_from[26*j1+j2] = 0;
                 continue;
             }
             else if (score0 + 4 - m >= 0) {
-                if (a == (dir_prod > 0 ? b : base_complement[b-'A']))
-                   if (a != 'N')
-                       score0 += 4;
+                if (a == b)
+                    score0 += 4;
                 if (score0 - m >= 0) {
                     dp_score[26*j1+j2] = score0;
                     dp_from[26*j1+j2] = 0;
