@@ -196,7 +196,7 @@ void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
  */
 int *best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem){
     int j1, j2, max_dp_score = -1000;
-    int *dp_score = mem->dp_score, *dp_from = mem->dp_from;
+    int *dp_score = mem->dp_score;
 
     int *best = malloc(2*sizeof(*best));
     assert(best);

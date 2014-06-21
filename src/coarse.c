@@ -127,8 +127,6 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
     /*Keeps track of the indices to be printed to coarse.links.index and
       coarse_fasta_base_index.*/
     uint64_t link_index = (uint64_t)0, base_index = (uint64_t)0;
-    int16_t mask = (int16_t)0xff;
-    int32_t j;
 
     for (i = 0; i < coarse_db->seqs->size; i++) {
         uint64_t coarse_fasta_index, link_count = 0;
@@ -333,9 +331,6 @@ void cb_coarse_seq_free(struct cb_coarse_seq *seq){
   sequence at the end of the linked list of links.*/
 void cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
                            struct cb_link_to_compressed *newlink){
-    struct cb_link_to_compressed *link;
-
-    assert(newlink->next == NULL);
     pthread_rwlock_wrlock(&seq->lock_links);
     if (seq->links == NULL) {
         seq->links     = newlink;
@@ -497,7 +492,7 @@ cb_coarse_r_init(int32_t seed_size,
 
 /*Frees a cb_coarse_r struct.*/
 void cb_coarse_r_free(struct cb_coarse_r *coarsedb){
-    int32_t i, j;
+    int32_t i;
 
     cb_coarse_free(coarsedb->db);
 
