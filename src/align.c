@@ -9,6 +9,8 @@
 #include "DNAalphabet.h"
 #include "flags.h"
 
+char *base_complements = "TNGNNNCNNNNNNNNNNNNANNNNNN";
+
 /*@param rseq, oseq: The coarse and original sequences.
  *@param rstart, rend, ostart, oend: The starting and ending indices of the
  *  coarse and original sequences.
@@ -49,23 +51,27 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
     ungapped.length = -1;
     ungapped.found_bad_window = false;
 
+    char *base_complement = base_complements;
+
     for (i = *matches_index - 100; i < *matches_index; i++)
         if (matches[i])
             matches_count++;
 
     while (i1 >= rstart && i1 < rend && i2 >= ostart && i2 < oend) {
-        bool cur_ismatch = bases_match(rseq[i1], oseq[i2], dir_prod);
+        char a = rseq[i1], b = oseq[i2];
+        bool cur_ismatch =
+          a == (dir_prod > 0 ? b : base_complement[b-'A']) && a != 'N';
 
         i1 += dir1;
         i2 += dir2;
         scanned++;
 
-        if (cur_ismatch == 1) {
+        if (cur_ismatch) {
             matches_past_clump[temp_index] = true;
             temp_index++;
             successive++;
 
-            if (successive >= consec_match_clump_size) {
+            if (consec_match_clump_size - successive <= 0) {
                 int update = check_and_update(matches, matches_index, 
                                               &matches_count,
                                               matches_past_clump, temp_index);
@@ -86,7 +92,7 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
             matches_past_clump[temp_index] = false;
             temp_index++;
             successive = 0;
-            if (scanned - length >= compress_flags.btwn_match_min_dist_check)
+            if (scanned-length-compress_flags.btwn_match_min_dist_check >= 0)
                 if ((double)matches_since_last_consec < (scanned-length)*0.5) {
                     ungapped.length = length;
                     return ungapped;
@@ -131,7 +137,6 @@ void cb_align_nw_memory_free(struct cb_align_nw_memory *mem){
     free(mem);
 }
 
-char *base_complements = "TNGNNNCNNNNNNNNNNNNANNNNNN";
 /*Makes the tables used in Needleman-Wunsch alignment; takes in two sequences,
  *the lengths of the sections of the sequences that we are aligning, indices
  *into these sequences, and the directions of the sequences and returns a
@@ -422,7 +427,7 @@ attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
         if (a != (dir_prod > 0 ? b : base_complement[b-'A']) && a != 'N') {
             consec_mismatch++;
             if (compress_flags.max_consec_mismatch - consec_mismatch == 0)
-                break;
+                return progress + 1;
         }
         else
             consec_mismatch = 0;
