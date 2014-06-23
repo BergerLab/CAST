@@ -43,4 +43,4 @@ The usage of `cablast-compress` is:
 cablast-compress [flags] database-directory fasta-file [fasta-file ...]
 ```
 
-**Currently the --ungapped-window-size, --match-extend, --match-seq-id-threshold, --btwn_match_ident_thresh, and --attempt-ext-len flags are unused**
+**Currently the --ungapped-window-size, --match-extend, --match-seq-id-threshold, --btwn_match_ident_thresh, and --attempt-ext-len flags are unused.  Also, the multithreaded version of compression is still under development and does not currently work.**
