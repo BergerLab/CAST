@@ -40,7 +40,7 @@ static int32_t hash_kmer(struct cb_seeds *seeds, char *kmer);
 
 struct cb_seeds *cb_seeds_init(int32_t seed_size){
     struct cb_seeds *seeds;
-    int32_t errno, i, p;
+    int32_t errno, p;
 
     seeds = malloc(sizeof(*seeds));
     assert(seeds);
@@ -57,7 +57,7 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     assert(seeds->powers);
 
     p = 1;
-    for (i = 0; i < seeds->powers_length; i++) {
+    for (int i = 0; i < seeds->powers_length; i++) {
         seeds->powers[i] = p;
         p *= CABLAST_SEEDS_ALPHA_SIZE;
     }
@@ -73,10 +73,14 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     seeds->loc_counts = malloc(seeds->locs_length*sizeof(*seeds->loc_counts));
     assert(seeds->loc_counts);
 
-    for (i = 0; i < seeds->locs_length; i++) {
-        seeds->locs[i] = NULL;
-        seeds->locs_last[i] = NULL;
-        seeds->loc_counts[i] = 0;
+    int locs_length = seeds->locs_length;
+    int32_t *loc_counts = seeds->loc_counts;
+    struct cb_seed_loc **locs = seeds->locs,
+                       **locs_last = seeds->locs_last;
+    for (int i = 0; i < locs_length; i++) {
+        locs[i]       = NULL;
+        locs_last[i]  = NULL;
+        loc_counts[i] = 0;
     }
 
     return seeds;
