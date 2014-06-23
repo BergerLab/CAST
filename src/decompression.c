@@ -71,15 +71,15 @@ printf("    %d %d\n", link->coarse_start, link->coarse_end);
                 struct cb_link_to_coarse *current = NULL;
                 struct cb_compressed_seq *seq;
                 struct cb_hit_expansion *expansion;
-                uint64_t original_start, original_end, original_range;
-                char *orig_str;
+                uint64_t exp_start, exp_end, exp_range;
+                char *exp_str;
                 bool dir = link->dir;
 
                 /*Calculate the range in the original sequence for the section
                  *of the original sequence we want to re-create with this
                  *expansion.
                  */
-                original_start =
+                exp_start =
                   get_max(0, (dir ? get_min(hit_from + (link->original_start -
                                                         link->coarse_start),
                                             hit_from + (link->original_end -
@@ -89,7 +89,7 @@ printf("    %d %d\n", link->coarse_start, link->coarse_end);
                                             link->original_end -
                                             (hit_to-link->coarse_start)))
                              - hit_pad_length);
-                original_end =
+                exp_end =
                   get_min((dir ? get_max(hit_to + (link->original_start -
                                                    link->coarse_start),
                                          hit_to + (link->original_end -
@@ -99,39 +99,39 @@ printf("    %d %d\n", link->coarse_start, link->coarse_end);
                                          link->original_start +
                                          link->coarse_end-hit_from))
                           + hit_pad_length, seq_lengths[link->org_seq_id] - 1);
-                original_range = original_end - original_start + 1;
+                exp_range = exp_end - exp_start + 1;
 
                 seq = comdb->seqs->size == 0 ?
                         cb_compressed_read_seq_at(comdb, link->org_seq_id) :
                         cb_compressed_seq_at(comdb, link->org_seq_id);
 
-                orig_str = malloc((original_range+1)*sizeof(*orig_str));
-                assert(orig_str);
+                exp_str = malloc((exp_range+1)*sizeof(*exp_str));
+                assert(exp_str);
 
-                for (k = 0; k < original_range; orig_str[k++]='?');
+                for (k = 0; k < exp_range; exp_str[k++]='?');
 
                 /*Run decode_edit_script for each link_to_coarse in the compressed
                   sequence to re-create the section of the original string.*/
                 current = seq->links;
                 for (; current; current = current->next) {
                     int coarse_range = current->coarse_end - current->coarse_start,
-                        init_i0 = current->original_start-(int32_t)original_start,
+                        init_i0 = current->original_start-(int32_t)exp_start,
                         last_i0 = init_i0 + coarse_range;
 
-                    if (0 < last_i0 && (int32_t)original_range > init_i0)
-                        decode_edit_script(orig_str, original_range,
-                                           original_start, coarse_db, current);
+                    if (0 < last_i0 && (int32_t)exp_range > init_i0)
+                        decode_edit_script(exp_str, exp_range,
+                                           exp_start, coarse_db, current);
                 }
-                orig_str[original_range] = '\0';
-/*printf("%s\n", orig_str);*/
+                exp_str[exp_range] = '\0';
+
                 expansion = malloc(sizeof(*expansion));
                 assert(expansion);
 
-                expansion->offset = (int64_t)original_start;
-                expansion->seq = cb_seq_init(link->org_seq_id, seq->name, orig_str);
+                expansion->offset = (int64_t)exp_start;
+                expansion->seq = cb_seq_init(link->org_seq_id, seq->name, exp_str);
                 ds_vector_append(oseqs, (void *)expansion);
 
-                free(orig_str);
+                free(exp_str);
 
                 /*Free the compressed sequence if it was loaded using
                   cb_compressed_read_seq_at*/
@@ -142,9 +142,6 @@ printf("    %d %d\n", link->coarse_start, link->coarse_end);
 
         ds_vector_free_no_data(link_block);
     }
-
-    /*if (!coarse_db->links)
-        ds_vector_free(coarse_seq_links);*/
 
     return oseqs;
 }
