@@ -26,10 +26,11 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
 struct cb_align_nw_memory {
     int32_t *dp_score;
     int32_t *dp_from;
+    int32_t *pos;
 };
 
-int *best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem);
-int *backtrack_to_clump(int *pos, struct cb_align_nw_memory *mem);
+void best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem);
+void backtrack_to_clump(struct cb_align_nw_memory *mem);
 
 void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
                     char *oseq, int dp_len2, int i2, int dir2,

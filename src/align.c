@@ -124,6 +124,8 @@ struct cb_align_nw_memory *cb_align_nw_memory_init(){
         dp_from[26*i]  = 1;
     }
 
+    mem->pos      = malloc(2*sizeof(*(mem->pos)));
+    assert(mem->pos);
     mem->dp_score = dp_score;
     mem->dp_from  = dp_from;
 
@@ -134,6 +136,7 @@ struct cb_align_nw_memory *cb_align_nw_memory_init(){
 void cb_align_nw_memory_free(struct cb_align_nw_memory *mem){
     free(mem->dp_score);
     free(mem->dp_from);
+    free(mem->pos);
     free(mem);
 }
 
@@ -194,32 +197,29 @@ void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
 /*Finds the space on the bottom and right edges of a Needleman-Wunsch score
  *table with the best score, returning it as an array of two ints.
  */
-int *best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem){
+void best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem){
     int j1, j2, max_dp_score = -1000;
     int *dp_score = mem->dp_score;
+    int *pos = mem->pos;
 
-    int *best = malloc(2*sizeof(*best));
-    assert(best);
-
-    best[0] = -1;
-    best[1] = -1;
+    pos[0] = -1;
+    pos[1] = -1;
     for (j2 = 0; j2 <= dp_len2; j2++)
         if (dp_score[26*dp_len1+j2] >= max_dp_score) {
             max_dp_score = dp_score[26*dp_len1+j2];
-            best[0] = dp_len1; best[1] = j2;
+            pos[0] = dp_len1; pos[1] = j2;
         }
     for (j1 = 0; j1 <= dp_len1; j1++)
         if (dp_score[26*j1+dp_len2] >= max_dp_score) {
             max_dp_score = dp_score[26*j1+dp_len2];
-            best[0] = j1; best[1] = dp_len2;
+            pos[0] = j1; pos[1] = dp_len2;
         }
-   return best; 
 }
 
-int *backtrack_to_clump(int *pos, struct cb_align_nw_memory *mem){
+void backtrack_to_clump(struct cb_align_nw_memory *mem){
     int consec_matches = 0,
         consec_match_clump_size = compress_flags.consec_match_clump_size;
-    int *dp_score = mem->dp_score, *dp_from = mem->dp_from;
+    int *dp_score = mem->dp_score, *dp_from = mem->dp_from, *pos = mem->pos;
 
     while (!(pos[0] == 0 && pos[1] == 0)) {
         int prev_j1, prev_j2;
@@ -250,7 +250,6 @@ int *backtrack_to_clump(int *pos, struct cb_align_nw_memory *mem){
         pos[0] = 0;
         pos[1] = 0;
     }
-    return pos;
 }
 
 /*@param rseq, oseq: The coarse and original sequences.
@@ -284,14 +283,14 @@ struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
     int *dp_score = mem->dp_score, *dp_from = mem->dp_from;
 
     make_nw_tables(rseq, dp_len1, i1, dir1, oseq, dp_len2, i2, dir2, mem);
-    int *best = best_edge(dp_len1, dp_len2, mem);
-    best = backtrack_to_clump(best, mem);
+    best_edge(dp_len1, dp_len2, mem);
+    backtrack_to_clump(mem);
+    int *best = mem->pos;
 
     if (best[0] <= 0) {
         align.ref = "\0";
         align.org = "\0";
         align.length = -1;
-        free(best);
        
         return align;
     }
