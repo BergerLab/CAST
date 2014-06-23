@@ -41,7 +41,6 @@ struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
     struct cb_compress_workers *workers;
     struct worker_args *wargs;
     int32_t i, errno;
-fprintf(stderr, "!!!\n");
     jobs = ds_queue_create(20);
 
     wargs = malloc(sizeof(*wargs));
@@ -128,7 +127,6 @@ static void *cb_compress_worker(void *data){
 struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             struct cb_align_nw_memory *mem){
-/*printf("\nsequence #%d\n", org_seq->id+1);*/
     struct DSVector *coarse_seqs = coarse_db->seqs;
     struct cb_seeds *coarse_seeds = coarse_db->seeds;
     struct extend_match mseqs_fwd, mseqs_rev;
@@ -189,9 +187,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                      org_seq_len);
                 end_of_section = min(start_of_section + max_section_size,
                                      org_seq_len);
-/*printf("%d->", current);*/
                 current        = start_of_section-1;
-/*printf("%d\n", current);*/
             }
             chunks++;
             continue;
@@ -345,13 +341,11 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 else
                     start_of_section = current + fwd_olen + seed_size;
 
-/*printf("%d, fwd_olen = %d->", current, fwd_olen);*/
                 current        = start_of_section - 1;
                 end_of_chunk   = min(start_of_section + max_chunk_size,
                                      org_seq_len);
                 end_of_section = min(start_of_section + max_section_size,
                                      org_seq_len);
-/*printf("%d\n", current);*/
 
                 chunks++;
 
@@ -502,13 +496,11 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                        compress_flags.overlap + seed_size;
                 else
                     start_of_section = current + rev_olen + seed_size;
-/*printf("%d, rev_olen = %d->", current, rev_olen);*/
                 current        = start_of_section - 1;
                 end_of_chunk   = min(start_of_section + max_chunk_size,
                                      org_seq_len);
                 end_of_section = min(start_of_section + max_section_size,
                                      org_seq_len);
-/*printf("%d\n", current);*/
 
                 chunks++;
 
@@ -547,14 +539,11 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                        org_seq_len);
                 end_of_section   = min(start_of_section + max_section_size,
                                        org_seq_len);
-/*printf("%d->", current);*/
                 current          = start_of_section - 1;
-/*printf("%d\n", current);*/
             }
             chunks++;
         }
     }
-/*printf("index at end: %d\n", current);*/
 
     free(matches);
     free(matches_temp);
