@@ -63,7 +63,7 @@ void fasta_free_all(struct fasta_file *ff){
 
 struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     struct fasta_seq *fs;
-    char *line = NULL;
+    char *line = NULL, *seq = NULL;
 
     /* check to make sure the next line starts a new sequence record */
     if (!is_new_sequence_start(f)){
@@ -86,28 +86,36 @@ struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     free(line);
 
     /* Now read all of the sequence data for this record */
-    fs->seq = malloc(sizeof(*fs->seq));
-    assert(fs->seq);
+    seq = malloc(sizeof(*seq));
+    assert(seq);
 
-    fs->seq[0] = '\0';
+    seq[0] = '\0';
+    int seq_length = 0;
     while (!is_new_sequence_start(f)) {
         if (0 == readline(f, &line)) {
             free(line);
+            seq[seq_length] = '\0';
+            fs->seq = seq;
             return fs;
         }
 
         line = trim(line, "* \n\r\t");
         exclude_residues(line, exclude);
         exclude_residues(line, "*");
+        int line_length = strlen(line);
 
-        fs->seq =
-          realloc(fs->seq, sizeof(*fs->seq)*(1+strlen(line)+strlen(fs->seq)));
-        assert(fs->seq);
+        seq = realloc(seq, sizeof(*seq)*(1+line_length+seq_length));
+        assert(seq);
 
-        strcat(fs->seq, line);
+        for (int i = 0; line_length - i != 0; i++)
+            seq[seq_length+i] = line[i];
+        seq_length += line_length;
+
         free(line);
     }
+    seq[seq_length] = '\0';
 
+    fs->seq = seq;
     return fs;
 }
 
@@ -176,7 +184,7 @@ static void *fasta_generator(void *gen){
 struct fasta_seq *fasta_generator_next(struct fasta_seq_gen *fsg){
     struct fasta_seq *seq;
 
-    seq = (struct fasta_seq *) ds_queue_get(fsg->seqs);
+    seq = (struct fasta_seq *)ds_queue_get(fsg->seqs);
     return seq;
 }
 
