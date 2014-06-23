@@ -460,7 +460,7 @@ int check_and_update(bool *matches, int *matches_index, int *num_matches,
             m--;
         index++;
 
-        if (m < 85) {
+        if (m < compress_flags.window_ident_thresh) {
             *matches_index = index;
             *num_matches = m;
             return i;
