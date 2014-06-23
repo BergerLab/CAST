@@ -13,9 +13,6 @@
 #include "link_to_coarse.h"
 #include "seq.h"
 
-struct cb_seq *cb_decompress_seq(struct cb_compressed_seq *cseq,
-                                   struct cb_coarse *coarsedb);
-
 struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
                                   struct cb_compressed *comdb,
                                   int32_t id, int32_t hit_from, int32_t hit_to,
