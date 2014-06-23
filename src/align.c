@@ -161,22 +161,14 @@ void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
                 score1 = dp_score[26*(j1-1)+j2] - 3,
                 score2 = dp_score[26*j1+j2-1] - 3,
                 m = score1>score2?score1:score2;
-
-            if (score0 - m >= 0) {
                 if (a == b)
                     score0 += 4;
+
+
+            if (score0 - m >= 0) {
                 dp_score[26*j1+j2] = score0;
                 dp_from[26*j1+j2] = 0;
                 continue;
-            }
-            else if (score0 + 4 - m >= 0) {
-                if (a == b)
-                    score0 += 4;
-                if (score0 - m >= 0) {
-                    dp_score[26*j1+j2] = score0;
-                    dp_from[26*j1+j2] = 0;
-                    continue;
-                }
             }
 
             if (m - score2 == 0) {
@@ -216,37 +208,40 @@ void best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem){
 void backtrack_to_clump(struct cb_align_nw_memory *mem){
     int consec_matches = 0,
         consec_match_clump_size = compress_flags.consec_match_clump_size;
-    int *dp_score = mem->dp_score, *dp_from = mem->dp_from, *pos = mem->pos;
+    int *dp_score = mem->dp_score, *dp_from = mem->dp_from, *pos = mem->pos,
+        pos0 = mem->pos[0], pos1 = mem->pos[1];
 
-    while (!(pos[0] == 0 && pos[1] == 0)) {
+    while (!(pos0 == 0 && pos1 == 0)) {
         int prev_j1, prev_j2;
 
         if (consec_matches == consec_match_clump_size) { /*found chunk; stop*/
-            pos[0] += consec_match_clump_size;
-            pos[1] += consec_match_clump_size;
+            pos0 += consec_match_clump_size;
+            pos1 += consec_match_clump_size;
             break;
         }
 
-        switch (dp_from[26*pos[0]+pos[1]]) { /*backtrack to previous cell*/
-            case 0:  prev_j1 = pos[0]-1; prev_j2 = pos[1]-1; break;
-            case 2:  prev_j1 = pos[0];   prev_j2 = pos[1]-1; break;
-            default: prev_j1 = pos[0]-1; prev_j2 = pos[1];
+        switch (dp_from[26*pos0+pos1]) { /*backtrack to previous cell*/
+            case 0:  prev_j1 = pos0-1; prev_j2 = pos1-1; break;
+            case 2:  prev_j1 = pos0;   prev_j2 = pos1-1; break;
+            default: prev_j1 = pos0-1; prev_j2 = pos1;
         }
-        if (dp_from[26*pos[0]+pos[1]] == 0)
-            if (dp_score[26*pos[0]+pos[1]] > dp_score[26*prev_j1+prev_j2]) /*match*/
+        if (dp_from[26*pos0+pos1] == 0)
+            if (dp_score[26*pos0+pos1] > dp_score[26*prev_j1+prev_j2]) /*match*/
                 consec_matches++;
             else
                 consec_matches = 0;
         else
             consec_matches = 0;
-        pos[0] = prev_j1;
-        pos[1] = prev_j2;
+        pos0 = prev_j1;
+        pos1 = prev_j2;
     }
     /*Couldn't find a 4-mer clump*/
     if (consec_matches < consec_match_clump_size) {
-        pos[0] = 0;
-        pos[1] = 0;
+        pos0 = 0;
+        pos1 = 0;
     }
+    pos[0] = pos0;
+    pos[1] = pos1;
 }
 
 /*@param rseq, oseq: The coarse and original sequences.
