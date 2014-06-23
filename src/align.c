@@ -59,14 +59,12 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
 
     while (i1 >= rstart && i1 < rend && i2 >= ostart && i2 < oend) {
         char a = rseq[i1], b = oseq[i2];
-        bool cur_ismatch =
-          a == (dir_prod > 0 ? b : base_complement[b-'A']) && a != 'N';
 
         i1 += dir1;
         i2 += dir2;
         scanned++;
 
-        if (cur_ismatch) {
+        if (a == (dir_prod > 0 ? b : base_complement[b-'A']) && a != 'N') {
             matches_past_clump[temp_index] = true;
             temp_index++;
             successive++;
@@ -82,8 +80,7 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
                         ungapped.found_bad_window = true;
                         return ungapped;
                     }
-                temp_index = 0;
-                matches_since_last_consec = 0;
+                temp_index = matches_since_last_consec = 0;
             }
             else
                 matches_since_last_consec++;
