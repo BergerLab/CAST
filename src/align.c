@@ -10,6 +10,7 @@
 #include "flags.h"
 
 char *base_complements = "TNGNNNCNNNNNNNNNNNNANNNNNN";
+int min(int a, int b){return a<b?a:b;}
 
 /*@param rseq, oseq: The coarse and original sequences.
  *@param rstart, rend, ostart, oend: The starting and ending indices of the
@@ -45,19 +46,22 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
     int32_t i = 0, dir_prod = dir1 * dir2, matches_count = 0,
             consec_match_clump_size = compress_flags.consec_match_clump_size,
             matches_since_last_consec = 0, temp_index = 0,
-            length = 0, scanned = 0, successive = consec_match_clump_size;
+            length = 0, scanned = 0, successive = consec_match_clump_size,
+            m = *matches_index;
 
     struct ungapped_alignment ungapped;
     ungapped.length = -1;
     ungapped.found_bad_window = false;
 
     char *base_complement = base_complements;
+    int distance = min(dir1 > 0 ? rend-i1 : i1-rstart+1,
+                       dir2 > 0 ? oend-i2 : i2-ostart+1);
 
-    for (i = *matches_index - 100; i < *matches_index; i++)
+    for (i = m - 100; i < m; i++)
         if (matches[i])
             matches_count++;
 
-    while (i1 >= rstart && i1 < rend && i2 >= ostart && i2 < oend) {
+    for (i = 0; i < distance; i++) {
         char a = rseq[i1], b = oseq[i2];
 
         i1 += dir1;
@@ -471,7 +475,6 @@ int check_and_update(bool *matches, int *matches_index, int *num_matches,
     return temp_index;
 }
 
-int min(int a, int b){return a<b?a:b;}
 
 /*Takes in an index in a DNA sequence, a direction, and the length of the
  *sequence and returns either 25 or the number of residues left in the sequence
