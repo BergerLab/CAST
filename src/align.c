@@ -417,8 +417,11 @@ attempt_ext(int32_t i1, const int32_t dir1, const char *s1, int32_t len1,
     i1 += dir1;
     i2 += dir2;
 
-    while (i1 >= start1 && i1 < start1+len1 &&
-           i2 >= start2 && i2 < start2+len2) {
+    int distance = min(min(dir1 > 0 ? start1+len1-i1 : i1-start1+1,
+                           dir2 > 0 ? start2+len2-i2 : i2-start2+1),
+                       compress_flags.min_progress+1);
+
+    while (progress < distance) {
         char a = s1[i1], b = s2[i2];
         if (a != (dir_prod > 0 ? b : base_complement[b-'A']) || a == 'N') {
             consec_mismatch++;
