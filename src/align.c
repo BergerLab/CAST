@@ -78,12 +78,12 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
                                               &matches_count,
                                               matches_past_clump, temp_index);
 
-                    length += update;
-                    if (update != temp_index) {
-                        ungapped.length = length;
-                        ungapped.found_bad_window = true;
-                        return ungapped;
-                    }
+                length += update;
+                if (update != temp_index) {
+                    ungapped.length = length;
+                    ungapped.found_bad_window = true;
+                    return ungapped;
+                }
                 temp_index = matches_since_last_consec = 0;
             }
             else
@@ -125,10 +125,20 @@ struct cb_align_nw_memory *cb_align_nw_memory_init(){
         dp_from[26*i]  = 1;
     }
 
-    mem->pos      = malloc(2*sizeof(*(mem->pos)));
+    mem->pos                = malloc(2*sizeof(*(mem->pos)));
     assert(mem->pos);
-    mem->dp_score = dp_score;
-    mem->dp_from  = dp_from;
+
+    mem->matches            =
+      malloc(2*compress_flags.max_chunk_size*sizeof(*(mem->matches)));
+    assert(mem->matches);
+
+    mem->matches_past_clump =
+      malloc(2*compress_flags.max_chunk_size*
+             sizeof(*(mem->matches_past_clump)));
+    assert(mem->matches_past_clump);
+
+    mem->dp_score           = dp_score;
+    mem->dp_from            = dp_from;
 
     return mem;
 }
@@ -138,6 +148,8 @@ void cb_align_nw_memory_free(struct cb_align_nw_memory *mem){
     free(mem->dp_score);
     free(mem->dp_from);
     free(mem->pos);
+    free(mem->matches);
+    free(mem->matches_past_clump);
     free(mem);
 }
 

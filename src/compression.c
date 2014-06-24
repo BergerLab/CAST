@@ -570,12 +570,8 @@ extend_match(struct cb_align_nw_memory *mem,
     max_section_size = 2 * compress_flags.max_chunk_size;
 
     /*Initialize the matches and matches_past_clump arrays.*/
-    matches = malloc(2*compress_flags.max_chunk_size*sizeof(*matches));
-    assert(matches);
-
-    matches_past_clump =
-      malloc(2*compress_flags.max_chunk_size*sizeof(*matches_past_clump));
-    assert(matches_past_clump);
+    matches = mem->matches;
+    matches_past_clump = mem->matches_past_clump;
 
     matches_index = compress_flags.gapped_window_size;
     for (i = 0; i < max_section_size; i++) {
@@ -719,8 +715,6 @@ extend_match(struct cb_align_nw_memory *mem,
 
     ds_vector_free(rseq_segments);
     ds_vector_free(oseq_segments);
-    free(matches);
-    free(matches_past_clump);
     return mseqs;
 }
 

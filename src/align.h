@@ -27,6 +27,8 @@ struct cb_align_nw_memory {
     int32_t *dp_score;
     int32_t *dp_from;
     int32_t *pos;
+    bool    *matches;
+    bool    *matches_past_clump;
 };
 
 void best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem);
