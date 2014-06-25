@@ -51,8 +51,8 @@ void cb_compressed_add(struct cb_compressed *com_db,
 
 void cb_compressed_write(struct cb_compressed *com_db,
                          struct cb_compressed_seq *seq);
-void cb_compressed_write_binary(struct cb_compressed *com_db,
-                                struct cb_compressed_seq *seq);
+uint64_t cb_compressed_write_binary(struct cb_compressed *com_db,
+                                    struct cb_compressed_seq *seq);
 
 struct cb_compressed_seq *cb_compressed_seq_at(struct cb_compressed *com_db,
                                                int32_t i);

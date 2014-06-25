@@ -91,8 +91,8 @@ void cb_compressed_write(struct cb_compressed *com_db,
 
 /*Outputs a compressed sequence in the compressed database to the database's
   compressed file in binary format.*/
-void cb_compressed_write_binary(struct cb_compressed *com_db,
-                                struct cb_compressed_seq *seq){
+uint64_t cb_compressed_write_binary(struct cb_compressed *com_db,
+                                    struct cb_compressed_seq *seq){
     struct cb_link_to_coarse *link, *find_length;
     uint64_t index = ftell(com_db->file_compressed), original_length = 0;
     char *id_string;
@@ -144,6 +144,7 @@ void cb_compressed_write_binary(struct cb_compressed *com_db,
         free(script);
     }
     putc('\n', com_db->file_compressed);
+    return seq->org_seq_id;
 }
 
 /*Takes in the ID number and the name of a sequence and creates a new compressed

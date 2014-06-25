@@ -46,7 +46,7 @@ struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
     wargs = malloc(sizeof(*wargs));
     assert(wargs);
 
-    wargs->db = db;
+    wargs->db   = db;
     wargs->jobs = jobs;
 
     workers = malloc(sizeof(*workers));
@@ -56,12 +56,12 @@ struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
     assert(workers->threads);
 
     workers->num_workers = num_workers;
-    workers->jobs = jobs;
-    workers->args = (void*) wargs;
+    workers->jobs        = jobs;
+    workers->args        = (void*)wargs;
 
     for (i = 0; i < num_workers; i++) {
         errno = pthread_create(&workers->threads[i], NULL,
-                               cb_compress_worker, (void*) wargs);
+                               cb_compress_worker, (void*)wargs);
         if (errno != 0) {
             fprintf(stderr,
               "cb_compress_start_workers: Could not start thread. Errno: %d",
@@ -98,7 +98,7 @@ void cb_compress_free_workers(struct cb_compress_workers *workers){
 
 void cb_compress_send_job(struct cb_compress_workers *workers,
                           struct cb_seq *org_seq){
-    ds_queue_put(workers->jobs, (void*) org_seq);
+    ds_queue_put(workers->jobs, (void*)org_seq);
 }
 
 static void *cb_compress_worker(void *data){
