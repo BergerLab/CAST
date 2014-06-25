@@ -115,6 +115,10 @@ extern inline struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db, i
     return seq;
 }
 
+int32_t by_index(void *a, void *b){
+    return ((int32_t)((struct cb_coarse_seq *)a)->id) -
+           ((int32_t)((struct cb_coarse_seq *)b)->id);}
+
 /*Outputs the sequences in the coarse database to a FASTA file in plain text,
  *outputs the links to the compressed database in a binary format, and outputs
  *the size of the database to the params file.
@@ -128,6 +132,7 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
       coarse_fasta_base_index.*/
     uint64_t link_index = (uint64_t)0, base_index = (uint64_t)0;
 
+    ds_vector_sort(coarse_db->seqs, by_index);
     for (i = 0; i < coarse_db->seqs->size; i++) {
         uint64_t coarse_fasta_index, link_count = 0;
         char *fasta_output;

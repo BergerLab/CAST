@@ -16,7 +16,6 @@
 struct cb_compressed *cb_compressed_init(FILE *file_compressed,
                                          FILE *file_index, bool populate){
     struct cb_compressed *com_db;
-    int32_t errno;
 
     com_db = malloc(sizeof(*com_db));
     assert(com_db);
@@ -50,18 +49,12 @@ struct cb_compressed *cb_compressed_init(FILE *file_compressed,
 
     com_db->next_seq_to_write = 0;
 
-    if (0 != (errno = pthread_rwlock_init(&com_db->lock_seq, NULL))) {
-        fprintf(stderr, "Could not create rwlock. Errno: %d\n", errno);
-        exit(1);
-    }
-
     return com_db;
 }
 
 /*Frees the compressed database and its sequences and closes its files.*/
 void cb_compressed_free(struct cb_compressed *com_db){
     int i;
-    int32_t errno;
 
     fclose(com_db->file_compressed);
     fclose(com_db->file_index);
@@ -70,11 +63,6 @@ void cb_compressed_free(struct cb_compressed *com_db){
         cb_compressed_seq_free(cb_compressed_seq_at(com_db, i));
 
     ds_vector_free_no_data(com_db->seqs);
-
-    if (0 != (errno = pthread_rwlock_destroy(&com_db->lock_seq))) {
-        fprintf(stderr, "Could not destroy rwlock. Errno: %d\n", errno);
-        exit(1);
-    }
 
     free(com_db);
 }
