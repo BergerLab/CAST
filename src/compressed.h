@@ -1,6 +1,10 @@
 #ifndef __CABLAST_COMPRESSED_H__
 #define __CABLAST_COMPRESSED_H__
 
+/* Apparently this is required to make pthread_rwlock* stuff available. */
+#define __USE_UNIX98
+
+#include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -30,6 +34,8 @@ void cb_compressed_seq_addlink(struct cb_compressed_seq *seq,
 struct cb_coarse;
 
 struct cb_compressed {
+    pthread_rwlock_t lock_seq;
+    uint64_t next_seq_to_write;
     /*The sequences in the compressed database*/
     struct DSVector *seqs;
     /*Binary representation of each compressed sequence*/
