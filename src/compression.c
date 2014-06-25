@@ -105,17 +105,30 @@ static void *cb_compress_worker(void *data){
     struct worker_args *args;
     struct cb_align_nw_memory *mem;
     struct cb_seq *s;
-    struct cb_compressed_seq *cseq;
+    struct cb_compressed_seq *cseq = NULL;
+    struct DSLinkedList *seqs_to_write = ds_list_create();
 
-    args = (struct worker_args *) data;
+    args = (struct worker_args *)data;
     mem = cb_align_nw_memory_init();
-    while (NULL != (s = (struct cb_seq *)ds_queue_get(args->jobs))) {
-        cseq = cb_compress(args->db->coarse_db, s, mem);
-        cb_compressed_write_binary(args->db->com_db, cseq);
-        args->db->coarse_db->dbsize += s->length;
 
-        cb_seq_free(s);
-        cb_compressed_seq_free(cseq);
+    while (NULL != (s = (struct cb_seq *)ds_queue_get(args->jobs)) ||
+           NULL != seqs_to_write->first) {
+        if (NULL != s) {
+            cseq = cb_compress(args->db->coarse_db, s, mem);
+            args->db->coarse_db->dbsize += s->length;
+            ds_list_append(seqs_to_write, (struct cb_compressed_seq *)cseq);
+            cb_seq_free(s);
+        }
+        struct DSListNode *current_node = seqs_to_write->first;
+        struct cb_compressed_seq *current_seq = current_node ?
+          (struct cb_compressed_seq *)seqs_to_write->first->data : NULL;
+        if (current_seq != NULL &&
+              current_seq->id == args->db->com_db->next_seq_to_write) {
+            cb_compressed_write_binary(args->db->com_db, current_seq);
+            cb_compressed_seq_free(current_seq);
+            ds_list_remove(seqs_to_write, seqs_to_write->first);
+            args->db->com_db->next_seq_to_write++;
+        }
     }
 
     cb_align_nw_memory_free(mem);
