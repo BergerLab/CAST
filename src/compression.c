@@ -12,6 +12,7 @@
 struct worker_args {
     struct cb_database *db;
     struct DSQueue *jobs;
+    int id;
 };
 
 struct extend_match {
@@ -39,15 +40,21 @@ struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
                                                       int32_t num_workers){
     struct DSQueue *jobs;
     struct cb_compress_workers *workers;
-    struct worker_args *wargs;
+    struct worker_args **wargs;
     int32_t i, errno;
     jobs = ds_queue_create(20);
 
-    wargs = malloc(sizeof(*wargs));
+    wargs = malloc(num_workers*sizeof(*wargs));
     assert(wargs);
 
-    wargs->db   = db;
-    wargs->jobs = jobs;
+    for (i = 0; i < num_workers; i++) {
+        wargs[i] = malloc(sizeof(*(wargs[i])));
+        assert(wargs[i]);
+
+        wargs[i]->db   = db;
+        wargs[i]->jobs = jobs;
+        wargs[i]->id   = i;
+    }
 
     workers = malloc(sizeof(*workers));
     assert(workers);
@@ -57,11 +64,11 @@ struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
 
     workers->num_workers = num_workers;
     workers->jobs        = jobs;
-    workers->args        = (void*)wargs;
+    workers->args        = (void *)wargs;
 
     for (i = 0; i < num_workers; i++) {
         errno = pthread_create(&workers->threads[i], NULL,
-                               cb_compress_worker, (void*)wargs);
+                               cb_compress_worker, (void *)wargs[i]);
         if (errno != 0) {
             fprintf(stderr,
               "cb_compress_start_workers: Could not start thread. Errno: %d",
@@ -135,7 +142,6 @@ static void *cb_compress_worker(void *data){
 
     return NULL;
 }
-
 
 struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
