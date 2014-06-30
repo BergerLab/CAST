@@ -47,6 +47,7 @@ struct cb_seed_loc *cb_seeds_lookup(struct cb_seeds *seeds, char *kmer);
 
 void print_seeds(struct cb_seeds *seeds);
 
+int32_t hash_kmer(struct cb_seeds *seeds, char *kmer);
 char *unhash_kmer(struct cb_seeds *seeds, int hash);
 
 #endif

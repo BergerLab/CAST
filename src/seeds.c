@@ -36,8 +36,6 @@ const int8_t cb_seeds_alpha_size[] = {
 
 static int32_t residue_value(char residue);
 
-static int32_t hash_kmer(struct cb_seeds *seeds, char *kmer);
-
 struct cb_seeds *cb_seeds_init(int32_t seed_size){
     struct cb_seeds *seeds;
     int32_t errno, p;
@@ -197,7 +195,7 @@ static int32_t residue_value(char residue){
 
 /*Takes in as input a seeds table and a k-mer and returns the k-mer's index
   in the seeds table*/
-static int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
+int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
     int32_t i = 0, key = 0, val = 0, seed_size = seeds->seed_size,
             *powers = seeds->powers;
 
