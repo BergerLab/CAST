@@ -110,11 +110,19 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
     char *kmer, *residues = seq->seq->residues;
 
     pthread_rwlock_wrlock(&seeds->lock);
-    for (i = 0; i < seq_length - seed_size + 1; i++) {
+
+    hash = hash_kmer(seeds, residues);
+    if (hash != -1 && loc_counts[hash] < compress_flags.max_kmer_freq) {
+        loc = cb_seed_loc_init(seq->id, i);
+        locs[hash][loc_counts[hash]] = loc;
+        (loc_counts[hash])++;
+    }
+   
+
+    for (i = 1; i < seq_length - seed_size + 1; i++) {
         kmer = residues + i;
 
-        hash = hash_kmer(seeds, kmer);
-
+        hash = update_kmer(seeds, kmer, hash);
         if (hash == -1 ||
             loc_counts[hash] >= compress_flags.max_kmer_freq)
             continue;
@@ -191,6 +199,28 @@ int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
     }
     return key;
 }
+
+/*Takes in as input a seeds table and a k-mer and returns the k-mer's index
+  in the seeds table*/
+int32_t update_kmer(struct cb_seeds *seeds, char *kmer, int32_t key){
+    int32_t i = 0, val = 0, seed_size = seeds->seed_size,
+            *powers = seeds->powers;
+    if (residue_value(kmer[seed_size-1]) == -1)
+        return -1;
+    key /= 4;
+    key += residue_value(kmer[seed_size-1])*powers[seed_size-1];
+
+    /*for (i = 0; i < seed_size; i++) {
+        val = residue_value(kmer[i]);
+        if (val == -1)
+            return -1;
+
+        key += residue_value(kmer[i]) * powers[i];
+    }*/
+    
+    return key;
+}
+
 
 /*Convert an integer to the k-mer that it represents.  Currently only works for
   size k = 10*/
