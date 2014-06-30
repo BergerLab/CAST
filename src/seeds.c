@@ -65,19 +65,25 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     seeds->locs = malloc(seeds->locs_length*sizeof(*seeds->locs));
     assert(seeds->locs);
 
-    seeds->locs_last = malloc(seeds->locs_length*sizeof(*seeds->locs_last));
-    assert(seeds->locs_last);
+    for (int i = 0; i < seeds->locs_length; i++){
+        seeds->locs[i] =
+          malloc(compress_flags.max_kmer_freq*sizeof(seeds->locs[i]));
+        assert(seeds->locs[i]);
+    }
+
+    /*seeds->locs_last = malloc(seeds->locs_length*sizeof(*seeds->locs_last));
+    assert(seeds->locs_last);*/
 
     seeds->loc_counts = malloc(seeds->locs_length*sizeof(*seeds->loc_counts));
     assert(seeds->loc_counts);
 
     int locs_length = seeds->locs_length;
     int32_t *loc_counts = seeds->loc_counts;
-    struct cb_seed_loc **locs = seeds->locs,
-                       **locs_last = seeds->locs_last;
+    struct cb_seed_loc **locs = seeds->locs;
+                       //**locs_last = seeds->locs_last;
     for (int i = 0; i < locs_length; i++) {
-        locs[i]       = NULL;
-        locs_last[i]  = NULL;
+        //locs[i]       = NULL;
+        //locs_last[i]  = NULL;
         loc_counts[i] = 0;
     }
 
@@ -103,7 +109,7 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
     struct cb_seed_loc *loc;
     int32_t hash, i, seed_size = seeds->seed_size+1,
             seq_length = seq->seq->length, *loc_counts = seeds->loc_counts;
-    struct cb_seed_loc **locs = seeds->locs, **locs_last = seeds->locs_last;
+    struct cb_seed_loc **locs = seeds->locs;//, **locs_last = seeds->locs_last;
     char *kmer, *residues = seq->seq->residues;
 
     pthread_rwlock_wrlock(&seeds->lock);
@@ -117,29 +123,32 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
             continue;
 
         loc = cb_seed_loc_init(seq->id, i);
-        if (locs[hash] == NULL) {
+        locs[hash][loc_counts[hash]] = *loc;
+        /*if (locs[hash] == NULL) {
             locs[hash]      = loc;
             locs_last[hash] = loc;
         }
         else {
             locs_last[hash]->next = loc;
             locs_last[hash]       = loc;
-        }
+        }*/
         (loc_counts[hash])++;
     }
     pthread_rwlock_unlock(&seeds->lock);
 }
 
-struct cb_seed_loc *cb_seeds_lookup(struct cb_seeds *seeds, char *kmer){
-    struct cb_seed_loc *sl, *copy_first, *copy;
+int32_t cb_seeds_lookup(struct cb_seeds *seeds, char *kmer){
+    //struct cb_seed_loc *sl, *copy_first, *copy;
     int32_t hash = hash_kmer(seeds, kmer);
+    int32_t count = 0;
 
     if (hash < 0)
-        return NULL;
+        return -1;
 
     pthread_rwlock_rdlock(&seeds->lock);
 
-    sl = seeds->locs[hash];
+    count = seeds->loc_counts[hash];
+    /*sl = seeds->locs[hash];
     if (sl == NULL) {
         pthread_rwlock_unlock(&seeds->lock);
         return NULL;
@@ -150,11 +159,11 @@ struct cb_seed_loc *cb_seeds_lookup(struct cb_seeds *seeds, char *kmer){
     for (sl = sl->next; sl != NULL; sl = sl->next) {
         copy->next = cb_seed_loc_init(sl->coarse_seq_id, sl->residue_index);
         copy = copy->next;
-    }
+    }*/
 
     pthread_rwlock_unlock(&seeds->lock);
 
-    return copy_first;
+    return count;
 }
 
 struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
