@@ -195,7 +195,7 @@ int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
         if (val == -1)
             return -1;
 
-        key += residue_value(kmer[i]) * powers[i];
+        key += val * powers[i];
     }
     return key;
 }
@@ -203,20 +203,13 @@ int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
 /*Takes in as input a seeds table and a k-mer and returns the k-mer's index
   in the seeds table*/
 int32_t update_kmer(struct cb_seeds *seeds, char *kmer, int32_t key){
-    int32_t i = 0, val = 0, seed_size = seeds->seed_size,
-            *powers = seeds->powers;
+    int32_t seed_size = seeds->seed_size, *powers = seeds->powers;
+
     if (residue_value(kmer[seed_size-1]) == -1)
         return -1;
-    key /= 4;
+
+    key /= CABLAST_SEEDS_ALPHA_SIZE;
     key += residue_value(kmer[seed_size-1])*powers[seed_size-1];
-
-    /*for (i = 0; i < seed_size; i++) {
-        val = residue_value(kmer[i]);
-        if (val == -1)
-            return -1;
-
-        key += residue_value(kmer[i]) * powers[i];
-    }*/
     
     return key;
 }

@@ -225,12 +225,14 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
         int32_t seeds_r_count = cb_seeds_lookup(coarse_seeds, revcomp);
 
         struct cb_seed_loc ***locs = coarse_seeds->locs;
+        int32_t hash = hash_kmer(coarse_seeds, kmer),
+                hash_revcomp = hash_kmer(coarse_seeds, revcomp);
 
         for (i = 0; i < seeds_count; i++) {
             if (found_match)
                 break;
 
-            seedLoc = locs[hash_kmer(coarse_seeds, kmer)][i];
+            seedLoc = locs[hash][i];
 
             resind = seedLoc->residue_index;
             coarse_seq = cb_coarse_get(coarse_db, seedLoc->coarse_seq_id);
@@ -386,7 +388,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
              *there is no need to check the locations for the reverse
              *complement.
              */
-            seedLoc = locs[hash_kmer(coarse_seeds, revcomp)][i];
+            seedLoc = locs[hash_revcomp][i];
             if (found_match)
                 break;
 
