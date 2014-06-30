@@ -65,12 +65,12 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     seeds->locs = malloc(seeds->locs_length*sizeof(*seeds->locs));
     assert(seeds->locs);
 
-    for (int i = 0; i < seeds->locs_length; i++){
-        seeds->locs[i] =
-          malloc(compress_flags.max_kmer_freq*sizeof(seeds->locs[i]));
+    for (int i = 0; i < seeds->locs_length; i++) {
+        seeds->locs[i] = NULL;
+        /*  malloc(compress_flags.max_kmer_freq*sizeof(seeds->locs[i]));
         assert(seeds->locs[i]);
         for (int j = 0; j < compress_flags.max_kmer_freq; j++)
-            seeds->locs[i][j] = NULL;
+            seeds->locs[i][j] = NULL;*/
     }
 
     seeds->loc_counts = malloc(seeds->locs_length*sizeof(*seeds->loc_counts));
@@ -104,8 +104,9 @@ void cb_seeds_free(struct cb_seeds *seeds){
 
 void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
     struct cb_seed_loc *loc;
-    int32_t hash, i, seed_size = seeds->seed_size+1,
-            seq_length = seq->seq->length, *loc_counts = seeds->loc_counts;
+    int32_t hash, seed_size = seeds->seed_size+1,
+            seq_length = seq->seq->length, *loc_counts = seeds->loc_counts,
+            id = seq->id;
     struct cb_seed_loc ***locs = seeds->locs;
     char *kmer, *residues = seq->seq->residues;
 
@@ -113,13 +114,18 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
 
     hash = hash_kmer(seeds, residues);
     if (hash != -1 && loc_counts[hash] < compress_flags.max_kmer_freq) {
-        loc = cb_seed_loc_init(seq->id, i);
+        loc = cb_seed_loc_init(id, 0);
+
+        if (locs[hash] == NULL) {
+            locs[hash]=malloc(compress_flags.max_kmer_freq*sizeof(locs[hash]));
+            assert(locs[hash]);
+        }
+
         locs[hash][loc_counts[hash]] = loc;
         (loc_counts[hash])++;
     }
    
-
-    for (i = 1; i < seq_length - seed_size + 1; i++) {
+    for (int i = 1; i <= seq_length - seed_size; i++) {
         kmer = residues + i;
 
         hash = update_kmer(seeds, kmer, hash);
@@ -127,10 +133,17 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
             loc_counts[hash] >= compress_flags.max_kmer_freq)
             continue;
 
-        loc = cb_seed_loc_init(seq->id, i);
+        loc = cb_seed_loc_init(id, i);
+
+        if (locs[hash] == NULL) {
+            locs[hash]=malloc(compress_flags.max_kmer_freq*sizeof(locs[hash]));
+            assert(locs[hash]);
+        }
+
         locs[hash][loc_counts[hash]] = loc;
         (loc_counts[hash])++;
     }
+
     pthread_rwlock_unlock(&seeds->lock);
 }
 
@@ -203,13 +216,14 @@ int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
 /*Takes in as input a seeds table and a k-mer and returns the k-mer's index
   in the seeds table*/
 int32_t update_kmer(struct cb_seeds *seeds, char *kmer, int32_t key){
-    int32_t seed_size = seeds->seed_size, *powers = seeds->powers;
+    int32_t seed_size = seeds->seed_size, *powers = seeds->powers,
+            val = residue_value(kmer[seed_size-1]);
 
-    if (residue_value(kmer[seed_size-1]) == -1)
+    if (val == -1)
         return -1;
 
     key /= CABLAST_SEEDS_ALPHA_SIZE;
-    key += residue_value(kmer[seed_size-1])*powers[seed_size-1];
+    key += val*powers[seed_size-1];
     
     return key;
 }
