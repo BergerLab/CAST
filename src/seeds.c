@@ -69,6 +69,8 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
         seeds->locs[i] =
           malloc(compress_flags.max_kmer_freq*sizeof(seeds->locs[i]));
         assert(seeds->locs[i]);
+        for (int j = 0; j < compress_flags.max_kmer_freq; j++)
+            seeds->locs[i][j] = NULL;
     }
 
     seeds->loc_counts = malloc(seeds->locs_length*sizeof(*seeds->loc_counts));
@@ -76,7 +78,6 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
 
     int locs_length = seeds->locs_length;
     int32_t *loc_counts = seeds->loc_counts;
-    struct cb_seed_loc **locs = seeds->locs;
 
     for (int i = 0; i < locs_length; i++) {
         loc_counts[i] = 0;
@@ -86,14 +87,15 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
 }
 
 void cb_seeds_free(struct cb_seeds *seeds){
-    int32_t errno, i;
+    int32_t errno;
 
     if (0 != (errno = pthread_rwlock_destroy(&seeds->lock))) {
         fprintf(stderr, "Could not destroy rwlock. Errno: %d\n", errno);
         exit(1);
     }
-    for (i = 0; i < seeds->locs_length; i++)
-        cb_seed_loc_free(seeds->locs[i]); /* frees the whole list */
+    for (int i = 0; i < seeds->locs_length; i++)
+        free(seeds->locs[i]);
+
     free(seeds->locs);
     free(seeds->loc_counts);
     free(seeds->powers);
@@ -104,7 +106,7 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
     struct cb_seed_loc *loc;
     int32_t hash, i, seed_size = seeds->seed_size+1,
             seq_length = seq->seq->length, *loc_counts = seeds->loc_counts;
-    struct cb_seed_loc **locs = seeds->locs;
+    struct cb_seed_loc ***locs = seeds->locs;
     char *kmer, *residues = seq->seq->residues;
 
     pthread_rwlock_wrlock(&seeds->lock);
@@ -118,7 +120,7 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
             continue;
 
         loc = cb_seed_loc_init(seq->id, i);
-        locs[hash][loc_counts[hash]] = *loc;
+        locs[hash][loc_counts[hash]] = loc;
         (loc_counts[hash])++;
     }
     pthread_rwlock_unlock(&seeds->lock);
@@ -152,7 +154,7 @@ struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
     return seedLoc;
 }
 
-void cb_seed_loc_free(struct cb_seed_loc *seedLoc){
+/*void cb_seed_loc_free(struct cb_seed_loc *seedLoc){
     struct cb_seed_loc *seed1, *seed2;
 
     for (seed1 = seedLoc; seed1 != NULL;) {
@@ -160,7 +162,7 @@ void cb_seed_loc_free(struct cb_seed_loc *seedLoc){
         free(seed1);
         seed1 = seed2;
     }
-}
+}*/
 
 static int32_t residue_value(char residue){
     int32_t i = residue - 'A', val;
@@ -208,7 +210,7 @@ char *unhash_kmer(struct cb_seeds *seeds, int hash){
 }
 
 /*Output the seeds table in plain text format for debugging*/
-void print_seeds(struct cb_seeds *seeds){
+/*void print_seeds(struct cb_seeds *seeds){
     int32_t i, j;
 
     char *kmer = malloc(seeds->seed_size*sizeof(*kmer));
@@ -232,4 +234,4 @@ void print_seeds(struct cb_seeds *seeds){
         }
         printf("\n");
     }
-}
+}*/

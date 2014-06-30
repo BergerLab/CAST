@@ -152,7 +152,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
     struct cb_coarse_seq *coarse_seq;
     struct cb_compressed_seq *cseq =
              cb_compressed_seq_init(org_seq->id, org_seq->name);
-    struct cb_seed_loc *seeds, *seeds_r, seedLoc;
+    struct cb_seed_loc *seeds, *seeds_r, *seedLoc;
     struct cb_alignment alignment;
     int32_t seed_size = coarse_db->seeds->seed_size,
             resind = -1, current = 0, i = 0, new_coarse_seq_id = -1,
@@ -224,7 +224,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
           current k-mer's reverse complement.*/
         int32_t seeds_r_count = cb_seeds_lookup(coarse_seeds, revcomp);
 
-        struct cb_seed_loc **locs = coarse_seeds->locs;
+        struct cb_seed_loc ***locs = coarse_seeds->locs;
 
         for (i = 0; i < seeds_count; i++) {
             if (found_match)
@@ -232,8 +232,8 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
 
             seedLoc = locs[hash_kmer(coarse_seeds, kmer)][i];
 
-            resind = seedLoc.residue_index;
-            coarse_seq = cb_coarse_get(coarse_db, seedLoc.coarse_seq_id);
+            resind = seedLoc->residue_index;
+            coarse_seq = cb_coarse_get(coarse_db, seedLoc->coarse_seq_id);
 
             if (resind + seed_size > coarse_seq->seq->length)
                 continue;
@@ -390,8 +390,8 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             if (found_match)
                 break;
 
-            resind = seedLoc.residue_index;
-            coarse_seq = cb_coarse_get(coarse_db, seedLoc.coarse_seq_id);
+            resind = seedLoc->residue_index;
+            coarse_seq = cb_coarse_get(coarse_db, seedLoc->coarse_seq_id);
 
             if (resind + seed_size > coarse_seq->seq->length)
                 continue;
