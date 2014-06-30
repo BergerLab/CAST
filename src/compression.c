@@ -226,8 +226,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
 
         struct cb_seed_loc **locs = coarse_seeds->locs;
 
-        for (/*seedLoc = seeds; seedLoc != NULL; seedLoc = seedLoc->next*/
-             i = 0; i < seeds_count; i++) {
+        for (i = 0; i < seeds_count; i++) {
             if (found_match)
                 break;
 
@@ -382,8 +381,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 free(alignment.org);
             }
         }
-        for (i = 0; i < seeds_r_count; i++
-             /*seedLoc = seeds_r; seedLoc != NULL; seedLoc = seedLoc->next*/) {
+        for (i = 0; i < seeds_r_count; i++) {
             /*If we found a match in the seed locations for the k-mer, then
              *there is no need to check the locations for the reverse
              *complement.
@@ -539,8 +537,6 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 free(alignment.org);
             }
         }
-        //cb_seed_loc_free(seeds);
-        //cb_seed_loc_free(seeds_r);
 
         /*If we have traversed an entire chunk of bases without finding a match,
          *then add the whole chunk as a sequence in the database and update
@@ -758,7 +754,6 @@ static int32_t add_without_match(struct cb_coarse *coarse_db,
     struct cb_link_to_compressed *link = NULL;
     struct cb_coarse_seq *coarse_seq =
       cb_coarse_add(coarse_db, org_seq->residues, ostart, oend);
-/*printf("%s\n", coarse_seq->seq->residues);*/
     cb_coarse_seq_addlink(coarse_seq,
       cb_link_to_compressed_init(org_seq->id, 0, oend - ostart - 1,
                                  ostart, oend - 1, true));
