@@ -74,7 +74,8 @@ cb_coarse_init(int32_t seed_size,
 void cb_coarse_free(struct cb_coarse *coarse_db);
 
 struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
-                                    int32_t start, int32_t end);
+                                    int32_t start, int32_t end,
+                                    struct cb_seeds_add_memory *seeds_mem);
 
 struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db, int32_t i);
 
