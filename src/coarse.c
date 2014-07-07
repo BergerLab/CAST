@@ -129,14 +129,15 @@ int32_t cb_coarse_db_seqs_count(struct cb_coarse *coarse_db){
 
 /*Increments the coarse database's dbsize*/
 void cb_coarse_db_update_dbsize(struct cb_coarse *coarse_db, int32_t size){
-    pthread_rwlock_rdlock(&coarse_db->lock_seq);
+    pthread_rwlock_wrlock(&coarse_db->lock_seq);
     coarse_db->dbsize += size;
     pthread_rwlock_unlock(&coarse_db->lock_seq);
 }
 
 int32_t by_index(void *a, void *b){
     return ((int32_t)((struct cb_coarse_seq *)a)->id) -
-           ((int32_t)((struct cb_coarse_seq *)b)->id);}
+           ((int32_t)((struct cb_coarse_seq *)b)->id);
+}
 
 /*Outputs the sequences in the coarse database to a FASTA file in plain text,
  *outputs the links to the compressed database in a binary format, and outputs
