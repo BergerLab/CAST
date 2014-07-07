@@ -165,6 +165,7 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
         coarse_fasta_index = ftell(coarse_db->file_fasta);
 
         link_index = ftell(coarse_db->file_links);
+
         /*At the start of outputting each sequence, output the indices for the
           coarse links and FASTA files to their index files.*/
         fwrite(&link_index, sizeof(link_index), 1, coarse_db->file_links_index);

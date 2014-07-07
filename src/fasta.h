@@ -20,8 +20,7 @@ struct fasta_file {
 struct fasta_file *
 fasta_read_all(const char *file_name, const char *exclude);
 
-void
-fasta_free_all(struct fasta_file *ff);
+void fasta_free_all(struct fasta_file *ff);
 
 
 struct fasta_seq {
@@ -29,11 +28,9 @@ struct fasta_seq {
     char *seq;
 };
 
-struct fasta_seq *
-fasta_read_next(FILE *f, const char *exclude);
+struct fasta_seq *fasta_read_next(FILE *f, const char *exclude);
 
-void
-fasta_free_seq(struct fasta_seq *seq);
+void fasta_free_seq(struct fasta_seq *seq);
 
 
 struct fasta_seq_gen {
@@ -47,10 +44,8 @@ struct fasta_seq_gen *
 fasta_generator_start(const char *file_name, const char *exclude,
                       int buffer_capacity);
 
-void
-fasta_generator_free(struct fasta_seq_gen *fsg);
+void fasta_generator_free(struct fasta_seq_gen *fsg);
 
-struct fasta_seq *
-fasta_generator_next(struct fasta_seq_gen *fsg);
+struct fasta_seq *fasta_generator_next(struct fasta_seq_gen *fsg);
 
 #endif
