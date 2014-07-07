@@ -121,7 +121,7 @@ static void *cb_compress_worker(void *data){
            NULL != seqs_to_write->first) {
         if (NULL != s) {
             cseq = cb_compress(args->db->coarse_db, s, mem);
-            args->db->coarse_db->dbsize += s->length;
+            cb_coarse_db_update_dbsize(args->db->coarse_db, s->length);
             ds_list_append(seqs_to_write, (struct cb_compressed_seq *)cseq);
             cb_seq_free(s);
         }
@@ -145,7 +145,6 @@ static void *cb_compress_worker(void *data){
 struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             struct cb_align_nw_memory *mem){
-    struct DSVector *coarse_seqs = coarse_db->seqs;
     struct cb_seeds *coarse_seeds = coarse_db->seeds;
     struct extend_match mseqs_fwd, mseqs_rev;
     struct cb_coarse_seq *coarse_seq;
@@ -161,7 +160,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             max_section_size = max_chunk_size * 2,
             overlap = compress_flags.overlap,
             start_of_section = 0,
-            coarse_seq_count = coarse_seqs->size,
+            coarse_seq_count = cb_coarse_db_seqs_count(coarse_db),
             org_seq_len = org_seq->length,
             end_of_chunk = min(start_of_section + max_chunk_size,
                                    org_seq_len),
@@ -224,7 +223,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
         int32_t seeds_r_count = cb_seeds_lookup(coarse_seeds, revcomp);
 
         struct cb_seed_loc ***locs = coarse_seeds->locs;
-        int32_t hash = hash_kmer(coarse_seeds, kmer),
+        int32_t hash         = hash_kmer(coarse_seeds, kmer),
                 hash_revcomp = hash_kmer(coarse_seeds, revcomp);
 
         for (i = 0; i < seeds_count; i++) {

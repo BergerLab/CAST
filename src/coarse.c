@@ -96,7 +96,7 @@ struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
     pthread_rwlock_wrlock(&coarse_db->lock_seq);
     id = coarse_db->seqs->size;
     seq = cb_coarse_seq_init(id, residues, start, end);
-    ds_vector_append(coarse_db->seqs, (void*) seq);
+    ds_vector_append(coarse_db->seqs, (void *)seq);
     pthread_rwlock_unlock(&coarse_db->lock_seq);
 
     cb_seeds_add(coarse_db->seeds, seq);
@@ -105,14 +105,33 @@ struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
 }
 
 /*Get the coarse sequence in the coarse database at index i.*/
-extern inline struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db, int32_t i){
+extern inline struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db,
+                                                  int32_t i){
     struct cb_coarse_seq *seq;
 
     pthread_rwlock_rdlock(&coarse_db->lock_seq);
-    seq = (struct cb_coarse_seq *) ds_vector_get(coarse_db->seqs, i);
+    seq = (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i);
     pthread_rwlock_unlock(&coarse_db->lock_seq);
 
     return seq;
+}
+
+/*Gets the number of sequences currently in the coarse database*/
+int32_t cb_coarse_db_seqs_count(struct cb_coarse *coarse_db){
+    int32_t size;
+
+    pthread_rwlock_rdlock(&coarse_db->lock_seq);
+    size = coarse_db->seqs->size;
+    pthread_rwlock_unlock(&coarse_db->lock_seq);
+
+    return size;
+}
+
+/*Increments the coarse database's dbsize*/
+void cb_coarse_db_update_dbsize(struct cb_coarse *coarse_db, int32_t size){
+    pthread_rwlock_rdlock(&coarse_db->lock_seq);
+    coarse_db->dbsize += size;
+    pthread_rwlock_unlock(&coarse_db->lock_seq);
 }
 
 int32_t by_index(void *a, void *b){
