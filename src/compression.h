@@ -13,7 +13,6 @@
 #include "coarse.h"
 #include "compressed.h"
 #include "database.h"
-#include "seeds.h"
 #include "seq.h"
 
 struct cb_compress_workers {
@@ -35,7 +34,6 @@ void cb_compress_send_job(struct cb_compress_workers *workers,
 
 struct cb_compressed_seq *cb_compress(struct cb_coarse *coarse_db,
                                       struct cb_seq *org_seq,
-                                      struct cb_align_nw_memory *mem,
-                                      struct cb_seeds_add_memory *seeds_mem);
+                                      struct cb_align_nw_memory *mem);
 
 #endif

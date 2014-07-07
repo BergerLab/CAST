@@ -27,23 +27,23 @@ cb_coarse_init(int32_t seed_size,
     struct cb_coarse *coarse_db = malloc(sizeof(*coarse_db));
     assert(coarse_db);
 
-    coarse_db->seqs   = ds_vector_create_capacity(10000000);
+    coarse_db->seqs = ds_vector_create_capacity(10000000);
 
     /*Only create a seeds table if we are using this coarse database for
       compression.*/
-    coarse_db->seeds  = read ? NULL : cb_seeds_init(seed_size);
+    coarse_db->seeds = read ? NULL : cb_seeds_init(seed_size);
 
     coarse_db->dbsize = (uint64_t)0;
 
     /*Initialize the file pointers*/
-    coarse_db->file_fasta             = file_fasta;
-    coarse_db->file_links             = file_links;
-    coarse_db->file_links_base_index  = file_links_base_index;
+    coarse_db->file_fasta = file_fasta;
+    coarse_db->file_links = file_links;
+    coarse_db->file_links_base_index = file_links_base_index;
     coarse_db->file_links_count_index = file_links_count_index;
-    coarse_db->file_fasta_index       = file_fasta_index;
-    coarse_db->file_fasta_base_index  = file_fasta_base_index;
-    coarse_db->file_links_index       = file_links_index;
-    coarse_db->file_params            = file_params;
+    coarse_db->file_fasta_index = file_fasta_index;
+    coarse_db->file_fasta_base_index = file_fasta_base_index;
+    coarse_db->file_links_index = file_links_index;
+    coarse_db->file_params = file_params;
 
     if (0 != (errno = pthread_rwlock_init(&coarse_db->lock_seq, NULL))) {
         fprintf(stderr, "Could not create rwlock. Errno: %d\n", errno);
@@ -89,8 +89,7 @@ void cb_coarse_free(struct cb_coarse *coarse_db){
  *table.
  */
 struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
-                                    int32_t start, int32_t end,
-                                    struct cb_seeds_add_memory *seeds_mem){
+                                    int32_t start, int32_t end){
     struct cb_coarse_seq *seq;
     int32_t id;
 
@@ -100,7 +99,7 @@ struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
     ds_vector_append(coarse_db->seqs, (void*) seq);
     pthread_rwlock_unlock(&coarse_db->lock_seq);
 
-    cb_seeds_add(coarse_db->seeds, seq, seeds_mem);
+    cb_seeds_add(coarse_db->seeds, seq);
 
     return seq;
 }
@@ -162,7 +161,7 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
         /*Output all links for the current sequence to the coarse links file*/
         for (link = seq->links; link != NULL; link = link->next) {
             uint64_t coarse_base_start = link->data->coarse_start + base_index,
-                     coarse_base_end   = link->data->coarse_end + base_index;
+                     coarse_base_end = link->data->coarse_end + base_index;
 
             fwrite(link->data, sizeof(*(link->data)), 1, coarse_db->file_links);
 
@@ -199,7 +198,7 @@ void cb_coarse_save_plain(struct cb_coarse *coarse_db){
         fprintf(coarse_db->file_links, "> %d\n", i);
         for (link = seq->links; link != NULL; link = link->next) {
             fprintf(coarse_db->file_links,
-              "    original sequence id: %d, reference range: (%d, %d), "
+              " original sequence id: %d, reference range: (%d, %d), "
               "direction: %c\n",
               link->data->org_seq_id, link->data->coarse_start,
               link->data->coarse_end, (link->data->dir?'0':'1'));
@@ -210,7 +209,7 @@ void cb_coarse_save_plain(struct cb_coarse *coarse_db){
 /*Loads the data of each link in the coarse database's links file into the
   coarse database's links vector.*/
 void cb_coarse_r_read_all_links(struct cb_coarse_r *coarse_db){
-    FILE *links_file  = coarse_db->db->file_links,
+    FILE *links_file = coarse_db->db->file_links,
          *links_index = coarse_db->db->file_links_index;
     struct DSVector *link_vectors = ds_vector_create();
     int64_t *seq_link_counts = coarse_db->seq_link_counts, links_count;
@@ -306,9 +305,9 @@ struct cb_coarse_seq *cb_coarse_seq_init(int32_t id, char *residues,
     seq = malloc(sizeof(*seq));
     assert(seq);
 
-    seq->id        = id;
-    seq->seq       = cb_seq_init_range(id, "", residues, start, end);
-    seq->links     = NULL;
+    seq->id = id;
+    seq->seq = cb_seq_init_range(id, "", residues, start, end);
+    seq->links = NULL;
     seq->last_link = NULL;
 
     if (0 != (errno = pthread_rwlock_init(&seq->lock_links, NULL))) {
@@ -339,7 +338,7 @@ void cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
                            struct cb_link_to_compressed *newlink){
     pthread_rwlock_wrlock(&seq->lock_links);
     if (seq->links == NULL) {
-        seq->links     = newlink;
+        seq->links = newlink;
         seq->last_link = newlink;
         pthread_rwlock_unlock(&seq->lock_links);
         return;
@@ -482,7 +481,7 @@ cb_coarse_r_init(int32_t seed_size,
     cb_coarse_r_init_blocks(coarsedb);
 
     coarsedb->all_residues = NULL;
-    coarsedb->links        = NULL;
+    coarsedb->links = NULL;
 
     /*If the --load-coarse-residues or --load-coarse-db search flag was passed
       in, load the coarse residues into coarse_db->all_residues.*/
@@ -522,8 +521,8 @@ void cb_coarse_r_free(struct cb_coarse_r *coarsedb){
 /*Initializes a cb_coarse_r's link_inds_by_block to have an empty vector
   of link indices for each block of bases in the coarse FASTA file.*/
 void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
-    FILE *file_fasta_base_index  = coarse_db->db->file_fasta_base_index,
-         *file_links_base_index  = coarse_db->db->file_links_base_index;
+    FILE *file_fasta_base_index = coarse_db->db->file_fasta_base_index,
+         *file_links_base_index = coarse_db->db->file_links_base_index;
     int64_t num_link_blocks, current_link, *current_link_ptr = NULL;
     int32_t current_seq = 0, link_count = 0, i = 0,
             block_size = coarse_db->link_block_size;
@@ -657,8 +656,8 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
 char *cb_coarse_r_get_seq_residues(struct cb_coarse_r *coarse_db,
                                    int64_t id){
     int64_t start = coarse_db->seq_base_indices[id],
-            end   = coarse_db->seq_base_indices[id+1], i;
-    char *residues     = malloc((end-start+1)*sizeof(*residues)),
+            end = coarse_db->seq_base_indices[id+1], i;
+    char *residues = malloc((end-start+1)*sizeof(*residues)),
          *all_residues = coarse_db->all_residues;
 
     if (all_residues == NULL) {

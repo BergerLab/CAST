@@ -3,12 +3,10 @@
 #include <string.h>
 
 #include "ds.h"
- 
 #include "compression.h"
+#include "flags.h"
 #include "DNAutils.h"
 #include "edit_scripts.h"
-#include "flags.h"
-#include "seeds.h"
 
 struct worker_args {
     struct cb_database *db;
@@ -31,8 +29,7 @@ extend_match(struct cb_align_nw_memory *mem,
 
 static int32_t add_without_match(struct cb_coarse *coarse_db,
                                  struct cb_seq *org_seq,
-                                 int32_t ostart, int32_t oend,
-                                 struct cb_seeds_add_memory *seeds_mem);
+                                 int32_t ostart, int32_t oend);
 
 static void *cb_compress_worker(void *data);
 
@@ -53,9 +50,9 @@ struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
         wargs[i] = malloc(sizeof(*(wargs[i])));
         assert(wargs[i]);
 
-        wargs[i]->db   = db;
+        wargs[i]->db = db;
         wargs[i]->jobs = jobs;
-        wargs[i]->id   = i;
+        wargs[i]->id = i;
     }
 
     workers = malloc(sizeof(*workers));
@@ -65,8 +62,8 @@ struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
     assert(workers->threads);
 
     workers->num_workers = num_workers;
-    workers->jobs        = jobs;
-    workers->args        = (void *)wargs;
+    workers->jobs = jobs;
+    workers->args = (void *)wargs;
 
     for (i = 0; i < num_workers; i++) {
         errno = pthread_create(&workers->threads[i], NULL,
@@ -113,19 +110,17 @@ void cb_compress_send_job(struct cb_compress_workers *workers,
 static void *cb_compress_worker(void *data){
     struct worker_args *args;
     struct cb_align_nw_memory *mem;
-    struct cb_seeds_add_memory *seeds_mem;
     struct cb_seq *s;
     struct cb_compressed_seq *cseq = NULL;
     struct DSLinkedList *seqs_to_write = ds_list_create();
 
     args = (struct worker_args *)data;
     mem = cb_align_nw_memory_init();
-    seeds_mem = cb_seeds_add_memory_init();
 
     while (NULL != (s = (struct cb_seq *)ds_queue_get(args->jobs)) ||
            NULL != seqs_to_write->first) {
         if (NULL != s) {
-            cseq = cb_compress(args->db->coarse_db, s, mem, seeds_mem);
+            cseq = cb_compress(args->db->coarse_db, s, mem);
             args->db->coarse_db->dbsize += s->length;
             ds_list_append(seqs_to_write, (struct cb_compressed_seq *)cseq);
             cb_seq_free(s);
@@ -149,8 +144,7 @@ static void *cb_compress_worker(void *data){
 
 struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
-            struct cb_align_nw_memory *mem,
-            struct cb_seeds_add_memory *seeds_mem){
+            struct cb_align_nw_memory *mem){
     struct DSVector *coarse_seqs = coarse_db->seqs;
     struct cb_seeds *coarse_seeds = coarse_db->seeds;
     struct extend_match mseqs_fwd, mseqs_rev;
@@ -162,16 +156,16 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
     int32_t seed_size = coarse_db->seeds->seed_size,
             resind = -1, current = 0, i = 0, new_coarse_seq_id = -1,
             fwd_rlen, rev_rlen, fwd_olen, rev_olen, index,
-            chunks           = 0,
-            max_chunk_size   = compress_flags.max_chunk_size,
+            chunks = 0,
+            max_chunk_size = compress_flags.max_chunk_size,
             max_section_size = max_chunk_size * 2,
-            overlap          = compress_flags.overlap,
+            overlap = compress_flags.overlap,
             start_of_section = 0,
             coarse_seq_count = coarse_seqs->size,
-            org_seq_len      = org_seq->length,
-            end_of_chunk     = min(start_of_section + max_chunk_size,
+            org_seq_len = org_seq->length,
+            end_of_chunk = min(start_of_section + max_chunk_size,
                                    org_seq_len),
-            end_of_section   = min(start_of_section + max_section_size,
+            end_of_section = min(start_of_section + max_section_size,
                                    org_seq_len);
     char *kmer, revcomp[seed_size+1], *org_seq_residues = org_seq->residues;
     bool *matches, *matches_temp, found_match;
@@ -198,8 +192,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
         if (current == 0 && coarse_seq_count == 0) {
             new_coarse_seq_id =
               add_without_match(coarse_db, org_seq, 0,
-                                minimum(org_seq_len, max_chunk_size),
-                                seeds_mem);
+                                minimum(org_seq_len, max_chunk_size));
 
             cb_compressed_seq_addlink(cseq, cb_link_to_coarse_init_nodiff(
                                                new_coarse_seq_id, 0,
@@ -208,23 +201,23 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
 
             if (end_of_chunk < org_seq_len - seed_size) {
                 start_of_section += max_chunk_size - overlap;
-                end_of_chunk   = min(start_of_section + max_chunk_size,
+                end_of_chunk = min(start_of_section + max_chunk_size,
                                      org_seq_len);
                 end_of_section = min(start_of_section + max_section_size,
                                      org_seq_len);
-                current        = start_of_section-1;
+                current = start_of_section-1;
             }
             chunks++;
             continue;
         }
 
         /*Get the k-mer and allocate a copy of its reverse complement*/
-        kmer    = org_seq_residues+current;
+        kmer = org_seq_residues+current;
         kmer_revcomp(revcomp, kmer, seed_size);
 
         /*The locations of all seeds in the database that start with the
           current k-mer.*/
-        int32_t seeds_count   = cb_seeds_lookup(coarse_seeds, kmer);
+        int32_t seeds_count = cb_seeds_lookup(coarse_seeds, kmer);
 
         /*The locations of all seeds in the database that start with the
           current k-mer's reverse complement.*/
@@ -276,7 +269,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 fwd_olen = cb_align_length_nogaps(mseqs_fwd.oseq);
                 rev_olen = cb_align_length_nogaps(mseqs_rev.oseq);
 
-                /*If the match was too short, try the next seed*/                
+                /*If the match was too short, try the next seed*/
                 if (rev_olen+seed_size+fwd_olen-1 < compress_flags.min_match_len) {
                     free(mseqs_fwd.rseq);
                     free(mseqs_fwd.oseq);
@@ -330,8 +323,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                     new_coarse_seq_id = add_without_match(coarse_db, org_seq,
                                                     start_of_section,
                                                     current - rev_olen +
-                                                      compress_flags.overlap,
-                                                    seeds_mem);
+                                                      compress_flags.overlap);
                     cb_compressed_seq_addlink(cseq,
                       cb_link_to_coarse_init_nodiff(
                         new_coarse_seq_id,
@@ -373,8 +365,8 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 else
                     start_of_section = current + fwd_olen + seed_size;
 
-                current        = start_of_section - 1;
-                end_of_chunk   = min(start_of_section + max_chunk_size,
+                current = start_of_section - 1;
+                end_of_chunk = min(start_of_section + max_chunk_size,
                                      org_seq_len);
                 end_of_section = min(start_of_section + max_section_size,
                                      org_seq_len);
@@ -410,7 +402,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                              start_of_section, resind + seed_size - 1, 1,
                              coarse_seq->seq->residues,
                              coarse_seq->seq->length, 0) +
-                 attempt_ext(current+seed_size-1, 1, org_seq_residues, 
+                 attempt_ext(current+seed_size-1, 1, org_seq_residues,
                              end_of_section - start_of_section,
                              start_of_section, resind, -1,
                              coarse_seq->seq->residues,
@@ -435,7 +427,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 fwd_olen = cb_align_length_nogaps(mseqs_fwd.oseq);
                 rev_olen = cb_align_length_nogaps(mseqs_rev.oseq);
 
-                /*If the match was too short, try the next seed*/                
+                /*If the match was too short, try the next seed*/
                 if (rev_olen+seed_size+fwd_olen-1 < compress_flags.min_match_len) {
                     free(mseqs_fwd.rseq);
                     free(mseqs_fwd.oseq);
@@ -489,8 +481,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                     new_coarse_seq_id = add_without_match(coarse_db, org_seq,
                                                     start_of_section,
                                                     current - fwd_olen +
-                                                      compress_flags.overlap,
-                                                    seeds_mem);
+                                                      compress_flags.overlap);
                     cb_compressed_seq_addlink(cseq,
                       cb_link_to_coarse_init_nodiff(
                         new_coarse_seq_id,
@@ -530,8 +521,8 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                        compress_flags.overlap + seed_size;
                 else
                     start_of_section = current + rev_olen + seed_size;
-                current        = start_of_section - 1;
-                end_of_chunk   = min(start_of_section + max_chunk_size,
+                current = start_of_section - 1;
+                end_of_chunk = min(start_of_section + max_chunk_size,
                                      org_seq_len);
                 end_of_section = min(start_of_section + max_section_size,
                                      org_seq_len);
@@ -555,7 +546,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
         if (current >= end_of_chunk - seed_size && !found_match) {
             new_coarse_seq_id = add_without_match(coarse_db, org_seq,
                                                   start_of_section,
-                                                  end_of_chunk, seeds_mem);
+                                                  end_of_chunk);
 
             cb_compressed_seq_addlink(cseq, cb_link_to_coarse_init_nodiff(
                                               new_coarse_seq_id,
@@ -567,11 +558,11 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
 
             if (end_of_chunk < org_seq_len - seed_size - 1) {
                 start_of_section = end_of_chunk - overlap;
-                end_of_chunk     = min(start_of_section + max_chunk_size,
+                end_of_chunk = min(start_of_section + max_chunk_size,
                                        org_seq_len);
-                end_of_section   = min(start_of_section + max_section_size,
+                end_of_section = min(start_of_section + max_section_size,
                                        org_seq_len);
-                current          = start_of_section - 1;
+                current = start_of_section - 1;
             }
             chunks++;
         }
@@ -751,20 +742,19 @@ extend_match(struct cb_align_nw_memory *mem,
 }
 
 /*Creates a new coarse sequence for a section of the original DNA sequence that
- *does not have a match, such as if the maximum chunk length was traversed in
- *the sequence without finding a match or if there is any DNA in the sequence
- *before the latest match that isn't part of the match.
- *
- *In addition to creating a new coarse sequence, add_without_match also adds a
- *a link to the sequence being compressed to the new coarse sequence.
- */
+*does not have a match, such as if the maximum chunk length was traversed in
+*the sequence without finding a match or if there is any DNA in the sequence
+*before the latest match that isn't part of the match.
+*
+*In addition to creating a new coarse sequence, add_without_match also adds a
+*a link to the sequence being compressed to the new coarse sequence.
+*/
 static int32_t add_without_match(struct cb_coarse *coarse_db,
                                  struct cb_seq *org_seq,
-                                 int32_t ostart, int32_t oend,
-                                 struct cb_seeds_add_memory *seeds_mem){
+                                 int32_t ostart, int32_t oend){
     struct cb_link_to_compressed *link = NULL;
     struct cb_coarse_seq *coarse_seq =
-      cb_coarse_add(coarse_db, org_seq->residues, ostart, oend, seeds_mem);
+      cb_coarse_add(coarse_db, org_seq->residues, ostart, oend);
     cb_coarse_seq_addlink(coarse_seq,
       cb_link_to_compressed_init(org_seq->id, 0, oend - ostart - 1,
                                  ostart, oend - 1, true));
