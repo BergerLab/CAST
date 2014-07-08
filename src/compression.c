@@ -248,7 +248,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                              start_of_section, resind+seed_size-1, 1,
                              coarse_seq->seq->residues,
                              coarse_seq->seq->length, 0)) >
-                 compress_flags.attempt_ext_len) {
+                 compress_flags.min_progress) {
                 mseqs_rev = extend_match(mem,
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length, resind, -1,
@@ -406,7 +406,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                              start_of_section, resind, -1,
                              coarse_seq->seq->residues,
                              coarse_seq->seq->length, 0)) >
-                 compress_flags.attempt_ext_len) {
+                 compress_flags.min_progress) {
                 mseqs_rev = extend_match(mem,
                                          coarse_seq->seq->residues, 0,
                                          coarse_seq->seq->length, resind, -1,

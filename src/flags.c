@@ -14,19 +14,8 @@ struct opt_config *load_compress_args(){
         &compress_flags.gapped_window_size, "gapped-window-size", 100,
         "The size of the gapped match window.");
     opt_flag_int(conf,
-        &compress_flags.ungapped_window_size, "ungapped-window-size", 10,
-        "The size of the ungapped match window.");
-    opt_flag_int(conf,
-        &compress_flags.match_extend, "match-extend", 30,
-        "The maximum number of residues to blindly extend a match without\n"
-        "\tregard to sequence identity. This is to avoid small sequences\n"
-        "\tin the coarse database.");
-    opt_flag_int(conf,
         &compress_flags.match_kmer_size, "match-kmer-size", 10,
         "The size of the K-mer fragments to match in ungapped extension.");
-    opt_flag_int(conf,
-        &compress_flags.match_seq_id_threshold, "match-seq-id-threshold", 70,
-        "The sequence identity threshold of an entire match.");
     opt_flag_int(conf,
         &compress_flags.procs, "procs", cpus,
         "The number of total CPUs to use to divide work.");
@@ -69,15 +58,6 @@ struct opt_config *load_compress_args(){
         "The number of bases scanned since the last clump of matches in "
         "align_ungapped that results in checking for 50%% identity since the "
         "last clump.");
-    opt_flag_double(conf,
-        &compress_flags.btwn_match_ident_thresh,
-        "btwn-match-ident_thresh", ((double)0.5),
-        "The identity threshold for continuing align_ungapped if it has been "
-        "more than 10 bases since the last clump of matches.");
-    opt_flag_int(conf,
-        &compress_flags.attempt_ext_len, "attempt-ext-len", 50,
-        "The minimum total length of an extension after running attempt_ext in "
-        "both directions needed to call extend_match.");
     opt_flag_int(conf,
         &compress_flags.notify_every, "notify-every", 1000,
         "Sets how many sequences to compress for each notification of how many "
