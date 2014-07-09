@@ -43,4 +43,5 @@ The usage of `cablast-compress` is:
 cablast-compress [flags] database-directory fasta-file [fasta-file ...]
 ```
 
-**Currently the multithreaded version of compression is still under development and does not currently work.**
+**Currently the multithreaded version of compression is still under development and does not currently work.
+  The --procs flag is disabled.**
