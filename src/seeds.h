@@ -20,8 +20,6 @@ struct cb_seed_loc {
 struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
                                      uint16_t residue_index);
 
-void cb_seed_loc_free(struct cb_seed_loc *seedLoc);
-
 struct cb_seeds {
     int32_t seed_size;
     int32_t *loc_counts;
@@ -43,8 +41,6 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq);
 /*Produces a copy of the list of seeds for 'kmer', and therefore the
   result needs to be freed with `cb_seed_loc_free` when finished. */
 int32_t cb_seeds_lookup(struct cb_seeds *seeds, char *kmer);
-
-void print_seeds(struct cb_seeds *seeds);
 
 int32_t hash_kmer(struct cb_seeds *seeds, char *kmer);
 int32_t update_kmer(struct cb_seeds *seeds, char *kmer, int32_t key);

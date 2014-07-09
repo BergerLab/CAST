@@ -65,13 +65,8 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     seeds->locs = malloc(seeds->locs_length*sizeof(*seeds->locs));
     assert(seeds->locs);
 
-    for (int i = 0; i < seeds->locs_length; i++) {
+    for (int i = 0; i < seeds->locs_length; i++)
         seeds->locs[i] = NULL;
-        /* malloc(compress_flags.max_kmer_freq*sizeof(seeds->locs[i]));
-        assert(seeds->locs[i]);
-        for (int j = 0; j < compress_flags.max_kmer_freq; j++)
-            seeds->locs[i][j] = NULL;*/
-    }
 
     seeds->loc_counts = malloc(seeds->locs_length*sizeof(*seeds->loc_counts));
     assert(seeds->loc_counts);
@@ -79,9 +74,8 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     int locs_length = seeds->locs_length;
     int32_t *loc_counts = seeds->loc_counts;
 
-    for (int i = 0; i < locs_length; i++) {
+    for (int i = 0; i < locs_length; i++)
         loc_counts[i] = 0;
-    }
 
     return seeds;
 }
@@ -175,16 +169,6 @@ struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
     return seedLoc;
 }
 
-/*void cb_seed_loc_free(struct cb_seed_loc *seedLoc){
-    struct cb_seed_loc *seed1, *seed2;
-
-    for (seed1 = seedLoc; seed1 != NULL;) {
-        seed2 = seed1->next;
-        free(seed1);
-        seed1 = seed2;
-    }
-}*/
-
 static int32_t residue_value(char residue){
     int32_t i = residue - 'A', val;
 
@@ -245,30 +229,3 @@ char *unhash_kmer(struct cb_seeds *seeds, int hash){
     }
     return kmer;
 }
-
-/*Output the seeds table in plain text format for debugging*/
-/*void print_seeds(struct cb_seeds *seeds){
-    int32_t i, j;
-
-    char *kmer = malloc(seeds->seed_size*sizeof(*kmer));
-    assert(kmer);
-
-    for (i = 0; i < seeds->locs_length; i++) {
-        struct cb_seed_loc *s = seeds->locs[i];
-        uint32_t new_kmer = (uint32_t)0;
-        char *kmer = unhash_kmer(seeds, i);
-
-        printf("%s\n", kmer);
-        for (j = 0; j < seeds->seed_size; j++) {
-            new_kmer <<= 2;
-            new_kmer |= ((i >> (2*j)) & ((uint32_t)3));
-        }
-        printf("%s\n", kmer);
-        free(kmer);
-        while (s) {
-            printf("(%d %d) > ", s->coarse_seq_id, s->residue_index);
-            s = s->next;
-        }
-        printf("\n");
-    }
-}*/
