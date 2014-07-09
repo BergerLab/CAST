@@ -13,61 +13,19 @@ static void exclude_residues(char *seq, const char *exclude);
 
 static void *fasta_generator(void *gen);
 
-struct fasta_file *fasta_read_all(const char *file_name, const char *exclude){
-    FILE *f;
-    struct fasta_file *ff;
-    struct fasta_seq *new_seq;
-    int allocated = 0;
-
-    printf("Reading all sequences from: %s\n", file_name);
-
-    f = fopen(file_name, "r");
-    if (f == NULL) {
-        perror("fasta_read_all");
-        exit(1);
-    }
-
-    ff = malloc(sizeof(*ff));
-    assert(ff);
-
-    ff->length = 0;
-
-    allocated = FASTA_INITIAL_SEQUENCE_LENGTH;
-
-    ff->seqs = malloc(allocated*sizeof(*ff->seqs));
-    assert(ff->seqs);
-
-    while (NULL != (new_seq = fasta_read_next(f, exclude))) {
-        if (ff->length == allocated) {
-            allocated *= 1.5;
-
-            ff->seqs = realloc(ff->seqs, allocated*sizeof(*ff->seqs));
-            assert(ff->seqs);
-        }
-        ff->seqs[ff->length++] = new_seq;
-    }
-
-    fclose(f);
-
-    return ff;
-}
-
-void fasta_free_all(struct fasta_file *ff){
-    int i;
-
-    for (i = 0; i < ff->length; i++)
-        fasta_free_seq(ff->seqs[i]);
-    free(ff->seqs);
-    free(ff);
-}
-
+/*Takes in a FASTA file pointer and an array of residue characters to exclude
+ *and reads in the next FASTA sequence to create a FASTA sequence struct
+ *that excludes the characters passed into "exclude".  If the file pointer is
+ *not at the start of a FASTA sequence or the sequence id is not read in, a NULL
+ *pointer is returned. 
+ */
 struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     struct fasta_seq *fs;
     char *line = NULL, *seq = NULL;
 
     /* check to make sure the next line starts a new sequence record */
-    if (!is_new_sequence_start(f)){
-        return NULL;}
+    if (!is_new_sequence_start(f))
+        return NULL;
 
     /* read in the sequence id */
     if (0 == readline(f, &line)) {
@@ -119,12 +77,18 @@ struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     return fs;
 }
 
+/*Frees a FASTA sequence struct.*/
 void fasta_free_seq(struct fasta_seq *seq){
     free(seq->name);
     free(seq->seq);
     free(seq);
 }
 
+/*Takes in the name of a FASTA file, an array of residue characters to exclude,
+ *and a buffer capacity and creates a new FASTA generator struct with its queue
+ *having the capacity passed into buffer_capacity, also starting a pthread for
+ *running fasta_generator on the file.
+ */
 struct fasta_seq_gen *
 fasta_generator_start(const char *file_name, const char *exclude,
                       int buffer_capacity){
@@ -146,7 +110,7 @@ fasta_generator_start(const char *file_name, const char *exclude,
     fsg->fp = fp;
     fsg->exclude = exclude;
 
-    errno = pthread_create(&fsg->thread, NULL, fasta_generator, (void*) fsg);
+    errno = pthread_create(&fsg->thread, NULL, fasta_generator, (void *)fsg);
     if (0 != errno) {
         fprintf(stderr, "Could not create pthread. Errno: %d\n", errno);
         exit(1);
@@ -155,6 +119,8 @@ fasta_generator_start(const char *file_name, const char *exclude,
     return fsg;
 }
 
+/*Frees the FASTA generator, joins its thread, and frees its thread-safe
+  queue.*/
 void fasta_generator_free(struct fasta_seq_gen *fsg){
     int errno;
 
@@ -167,6 +133,10 @@ void fasta_generator_free(struct fasta_seq_gen *fsg){
     free(fsg);
 }
 
+/*The FASTA generator function, which is run in a pthread and reads FASTA
+ *sequences from the FASTA file and puts them into the generator's thread-safe
+ *queue.
+ */
 static void *fasta_generator(void *gen){
     struct fasta_seq_gen *fsg;
     struct fasta_seq *seq;
@@ -181,6 +151,8 @@ static void *fasta_generator(void *gen){
     return NULL;
 }
 
+/*Takes in a FASTA generator and returns the next FASTA sequence in the
+  generator's thread-safe queue.*/
 struct fasta_seq *fasta_generator_next(struct fasta_seq_gen *fsg){
     struct fasta_seq *seq;
 
@@ -188,6 +160,8 @@ struct fasta_seq *fasta_generator_next(struct fasta_seq_gen *fsg){
     return seq;
 }
 
+/*Takes in a file pointer and checks if the pointer is at the start of a new
+  FASTA sequence.*/
 static bool is_new_sequence_start(FILE *f){
     char next;
     bool is_new_seq;
@@ -203,6 +177,8 @@ static bool is_new_sequence_start(FILE *f){
     return is_new_seq;
 }
 
+/*Takes in a sequence and an array of residues to exclude and replaces all
+  excluded residues in the sequence with X's.*/
 static void exclude_residues(char *seq, const char *exclude){
     int i, j;
 

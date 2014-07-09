@@ -12,17 +12,6 @@
 #define FASTA_MAX_LINE 1024
 #define FASTA_EXCLUDE_NCBI_BLOSUM62 "JOU"
 
-struct fasta_file {
-    struct fasta_seq **seqs;
-    int32_t length;
-};
-
-struct fasta_file *
-fasta_read_all(const char *file_name, const char *exclude);
-
-void fasta_free_all(struct fasta_file *ff);
-
-
 struct fasta_seq {
     char *name;
     char *seq;
