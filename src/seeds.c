@@ -36,6 +36,8 @@ const int8_t cb_seeds_alpha_size[] = {
 
 static int32_t residue_value(char residue);
 
+/*Takes in the length of the k-mers used and creates a new seeds table with one
+  array of seed locations for each k-mer.*/
 struct cb_seeds *cb_seeds_init(int32_t seed_size){
     struct cb_seeds *seeds;
     int32_t errno, p;
@@ -80,6 +82,7 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     return seeds;
 }
 
+/*Frees the seeds table and all of the seed locations in the table.*/
 void cb_seeds_free(struct cb_seeds *seeds){
     int32_t errno;
 
@@ -96,6 +99,11 @@ void cb_seeds_free(struct cb_seeds *seeds){
     free(seeds);
 }
 
+/*Takes in the seeds table and a coarse sequence and adds a new seed location
+ *in the seeds table for each coarse sequence.  If a k-mer has more seed
+ *locations than the number specified with the --max-kmer-freq flag, then no
+ *new seed locations will be added for that k-mer.
+ */
 void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
     struct cb_seed_loc *loc;
     int32_t hash, seed_size = seeds->seed_size+1,
@@ -141,6 +149,8 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
     pthread_rwlock_unlock(&seeds->lock);
 }
 
+/*Takes in the seeds table and a k-mer and returns the number of seed locations
+  in the table for that k-mer.*/
 int32_t cb_seeds_lookup(struct cb_seeds *seeds, char *kmer){
     int32_t hash = hash_kmer(seeds, kmer);
     int32_t count = 0;
@@ -155,6 +165,8 @@ int32_t cb_seeds_lookup(struct cb_seeds *seeds, char *kmer){
     return count;
 }
 
+/*Takes in a coarse sequence ID number and an index into the coarse sequence
+  with that ID number and uses them to create a new seed location struct.*/
 struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
                                      uint16_t residue_index){
     struct cb_seed_loc *seedLoc;
@@ -169,6 +181,8 @@ struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
     return seedLoc;
 }
 
+/*Takes in a residue and returns its value in the cb_seeds_alpha_size array,
+  which is used for hashing k-mers.*/
 static int32_t residue_value(char residue){
     int32_t i = residue - 'A', val;
 
