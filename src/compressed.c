@@ -41,10 +41,9 @@ struct cb_compressed *cb_compressed_init(FILE *file_compressed,
             return NULL;
         }
 
-        for (i = 0; i < num_sequences; i++) {
+        for (i = 0; i < num_sequences; i++)
             ds_vector_append(com_db->seqs,
                              cb_compressed_read_seq_at(com_db, i));
-        }
     }
 
     com_db->next_seq_to_write = 0;

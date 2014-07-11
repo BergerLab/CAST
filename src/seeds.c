@@ -176,7 +176,6 @@ struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
 
     seedLoc->coarse_seq_id = coarse_seq_id;
     seedLoc->residue_index = residue_index;
-    seedLoc->next = NULL;
 
     return seedLoc;
 }
