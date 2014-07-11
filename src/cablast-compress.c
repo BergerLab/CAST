@@ -49,7 +49,7 @@ int main(int argc, char **argv){
     }
 
     db = cb_database_init(args->args[0], compress_flags.map_seed_size, false);
-    workers = cb_compress_start_workers(db, 1);
+    workers = cb_compress_start_workers(db, compress_flags.procs);
 
     org_seq_id = 0;
     gettimeofday(&start, NULL);

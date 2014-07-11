@@ -133,7 +133,7 @@ static void *cb_compress_worker(void *data){
             cb_compressed_write_binary(args->db->com_db, current_seq);
             cb_compressed_seq_free(current_seq);
             ds_list_remove(seqs_to_write, seqs_to_write->first);
-            args->db->com_db->next_seq_to_write++;
+            __sync_fetch_and_add(&(args->db->com_db->next_seq_to_write), 1);
         }
     }
 
