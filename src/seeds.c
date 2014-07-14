@@ -158,10 +158,7 @@ int32_t cb_seeds_lookup(struct cb_seeds *seeds, char *kmer){
     if (hash < 0)
         return -1;
 
-    pthread_rwlock_rdlock(&seeds->lock);
     count = seeds->loc_counts[hash];
-    pthread_rwlock_unlock(&seeds->lock);
-
     return count;
 }
 
