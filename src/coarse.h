@@ -79,8 +79,6 @@ struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
 
 struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db, int32_t i);
 
-int32_t cb_coarse_db_seqs_count(struct cb_coarse *coarse_db);
-
 void cb_coarse_db_update_dbsize(struct cb_coarse *coarse_db, int32_t size);
 
 void cb_coarse_save_binary(struct cb_coarse *coarse_db);

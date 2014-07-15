@@ -113,17 +113,6 @@ extern inline struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db,
     return (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i);
 }
 
-/*Gets the number of sequences currently in the coarse database*/
-int32_t cb_coarse_db_seqs_count(struct cb_coarse *coarse_db){
-    int32_t size;
-
-    pthread_rwlock_rdlock(&coarse_db->lock_seq);
-    size = coarse_db->seqs->size;
-    pthread_rwlock_unlock(&coarse_db->lock_seq);
-
-    return size;
-}
-
 /*Increments the coarse database's dbsize*/
 void cb_coarse_db_update_dbsize(struct cb_coarse *coarse_db, int32_t size){
     pthread_rwlock_wrlock(&coarse_db->lock_seq);
