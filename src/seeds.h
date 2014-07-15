@@ -30,13 +30,21 @@ struct cb_seeds {
     pthread_rwlock_t lock;
 };
 
+struct cb_seeds_add_memory {
+    int32_t *hashes;
+    struct cb_seed_loc **locs;
+};
+
+struct cb_seeds_add_memory *cb_seeds_add_memory_init();
+
 struct cb_seeds *cb_seeds_init(int32_t seed_size);
 
 void cb_seeds_free(struct cb_seeds *seeds);
 
 struct cb_coarse_seq;
 
-void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq);
+void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
+                  struct cb_seeds_add_memory *mem);
 
 /*Produces a copy of the list of seeds for 'kmer', and therefore the
   result needs to be freed with `cb_seed_loc_free` when finished. */

@@ -104,48 +104,40 @@ void cb_seeds_free(struct cb_seeds *seeds){
  *locations than the number specified with the --max-kmer-freq flag, then no
  *new seed locations will be added for that k-mer.
  */
-void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq){
-    struct cb_seed_loc *loc;
+void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
+                  struct cb_seeds_add_memory *mem){
+    struct cb_seed_loc **locs_to_add = mem->locs;
     int32_t hash, seed_size = seeds->seed_size+1,
             seq_length = seq->seq->length, *loc_counts = seeds->loc_counts,
-            id = seq->id;
+            id = seq->id, *hashes = mem->hashes;
+
     struct cb_seed_loc ***locs = seeds->locs;
     char *kmer, *residues = seq->seq->residues;
 
-    pthread_rwlock_wrlock(&seeds->lock);
-
     hash = hash_kmer(seeds, residues);
-    if (hash != -1 && loc_counts[hash] < compress_flags.max_kmer_freq) {
-        loc = cb_seed_loc_init(id, 0);
-
-        if (locs[hash] == NULL) {
-            locs[hash]=malloc(compress_flags.max_kmer_freq*sizeof(locs[hash]));
-            assert(locs[hash]);
-        }
-
-        locs[hash][loc_counts[hash]] = loc;
-        (loc_counts[hash])++;
-    }
-   
+    hashes[0] = hash;
+    locs_to_add[0] = hash != -1 ? cb_seed_loc_init(id, 0) : NULL;
+ 
     for (int i = 1; i <= seq_length - seed_size; i++) {
         kmer = residues + i;
-
         hash = update_kmer(seeds, kmer, hash);
-        if (hash == -1 ||
-            loc_counts[hash] >= compress_flags.max_kmer_freq)
-            continue;
+        hashes[i] = hash;
+        locs_to_add[i] = hash != -1 ? cb_seed_loc_init(id, i) : NULL;
+    }
 
-        loc = cb_seed_loc_init(id, i);
-
+    pthread_rwlock_wrlock(&seeds->lock);
+    for (int i = 0; i <= seq_length - seed_size; i++) {
+        hash = hashes[i];
         if (locs[hash] == NULL) {
             locs[hash]=malloc(compress_flags.max_kmer_freq*sizeof(locs[hash]));
             assert(locs[hash]);
         }
-
-        locs[hash][loc_counts[hash]] = loc;
-        (loc_counts[hash])++;
+        if (locs_to_add[i] != NULL &&
+              loc_counts[hash] < compress_flags.max_kmer_freq) {
+            locs[hash][loc_counts[hash]] = locs_to_add[i];
+            (loc_counts[hash])++;
+        }
     }
-
     pthread_rwlock_unlock(&seeds->lock);
 }
 
@@ -239,3 +231,18 @@ char *unhash_kmer(struct cb_seeds *seeds, int hash){
     }
     return kmer;
 }
+
+struct cb_seeds_add_memory *cb_seeds_add_memory_init(){
+    struct cb_seeds_add_memory *mem = malloc(sizeof(*mem));
+    assert(mem);
+
+    mem->hashes =
+      malloc(2*compress_flags.max_chunk_size*sizeof(*(mem->hashes)));
+    assert(mem->hashes);
+
+    mem->locs   = malloc(2*compress_flags.max_chunk_size*sizeof(*(mem->locs)));
+    assert(mem->locs);
+
+    return mem;
+}
+
