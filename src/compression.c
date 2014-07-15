@@ -434,7 +434,8 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                 rev_olen = cb_align_length_nogaps(mseqs_rev.oseq);
 
                 /*If the match was too short, try the next seed*/
-                if (rev_olen+seed_size+fwd_olen-1 < compress_flags.min_match_len) {
+                if (rev_olen+seed_size+fwd_olen-1 <
+                      compress_flags.min_match_len) {
                     free(mseqs_fwd.rseq);
                     free(mseqs_fwd.oseq);
                     free(mseqs_rev.rseq);
@@ -566,9 +567,9 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             if (end_of_chunk < org_seq_len - seed_size - 1) {
                 start_of_section = end_of_chunk - overlap;
                 end_of_chunk = min(start_of_section + max_chunk_size,
-                                       org_seq_len);
+                                   org_seq_len);
                 end_of_section = min(start_of_section + max_section_size,
-                                       org_seq_len);
+                                     org_seq_len);
                 current = start_of_section - 1;
             }
             chunks++;
