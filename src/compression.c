@@ -207,7 +207,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             if (end_of_chunk < org_seq_len - seed_size) {
                 start_of_section += max_chunk_size - overlap;
                 end_of_chunk = min(start_of_section + max_chunk_size,
-                                     org_seq_len);
+                                   org_seq_len);
                 end_of_section = min(start_of_section + max_section_size,
                                      org_seq_len);
                 current = start_of_section-1;

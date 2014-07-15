@@ -145,22 +145,14 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
   in the table for that k-mer.*/
 int32_t cb_seeds_lookup(struct cb_seeds *seeds, char *kmer){
     int32_t hash = hash_kmer(seeds, kmer);
-    int32_t count = 0;
-
-    if (hash < 0)
-        return -1;
-
-    count = seeds->loc_counts[hash];
-    return count;
+    return hash >= 0 ? seeds->loc_counts[hash] : -1;
 }
 
 /*Takes in a coarse sequence ID number and an index into the coarse sequence
   with that ID number and uses them to create a new seed location struct.*/
 struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
                                      uint16_t residue_index){
-    struct cb_seed_loc *seedLoc;
-
-    seedLoc = malloc(sizeof(*seedLoc));
+    struct cb_seed_loc *seedLoc = malloc(sizeof(*seedLoc));
     assert(seedLoc);
 
     seedLoc->coarse_seq_id = coarse_seq_id;
@@ -171,16 +163,13 @@ struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
 
 /*Takes in a residue and returns its value in the cb_seeds_alpha_size array,
   which is used for hashing k-mers.*/
-static int32_t residue_value(char residue){
-    int32_t i = residue - 'A', val;
-
-    if (i < 0 || i >= 26) {
+static inline int32_t residue_value(char residue){
+    if (residue < 'A' || residue > 'Z') {
         fprintf(stderr, "Invalid nucleotide residue: %c\n", residue);
         exit(1);
     }
-    val = cb_seeds_alpha_size[i];
 
-    return val;
+    return cb_seeds_alpha_size[residue-'A'];
 }
 
 /*Takes in as input a seeds table and a k-mer and returns the k-mer's index
