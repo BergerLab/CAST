@@ -165,12 +165,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             max_section_size = max_chunk_size * 2,
             overlap = compress_flags.overlap,
             start_of_section = 0,
-            coarse_seq_count = cb_coarse_db_seqs_count(coarse_db),
             org_seq_len = org_seq->length,
             end_of_chunk = min(start_of_section + max_chunk_size,
                                    org_seq_len),
             end_of_section = min(start_of_section + max_section_size,
-                                   org_seq_len);
+                                   org_seq_len),
+            org_seq_id = org_seq->id;
     char *kmer, revcomp[seed_size+1], *org_seq_residues = org_seq->residues;
     bool *matches, *matches_temp, found_match;
 
@@ -193,7 +193,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
          *add the first chunk without a match and skip ahead to the start of
          *the second chunk.
          */
-        if (current == 0 && coarse_seq_count == 0) {
+        if (current == 0 && org_seq_id == 0) {
             new_coarse_seq_id =
               add_without_match(coarse_db, org_seq, 0,
                                 minimum(org_seq_len, max_chunk_size),
