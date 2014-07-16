@@ -5,6 +5,8 @@
 #include "flags.h"
 #include "seeds.h"
 
+/*The residue values for each letter of the alphabet, used for hashing k-mers
+  -1 = invalid residue.*/
 const int8_t cb_seeds_alpha_size[] = {
     0,  /* 'A' */
     -1, /* 'B' */
@@ -48,18 +50,23 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     seeds->alloc_locks = malloc(256*sizeof(*(seeds->alloc_locks)));
     assert(seeds->alloc_locks);
 
+    /*Create one alloc lock for k-mers ending in each of the 256 possible sets
+     *of 4 bases.  These are used for allocating an array of seed locations for
+     *a k-mer.
+     */
     for (int i = 0; i < 256; i++)
         if (0 != (errno = pthread_rwlock_init(&(seeds->alloc_locks[i]),NULL))) {
             fprintf(stderr, "Could not create rwlock. Errno: %d\n", errno);
             exit(1);
         }
 
+    //Create the lock for adding seeds to the seeds table.
     if (0 != (errno = pthread_rwlock_init(&seeds->lock, NULL))) {
         fprintf(stderr, "Could not create rwlock. Errno: %d\n", errno);
         exit(1);
     }
 
-    seeds->seed_size = seed_size;
+    seeds->seed_size     = seed_size;
     seeds->powers_length = seed_size + 1;
     
     seeds->powers = malloc((seeds->powers_length)*sizeof(*seeds->powers));
@@ -73,7 +80,7 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
 
     seeds->locs_length = seeds->powers[seed_size];
 
-    seeds->locs = malloc(seeds->locs_length*sizeof(*seeds->locs));
+    seeds->locs        = malloc(seeds->locs_length*sizeof(*seeds->locs));
     assert(seeds->locs);
 
     for (int i = 0; i < seeds->locs_length; i++)
@@ -95,6 +102,7 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
 void cb_seeds_free(struct cb_seeds *seeds){
     int32_t errno;
 
+    //Destroy the locks and free the array of alloc locks.
     if (0 != (errno = pthread_rwlock_destroy(&seeds->lock))) {
         fprintf(stderr, "Could not destroy rwlock. Errno: %d\n", errno);
         exit(1);
@@ -118,8 +126,8 @@ void cb_seeds_free(struct cb_seeds *seeds){
 
 /*Takes in the seeds table and a coarse sequence and adds a new seed location
  *in the seeds table for each coarse sequence.  If a k-mer has more seed
- *locations than the number specified with the --max-kmer-freq flag, then no
- *new seed locations will be added for that k-mer.
+ *locations than the number specified with the --max-kmer-freq flag
+ *(default 500), then no new seed locations will be added for that k-mer.
  */
 void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
                   struct cb_seeds_add_memory *mem){
@@ -134,7 +142,8 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
     hash = hash_kmer(seeds, residues);
     hashes[0] = hash;
     locs_to_add[0] = hash != -1 ? cb_seed_loc_init(id, 0) : NULL;
- 
+
+    //Fill the array of hashes and create the seed locations to add 
     for (int i = 1; i <= seq_length - seed_size; i++) {
         kmer = residues + i;
         hash = update_kmer(seeds, kmer, hash);
@@ -142,6 +151,8 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
         locs_to_add[i] = hash != -1 ? cb_seed_loc_init(id, i) : NULL;
     }
 
+    /*Allocate a seed locations array for any k-mers being added that currently
+      don't have a locations array in the seeds table*/
     for (int i = 0; i <= seq_length - seed_size; i++) {
         hash = hashes[i];
         if (locs[hash] == NULL) {
@@ -153,6 +164,8 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
         }
     }
 
+    /*For each k-mer, add its seed locations to the seeds table and update that
+      k-mer's entry in loc_counts.*/
     pthread_rwlock_wrlock(&seeds->lock);
     for (int i = 0; i <= seq_length - seed_size; i++) {
         hash = hashes[i];
@@ -245,6 +258,8 @@ char *unhash_kmer(struct cb_seeds *seeds, int hash){
     return kmer;
 }
 
+/*Allocates a new seeds_add_memory for a compression worker, which contains
+  an array of k-mers as integers and an array of seed locations.*/
 struct cb_seeds_add_memory *cb_seeds_add_memory_init(){
     struct cb_seeds_add_memory *mem = malloc(sizeof(*mem));
     assert(mem);
