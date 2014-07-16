@@ -35,16 +35,17 @@ cb_coarse_init(int32_t seed_size,
 
     coarse_db->dbsize = (uint64_t)0;
 
-    /*Initialize the file pointers*/
-    coarse_db->file_fasta = file_fasta;
-    coarse_db->file_links = file_links;
-    coarse_db->file_links_base_index = file_links_base_index;
+    //Initialize the file pointers
+    coarse_db->file_fasta             = file_fasta;
+    coarse_db->file_links             = file_links;
+    coarse_db->file_links_base_index  = file_links_base_index;
     coarse_db->file_links_count_index = file_links_count_index;
-    coarse_db->file_fasta_index = file_fasta_index;
-    coarse_db->file_fasta_base_index = file_fasta_base_index;
-    coarse_db->file_links_index = file_links_index;
-    coarse_db->file_params = file_params;
+    coarse_db->file_fasta_index       = file_fasta_index;
+    coarse_db->file_fasta_base_index  = file_fasta_base_index;
+    coarse_db->file_links_index       = file_links_index;
+    coarse_db->file_params            = file_params;
 
+    //Create the lock for the coarse database
     if (0 != (errno = pthread_rwlock_init(&coarse_db->lock_seq, NULL))) {
         fprintf(stderr, "Could not create rwlock. Errno: %d\n", errno);
         exit(1);
@@ -56,8 +57,7 @@ cb_coarse_init(int32_t seed_size,
 /*Takes in a coarse database, closes its file pointers, and frees the struct
   for the database.*/
 void cb_coarse_free(struct cb_coarse *coarse_db){
-    int32_t errno;
-    int32_t i;
+    int32_t errno, i;
 
     fclose(coarse_db->file_fasta);
     fclose(coarse_db->file_links);
@@ -68,15 +68,19 @@ void cb_coarse_free(struct cb_coarse *coarse_db){
     fclose(coarse_db->file_fasta_base_index);
     fclose(coarse_db->file_params);
 
+    //Destroy the lock
     if (0 != (errno = pthread_rwlock_destroy(&coarse_db->lock_seq))) {
         fprintf(stderr, "Could not destroy rwlock. Errno: %d\n", errno);
         exit(1);
     }
+
+    //Free each coarse sequence
     for (i = 0; i < coarse_db->seqs->size; i++)
         cb_coarse_seq_free(
             (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i));
-
     ds_vector_free_no_data(coarse_db->seqs);
+
+    //Free the seeds table
     if (coarse_db->seeds != NULL)
         cb_seeds_free(coarse_db->seeds);
 
@@ -85,8 +89,8 @@ void cb_coarse_free(struct cb_coarse *coarse_db){
 
 /*Takes in the coarse database and the residues and original start and end
  *indices for a sequence to be added to a coarse database and adds a sequence
- *created from those residues while also adding the sequence to the seeds
- *table.
+ *created from those residues while also adding the sequence's k-mers to the
+ *seeds table.
  */
 struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
                                     int32_t start, int32_t end,
@@ -109,13 +113,15 @@ extern inline struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db,
     return (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i);
 }
 
-/*Increments the coarse database's dbsize*/
+//Increments the coarse database's dbsize
 void cb_coarse_db_update_dbsize(struct cb_coarse *coarse_db, int32_t size){
     pthread_rwlock_wrlock(&coarse_db->lock_seq);
     coarse_db->dbsize += size;
     pthread_rwlock_unlock(&coarse_db->lock_seq);
 }
 
+/*A function used in quicksort for sorting the sequences in the coarse database
+  by their indices*/
 int32_t by_index(void *a, void *b){
     return ((int32_t)((struct cb_coarse_seq *)a)->id) -
            ((int32_t)((struct cb_coarse_seq *)b)->id);
