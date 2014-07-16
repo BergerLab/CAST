@@ -45,6 +45,15 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     seeds = malloc(sizeof(*seeds));
     assert(seeds);
 
+    seeds->alloc_locks = malloc(256*sizeof(*(seeds->alloc_locks)));
+    assert(seeds->alloc_locks);
+
+    for (int i = 0; i < 256; i++)
+        if (0 != (errno = pthread_rwlock_init(&(seeds->alloc_locks[i]),NULL))) {
+            fprintf(stderr, "Could not create rwlock. Errno: %d\n", errno);
+            exit(1);
+        }
+
     if (0 != (errno = pthread_rwlock_init(&seeds->lock, NULL))) {
         fprintf(stderr, "Could not create rwlock. Errno: %d\n", errno);
         exit(1);
@@ -90,6 +99,14 @@ void cb_seeds_free(struct cb_seeds *seeds){
         fprintf(stderr, "Could not destroy rwlock. Errno: %d\n", errno);
         exit(1);
     }
+
+    for (int i = 0; i < 256; i++)
+        if (0 != (errno = pthread_rwlock_destroy(&(seeds->alloc_locks[i])))) {
+            fprintf(stderr, "Could not create rwlock. Errno: %d\n", errno);
+            exit(1);
+        }
+    free(seeds->alloc_locks);
+
     for (int i = 0; i < seeds->locs_length; i++)
         free(seeds->locs[i]);
 
@@ -125,13 +142,20 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
         locs_to_add[i] = hash != -1 ? cb_seed_loc_init(id, i) : NULL;
     }
 
-    pthread_rwlock_wrlock(&seeds->lock);
     for (int i = 0; i <= seq_length - seed_size; i++) {
         hash = hashes[i];
         if (locs[hash] == NULL) {
-            locs[hash]=malloc(compress_flags.max_kmer_freq*sizeof(locs[hash]));
+            pthread_rwlock_wrlock(&(seeds->alloc_locks[hash%256]));
+            if (locs[hash] == NULL)
+                locs[hash]=malloc(compress_flags.max_kmer_freq*sizeof(locs[hash]));
             assert(locs[hash]);
+            pthread_rwlock_unlock(&(seeds->alloc_locks[hash%256]));
         }
+    }
+
+    pthread_rwlock_wrlock(&seeds->lock);
+    for (int i = 0; i <= seq_length - seed_size; i++) {
+        hash = hashes[i];
         if (locs_to_add[i] != NULL &&
               loc_counts[hash] < compress_flags.max_kmer_freq) {
             locs[hash][loc_counts[hash]] = locs_to_add[i];

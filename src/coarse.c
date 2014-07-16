@@ -91,14 +91,10 @@ void cb_coarse_free(struct cb_coarse *coarse_db){
 struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
                                     int32_t start, int32_t end,
                                     struct cb_seeds_add_memory *seeds_mem){
-    struct cb_coarse_seq *seq;
-    int32_t id;
-
-    seq = cb_coarse_seq_init(-1, residues, start, end);
+    struct cb_coarse_seq *seq = cb_coarse_seq_init(-1, residues, start, end);
 
     pthread_rwlock_wrlock(&coarse_db->lock_seq);
-    id = coarse_db->seqs->size;
-    seq->id = id;
+    seq->id = coarse_db->seqs->size;
     ds_vector_append(coarse_db->seqs, (void *)seq);
     pthread_rwlock_unlock(&coarse_db->lock_seq);
 

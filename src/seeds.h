@@ -28,6 +28,7 @@ struct cb_seeds {
     int32_t *powers;
     int32_t powers_length;
     pthread_rwlock_t lock;
+    pthread_rwlock_t *alloc_locks;
 };
 
 struct cb_seeds_add_memory {
