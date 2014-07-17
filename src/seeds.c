@@ -146,7 +146,7 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
     //Fill the array of hashes and create the seed locations to add 
     for (int i = 1; i <= seq_length - seed_size; i++) {
         kmer = residues + i;
-        hash = update_kmer(seeds, kmer, hash);
+        hash = hash < 0 ? hash_kmer(seeds, kmer):update_kmer(seeds, kmer, hash);
         hashes[i] = hash;
         locs_to_add[i] = hash != -1 ? cb_seed_loc_init(id, i) : NULL;
     }
@@ -158,7 +158,8 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
         if (locs[hash] == NULL) {
             pthread_rwlock_wrlock(&(seeds->alloc_locks[hash%256]));
             if (locs[hash] == NULL)
-                locs[hash]=malloc(compress_flags.max_kmer_freq*sizeof(locs[hash]));
+                locs[hash] =
+                  malloc(compress_flags.max_kmer_freq*sizeof(locs[hash]));
             assert(locs[hash]);
             pthread_rwlock_unlock(&(seeds->alloc_locks[hash%256]));
         }
