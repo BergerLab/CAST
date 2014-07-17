@@ -115,8 +115,11 @@ void cb_seeds_free(struct cb_seeds *seeds){
         }
     free(seeds->alloc_locks);
 
-    for (int i = 0; i < seeds->locs_length; i++)
+    for (int i = 0; i < seeds->locs_length; i++) {
+        for (int j = 0; j < seeds->loc_counts[i]; j++)
+            free(seeds->locs[i][j]);
         free(seeds->locs[i]);
+    }
 
     free(seeds->locs);
     free(seeds->loc_counts);
