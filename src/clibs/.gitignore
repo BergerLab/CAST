@@ -1,0 +1,7 @@
+.*.swp
+*.o
+ex-*
+*.so
+include/
+lib/
+ds.h
