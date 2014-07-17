@@ -8,9 +8,8 @@ with the compressed databases produced by the C++ implementation. Namely, the
 data itself should be the same (or similar), but its representation on disk is
 completely different. There may be other, subtler differences as well.
 
-**This code is currently under development.**
-
-There are no benchmarks.
+**Multithreaded compression introduces some variance into the size of the
+  resulting compressed database.**
 
 The official Go implementation of CaBLASTP can be found here:
 https://github.com/BurntSushi/cablastp
@@ -42,6 +41,3 @@ The usage of `cablast-compress` is:
 ```bash
 cablast-compress [flags] database-directory fasta-file [fasta-file ...]
 ```
-
-**Currently the multithreaded version of compression is still under development and does not currently work.
-  The --procs flag is disabled.**
