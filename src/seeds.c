@@ -125,7 +125,7 @@ void cb_seeds_free(struct cb_seeds *seeds){
 }
 
 /*Takes in the seeds table and a coarse sequence and adds a new seed location
- *in the seeds table for each coarse sequence.  If a k-mer has more seed
+ *in the seeds table for each k-mer in the sequence.  If a k-mer has more seed
  *locations than the number specified with the --max-kmer-freq flag
  *(default 500), then no new seed locations will be added for that k-mer.
  */
@@ -143,21 +143,26 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
     hashes[0] = hash;
     locs_to_add[0] = hash != -1 ? cb_seed_loc_init(id, 0) : NULL;
 
-    //Fill the array of hashes and create the seed locations to add 
+    //Fill the array of k-mer hashes and create the seed locations to add. 
     for (int i = 1; i <= seq_length - seed_size; i++) {
         kmer = residues + i;
         hash = hash < 0 ? hash_kmer(seeds, kmer) :
                           update_kmer(seeds, kmer, hash);
         hashes[i] = hash;
+
+        /*Create a new seed location for the current k-mer unless it contains an
+          N base call.*/
         locs_to_add[i] = hash != -1 ? cb_seed_loc_init(id, i) : NULL;
     }
 
     /*Allocate a seed locations array for any k-mers being added that currently
-      don't have a locations array in the seeds table*/
+      don't have a locations array in the seeds table.*/
     for (int i = 0; i <= seq_length - seed_size; i++) {
         hash = hashes[i];
         if (locs[hash] == NULL) {
             pthread_rwlock_wrlock(&(seeds->alloc_locks[hash%256]));
+            /*Make sure the locations array was not allocated by another thread
+              before this thread got the lock.*/
             if (locs[hash] == NULL)
                 locs[hash] =
                   malloc(compress_flags.max_kmer_freq*sizeof(locs[hash]));
@@ -239,24 +244,6 @@ int32_t update_kmer(struct cb_seeds *seeds, char *kmer, int32_t key){
     key += val*seeds->powers[seed_size-1];
     
     return key;
-}
-
-
-/*Convert an integer to the k-mer that it represents. Currently only works for
-  size k = 10*/
-char *unhash_kmer(struct cb_seeds *seeds, int hash){
-    int i;
-    char nucleotides[4] = {'A','C','G','T'};
-
-    char *kmer = malloc(11*sizeof(*kmer));
-    assert(kmer);
-
-    kmer[10] = '\0';
-    for (i = 0; i < seeds->seed_size; i++) {
-        kmer[i] = nucleotides[hash%4];
-        hash /= 4;
-    }
-    return kmer;
 }
 
 /*Allocates a new seeds_add_memory for a compression worker, which contains

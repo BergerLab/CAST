@@ -70,7 +70,7 @@ int32_t readline(FILE *f, char **line){
     int32_t allocated;
     char buf[1024];
 
-    allocated = 1; //For \0
+    allocated = 1; //For the null terminator
 
     *line = malloc(allocated*sizeof(**line));
     assert(line);
