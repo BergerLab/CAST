@@ -166,7 +166,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
     struct cb_coarse_seq *coarse_seq;
     struct cb_compressed_seq *cseq =
              cb_compressed_seq_init(org_seq->id, org_seq->name);
-    struct cb_seed_loc *seeds, *seeds_r, *seedLoc;
+    struct cb_seed_loc *seedLoc;
     struct cb_alignment alignment;
     int32_t seed_size = coarse_db->seeds->seed_size,
             resind = -1, current = 0, i = 0, new_coarse_seq_id = -1,

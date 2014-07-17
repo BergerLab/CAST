@@ -14,7 +14,6 @@ const int8_t cb_seeds_alpha_size[26];
 struct cb_seed_loc {
     uint32_t coarse_seq_id;
     uint16_t residue_index;
-    struct cb_seed_loc *next;
 };
 
 struct cb_seed_loc *cb_seed_loc_init(uint32_t coarse_seq_id,
