@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "DNAutils.h"
 
+//Global string of base complements of all leters of the alphabet
 char *base_complement = "TNGNNNCNNNNNNNNNNNNANNNNNN";
 
 /*Checks if two bases match.  If one or both bases is an N, it is an
@@ -11,26 +12,10 @@ extern inline bool bases_match(char a, char b, int dir_prod){
     return a == (dir_prod > 0 ? b : base_complement[b-'A']) && a != 'N';
 }
 
-/*Takes in a pointer to the start of a k-mer in a DNA sequence and the length
-  of the k-mer and returns a copy of the k-mer.*/
-char *get_kmer(char *DNA_string, int k){
-    int i = 0;
-
-    char *kmer = malloc(k*sizeof(*kmer));
-    assert(kmer);
-
-    for (i = 0; i < k; i++)
-        kmer[i] = DNA_string[i];
-    kmer[k] = '\0';
-    return kmer;
-}
-
 /*Takes in a k-mer, its length, and a char * "revcomp" and puts the k-mer's
   reverse complement in revcomp.*/
 void kmer_revcomp(char *revcomp, char *kmer, int k){
-    int i = 0;
-
-    for (i = 0; i < k; i++)
+    for (int i = 0; i < k; i++)
         revcomp[i] = base_complement[kmer[k-i-1]-'A'];
     revcomp[k] = '\0';
 }
