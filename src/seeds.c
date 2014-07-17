@@ -146,7 +146,8 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
     //Fill the array of hashes and create the seed locations to add 
     for (int i = 1; i <= seq_length - seed_size; i++) {
         kmer = residues + i;
-        hash = hash < 0 ? hash_kmer(seeds, kmer):update_kmer(seeds, kmer, hash);
+        hash = hash < 0 ? hash_kmer(seeds, kmer) :
+                          update_kmer(seeds, kmer, hash);
         hashes[i] = hash;
         locs_to_add[i] = hash != -1 ? cb_seed_loc_init(id, i) : NULL;
     }
@@ -213,11 +214,10 @@ static inline int32_t residue_value(char residue){
 /*Takes in as input a seeds table and a k-mer and returns the k-mer's index
   in the seeds table*/
 int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
-    int32_t i = 0, key = 0, val = 0, seed_size = seeds->seed_size,
-            *powers = seeds->powers;
+    int32_t key = 0, seed_size = seeds->seed_size, *powers = seeds->powers;
 
-    for (i = 0; i < seed_size; i++) {
-        val = residue_value(kmer[i]);
+    for (int32_t i = 0; i < seed_size; i++) {
+        int32_t val = residue_value(kmer[i]);
         if (val == -1)
             return -1;
 
@@ -229,14 +229,14 @@ int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
 /*Takes in as input a seeds table and a k-mer and returns the k-mer's index
   in the seeds table*/
 int32_t update_kmer(struct cb_seeds *seeds, char *kmer, int32_t key){
-    int32_t seed_size = seeds->seed_size, *powers = seeds->powers,
-            val = residue_value(kmer[seed_size-1]);
+    int32_t seed_size = seeds->seed_size,
+            val       = residue_value(kmer[seed_size-1]);
 
     if (val == -1)
         return -1;
 
-    key /= CABLAST_SEEDS_ALPHA_SIZE;
-    key += val*powers[seed_size-1];
+    key >>= 2;
+    key += val*seeds->powers[seed_size-1];
     
     return key;
 }

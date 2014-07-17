@@ -47,8 +47,6 @@ struct cb_coarse_seq;
 void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
                   struct cb_seeds_add_memory *mem);
 
-/*Produces a copy of the list of seeds for 'kmer', and therefore the
-  result needs to be freed with `cb_seed_loc_free` when finished. */
 int32_t cb_seeds_lookup(struct cb_seeds *seeds, char *kmer);
 
 int32_t hash_kmer(struct cb_seeds *seeds, char *kmer);
