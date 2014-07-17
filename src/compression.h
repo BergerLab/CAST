@@ -1,7 +1,7 @@
 #ifndef __CABLAST_COMPRESSION_H__
 #define __CABLAST_COMPRESSION_H__
 
-/* Apparently this is required to make pthread_rwlock* stuff available. */
+//Apparently this is required to make pthread_rwlock* stuff available.
 #define __USE_UNIX98
 
 #include <pthread.h>

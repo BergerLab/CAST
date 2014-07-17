@@ -20,4 +20,5 @@ char *no_dashes(char *sequence);
 
 int minimum(int a, int b);
 int maximum(int a, int b);
+
 #endif

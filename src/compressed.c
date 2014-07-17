@@ -51,7 +51,7 @@ struct cb_compressed *cb_compressed_init(FILE *file_compressed,
     return com_db;
 }
 
-/*Frees the compressed database and its sequences and closes its files.*/
+//Frees the compressed database and its sequences and closes its files.
 void cb_compressed_free(struct cb_compressed *com_db){
     int i;
 
@@ -66,12 +66,12 @@ void cb_compressed_free(struct cb_compressed *com_db){
     free(com_db);
 }
 
-/*Returns the number of sequences in the compressed database*/
+//Returns the number of sequences in the compressed database
 int32_t cb_compressed_size(struct cb_compressed *com_db){
     return com_db->seqs->size;
 }
 
-/*Add a sequence to the compressed database*/
+//Add a sequence to the compressed database
 void cb_compressed_add(struct cb_compressed *com_db,
                        struct cb_compressed_seq *seq){
     ds_vector_append(com_db->seqs, (void *)seq);
@@ -104,7 +104,7 @@ uint64_t cb_compressed_write_binary(struct cb_compressed *com_db,
 
     fwrite(&index, sizeof(index), 1, com_db->file_index);
 
-    /*Output the header for the sequence*/
+    //Output the header for the sequence
     sprintf(id_string, ">%s\n", seq->name);
     fputs(id_string, com_db->file_compressed);
 
@@ -127,10 +127,10 @@ uint64_t cb_compressed_write_binary(struct cb_compressed *com_db,
             script_length++;
         odd = script_length % 2 == 1 ? 1 : 0;
 
-        /*Output link_data in binary format*/        
+        //Output link_data in binary format
         fwrite(link_data, sizeof(*link_data), 1, com_db->file_compressed);
 
-        /*Output all of the characters of the edit script as half-bytes*/
+        //Output all of the characters of the edit script as half-bytes
         fwrite(script, sizeof(*script),
                script_length/2+odd, com_db->file_compressed);
 
@@ -167,7 +167,7 @@ struct cb_compressed_seq *cb_compressed_seq_init(int32_t id, char *name){
     return seq;
 }
 
-/*Frees a compressed sequence*/
+//Frees a compressed sequence
 void cb_compressed_seq_free(struct cb_compressed_seq *seq){
     cb_link_to_coarse_free(seq->links);
     free(seq->name);
@@ -190,7 +190,7 @@ void cb_compressed_seq_addlink(struct cb_compressed_seq *seq,
     seq->last_link       = newlink;
 }
 
-/*Gets the i-th compressed sequence from the compressed database.*/
+//Gets the i-th compressed sequence from the compressed database.
 struct cb_compressed_seq *cb_compressed_seq_at(struct cb_compressed *com_db,
                                                int32_t i){
     return (struct cb_compressed_seq *)ds_vector_get(com_db->seqs, i);
@@ -237,14 +237,14 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
     char *half_bytes, *diff;
     bool fread_success;
 
-    /*Read in the data of the current link*/
+    //Read in the data of the current link
     link_data = malloc(sizeof(*link_data));
     assert(link_data);
 
     fread_success = fread(link_data, sizeof(*link_data), 1, f) == 1;
     assert(fread_success);
 
-    /*Read in the link's edit script and convert it to ASCII format*/
+    //Read in the link's edit script and convert it to ASCII format
     script_length = link_data->script_length;
 
     chars_to_read = script_length / 2;
@@ -262,7 +262,7 @@ struct cb_link_to_coarse *read_compressed_link(FILE *f){
 
     free(half_bytes);
 
-    /*Create a new cb_link_to_coarse with the link's data and edit script.*/
+    //Create a new cb_link_to_coarse with the link's data and edit script.
     return cb_link_to_coarse_from_data(link_data, diff);
 }
 
@@ -356,7 +356,7 @@ int64_t cb_compressed_get_seq_length(FILE *f){
     return length;
 }
 
-/*Gets the lengths in bases for all sequences in the database*/
+//Gets the lengths in bases for all sequences in the database
 int64_t *cb_compressed_get_lengths(struct cb_compressed *comdb){
     FILE *links = comdb->file_compressed, *index = comdb->file_index;
     int64_t *lengths = NULL, num_sequences;
@@ -409,7 +409,7 @@ struct cb_compressed_seq **read_compressed(FILE *f){
       malloc(1000*sizeof(*compressed_seqs));
     assert(compressed_seqs);
 
-    /*Read each sequence*/
+    //Read each sequence
     while (true) {
         struct cb_link_to_coarse *links = NULL;
         char *header = get_compressed_header(f);
@@ -417,10 +417,10 @@ struct cb_compressed_seq **read_compressed(FILE *f){
         if (header == NULL)
             break;
 
-        /*Skip over the length of the original sequence*/
+        //Skip over the length of the original sequence
         read_int_from_file(8, f);
 
-        /*Read each link in the sequence*/
+        //Read each link in the sequence
         while (true) {
             struct cb_link_to_coarse *current_link = read_compressed_link(f);
             char c = 1;

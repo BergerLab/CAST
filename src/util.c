@@ -7,7 +7,7 @@
 
 #include "util.h"
 
-/*Calls trim to remove leading and trailing whitespace*/
+//Calls trim to remove leading and trailing whitespace
 char *trim_space(char *s){
     return trim(s, " \r\n\t");
 }
@@ -70,7 +70,7 @@ int32_t readline(FILE *f, char **line){
     int32_t allocated;
     char buf[1024];
 
-    allocated = 1; /*for \0*/
+    allocated = 1; //For \0
 
     *line = malloc(allocated*sizeof(**line));
     assert(line);
@@ -84,14 +84,14 @@ int32_t readline(FILE *f, char **line){
 
         strcat(*line, buf);
 
-        /*If we have found a new line, quit*/
+        //If we have found a new line, quit.
         if ((*line)[allocated - 2] == '\n')
             break;
     }
     return allocated - 1;
 }
 
-/*Gets the number of processors on the machine.*/
+//Gets the number of processors on the machine.
 int32_t num_cpus(){
     int32_t cpus;
 

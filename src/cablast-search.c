@@ -26,7 +26,7 @@
 #include "util.h"
 #include "xml.h"
 
-/*Joins two strings to create a new file path string.*/
+//Joins two strings to create a new file path string.
 static char *path_join(char *a, char *b){
     char *joined;
 
@@ -64,7 +64,7 @@ void blast_coarse(struct opt_args *args, uint64_t dbsize){
     free(blastn);
 }
 
-/*Runs BLAST on the fine FASTA file*/
+//Runs BLAST on the fine FASTA file
 void blast_fine(struct opt_args *args, uint64_t dbsize){
     char *blastn,
          *blastn_command =
@@ -86,7 +86,7 @@ void blast_fine(struct opt_args *args, uint64_t dbsize){
     if (!search_flags.hide_progress)
           fprintf(stderr, "\n%s\n", blastn);
 
-    system(blastn); /*Run fine BLAST*/
+    system(blastn); //Run fine BLAST
 
     free(blastn);
 }
@@ -375,7 +375,7 @@ int main(int argc, char **argv){
     if (search_flags.show_hit_info)
         test_hits_file = fopen("CaBLAST_hits.txt", "w");
 
-    /*Parse the XML file generated from coarse BLAST and get its iterations.*/
+    //Parse the XML file generated from coarse BLAST and get its iterations.
     doc = xmlReadFile("CaBLAST_temp_blast_results.xml", NULL, 0);
     if (doc == NULL) {
         fprintf(stderr, "Could not parse CaBLAST_temp_blast_results.xml\n");
@@ -410,12 +410,12 @@ int main(int argc, char **argv){
     blast_fine(args, dbsize);
 
     if (!search_flags.hide_progress)
-        fprintf(stderr, "\n"); /*Make a newline after the progress bar*/
+        fprintf(stderr, "\n"); //Make a newline after the progress bar
     ds_vector_free_no_data(queries);
     if (search_flags.show_hit_info)
         fclose(test_hits_file);
 
-    /*Free the XML data and expanded hits*/
+    //Free the XML data and expanded hits
     for (i = 0; i < iterations->size; i++) {
         struct DSVector *iteration =
           (struct DSVector *)ds_vector_get(iterations, i);

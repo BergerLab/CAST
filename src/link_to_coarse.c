@@ -47,19 +47,19 @@ cb_link_to_coarse_init_nodiff(uint64_t coarse_seq_id,
     link->coarse_start   = coarse_start;
     link->coarse_end     = coarse_end;
 
-    /*Give the link a blank edit script*/
+    //Give the link a blank edit script.
     link->diff = malloc(2*sizeof(*(link->diff)));
     assert(link->diff);
 
-    link->diff[0]        = dir ? '0' : '1';
-    link->diff[1]        = '\0';
+    link->diff[0] = dir ? '0' : '1';
+    link->diff[1] = '\0';
 
-    link->next           = NULL;
+    link->next = NULL;
 
     return link;
 }
 
-/*Freeing function for a cb_link_to_coarse*/
+//Freeing function for a cb_link_to_coarse
 void cb_link_to_coarse_free(struct cb_link_to_coarse *link){
     if (link != NULL) {
         cb_link_to_coarse_free(link->next);

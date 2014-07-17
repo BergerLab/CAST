@@ -83,19 +83,14 @@ int main(int argc, char **argv){
               decompressed sequence currently being decompressed.*/
             overlap = last_end - link->original_start;
 
-/*printf("\n%ld %ld...%d %d, last_end = %lu, overlap = %d\n-%s\n=%s\n\n",
-       link->original_start, link->original_end,
-       link->coarse_start, link->coarse_end, last_end, overlap,
-       coarse_sequences[link->coarse_seq_id]->seq, chunk->residues);*/
-
-
             for (length = 0; chunk->residues[length] != '\0'; length++);
 
             decompressed = read_edit_script(link->diff,chunk->residues,length);
 
             /*Print all characters of the decompressed chunk past the index
-              "overlap" unless overlap is greater than the length of the
-              decompressed chunk.*/
+             *"overlap" unless overlap is greater than the length of the
+             *decompressed chunk.
+             */
             decompressed += overlap;
             if (overlap < link->original_end - link->original_start ||
                 overlap == link->original_end - link->original_start && !link->next)

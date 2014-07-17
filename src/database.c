@@ -32,7 +32,7 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
          *findex_coarse_fasta, *findex_coarse_fasta_base, *findex_compressed,
          *findex_params;
 
-    /*Get the file paths for the new database's file*/
+    //Get the file paths for the new database's file
     char *pfasta                    = path_join(dir, CABLAST_COARSE_FASTA),
          *plinks                    = path_join(dir, CABLAST_COARSE_LINKS),
          *pindex_coarse_links       =
@@ -49,7 +49,7 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
          *pindex_compressed         = path_join(dir, CABLAST_COMPRESSED_INDEX),
          *pindex_params             = path_join(dir, CABLAST_PARAMS);
 
-    /* If we're not adding to a database, make sure `dir` does not exist. */
+    //If we're not adding to a database, make sure `dir` does not exist.
     if (!add && 0 == stat(dir, &buf)) {
         fprintf(stderr,
                 "The directory '%s' already exists. A new compressed "
@@ -57,7 +57,7 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
                 "existing database.\n", dir);
         exit(1); 
 
-        /* Just for testing purposes. */
+        //Just for testing purposes.
         unlink(pfasta);
         unlink(plinks);
         unlink(pindex_coarse_links);
@@ -70,7 +70,7 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
         unlink(pindex_params);
         rmdir(dir);
     }
-    /* Otherwise, check to make sure it *does* exist. */
+    //Otherwise, check to make sure it *does* exist.
     if (add && 0 != stat(dir, &buf)) {
         fprintf(stderr, "Could not open '%s' database for appending.", dir);
         exit(1);
@@ -100,7 +100,7 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
     findex_compressed         = open_db_file(pindex_compressed, "rb+");
     findex_params             = open_db_file(pindex_params, "rb+");
 
-    /*Initialize the coarse and compressed databases*/
+    //Initialize the coarse and compressed databases
     db->coarse_db = cb_coarse_init(seed_size, ffasta, flinks,
                                  findex_coarse_links, findex_coarse_links_base,
                                  findex_coarse_links_count, findex_coarse_fasta,
@@ -162,7 +162,7 @@ cb_database_r_init(char *dir, int32_t seed_size,
          *pindex_compressed         = path_join(dir, CABLAST_COMPRESSED_INDEX),
          *pindex_params             = path_join(dir, CABLAST_PARAMS);
 
-    /* Make sure the database directory exists. */
+    //Make sure the database directory exists.
     if (0 != stat(dir, &buf)) {
         fprintf(stderr, "Could not open '%s' database for reading.", dir);
         exit(1);
@@ -201,7 +201,7 @@ cb_database_r_init(char *dir, int32_t seed_size,
 /*Freeing function for a cb_database.  Frees the database and its coarse and
   compressed databases and closes its files.*/
 void cb_database_free(struct cb_database *db){
-    /* All files opened in cb_database_init are closed in subsequent frees. */
+    //All files opened in cb_database_init are closed in subsequent frees.
     cb_coarse_free(db->coarse_db);
     cb_compressed_free(db->com_db);
     free(db->name);
@@ -211,7 +211,7 @@ void cb_database_free(struct cb_database *db){
 /*Freeing function for a cb_database_r.  Frees the database and its coarse and
   compressed databases and closes its files.*/
 void cb_database_r_free(struct cb_database_r *db){
-    /* All files opened in cb_database_init are closed in subsequent frees. */
+    //All files opened in cb_database_init are closed in subsequent frees.
     cb_coarse_r_free(db->coarse_db);
     cb_compressed_free(db->com_db);
     free(db->name);
@@ -241,7 +241,7 @@ static FILE *open_db_file(char *path, char *fopen_mode){
     return fp;
 }
 
-/*Joins two strings to create a new file path string.*/
+//Joins two strings to create a new file path string.
 static char *path_join(char *a, char *b){
     char *joined;
 
@@ -252,7 +252,7 @@ static char *path_join(char *a, char *b){
     return joined;
 }
 
-/*Takes in a file path and returns a new string containing the basename.*/
+//Takes in a file path and returns a new string containing the basename.
 static char *basename(char *path){
     char *base;
     int i;

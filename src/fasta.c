@@ -23,11 +23,11 @@ struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     struct fasta_seq *fs;
     char *line = NULL, *seq = NULL;
 
-    /* check to make sure the next line starts a new sequence record */
+    //Check to make sure the next line starts a new sequence record.
     if (!is_new_sequence_start(f))
         return NULL;
 
-    /* read in the sequence id */
+    //Read in the sequence id.
     if (0 == readline(f, &line)) {
         free(line);
         return NULL;
@@ -43,7 +43,7 @@ struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     strcpy(fs->name, line);
     free(line);
 
-    /* Now read all of the sequence data for this record */
+    //Now read all of the sequence data for this record.
     seq = malloc(sizeof(*seq));
     assert(seq);
 
@@ -77,7 +77,7 @@ struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     return fs;
 }
 
-/*Frees a FASTA sequence struct.*/
+//Frees a FASTA sequence struct.
 void fasta_free_seq(struct fasta_seq *seq){
     free(seq->name);
     free(seq->seq);
@@ -106,8 +106,8 @@ fasta_generator_start(const char *file_name, const char *exclude,
     fsg = malloc(sizeof(*fsg));
     assert(fsg);
 
-    fsg->seqs = ds_queue_create(buffer_capacity);
-    fsg->fp = fp;
+    fsg->seqs    = ds_queue_create(buffer_capacity);
+    fsg->fp      = fp;
     fsg->exclude = exclude;
 
     errno = pthread_create(&fsg->thread, NULL, fasta_generator, (void *)fsg);
@@ -119,8 +119,7 @@ fasta_generator_start(const char *file_name, const char *exclude,
     return fsg;
 }
 
-/*Frees the FASTA generator, joins its thread, and frees its thread-safe
-  queue.*/
+//Frees the FASTA generator, joins its thread, and frees its thread-safe queue.
 void fasta_generator_free(struct fasta_seq_gen *fsg){
     int errno;
 
@@ -180,10 +179,8 @@ static bool is_new_sequence_start(FILE *f){
 /*Takes in a sequence and an array of residues to exclude and replaces all
   excluded residues in the sequence with X's.*/
 static void exclude_residues(char *seq, const char *exclude){
-    int i, j;
-
-    for (i = 0; seq[i] != '\0'; i++)
-        for (j = 0; exclude[j] != '\0'; j++)
+    for (int i = 0; seq[i] != '\0'; i++)
+        for (int j = 0; exclude[j] != '\0'; j++)
             if (seq[i] == exclude[j])
                 seq[i] = 'X';
 }

@@ -9,7 +9,9 @@
 #include "DNAalphabet.h"
 #include "flags.h"
 
+//Global string of base complements of all leters of the alphabet
 char *base_complements = "TNGNNNCNNNNNNNNNNNNANNNNNN";
+
 int min(int a, int b){return a<b?a:b;}
 
 /*@param rseq, oseq: The coarse and original sequences.
@@ -104,7 +106,7 @@ cb_align_ungapped(char *rseq, int32_t rstart, int32_t rend, int32_t dir1,
     return ungapped;
 }
 
-/*Initialization function for creating a cb_align_nw_memory data structure*/
+//Initialization function for creating a cb_align_nw_memory data structure
 struct cb_align_nw_memory *cb_align_nw_memory_init(){
     struct cb_align_nw_memory *mem;
 
@@ -143,7 +145,7 @@ struct cb_align_nw_memory *cb_align_nw_memory_init(){
     return mem;
 }
 
-/*Function for freeing a cb_align_nw_memory data structure*/
+//Function for freeing a cb_align_nw_memory data structure
 void cb_align_nw_memory_free(struct cb_align_nw_memory *mem){
     free(mem->dp_score);
     free(mem->dp_from);
@@ -200,8 +202,7 @@ void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
 }
 
 /*Finds the space on the bottom and right edges of a Needleman-Wunsch score
- *table with the best score, returning it as an array of two ints.
- */
+  table with the best score, returning it as an array of two ints.*/
 void best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem){
     int j1, j2, max_dp_score = -1000;
     int *dp_score = mem->dp_score;
@@ -230,19 +231,19 @@ void backtrack_to_clump(struct cb_align_nw_memory *mem){
     while (!(pos0 == 0 && pos1 == 0)) {
         int prev_j1, prev_j2;
 
-        if (consec_matches == consec_match_clump_size) { /*found chunk; stop*/
+        if (consec_matches == consec_match_clump_size) { //Found chunk; stop
             pos0 += consec_match_clump_size;
             pos1 += consec_match_clump_size;
             break;
         }
 
-        switch (dp_from[26*pos0+pos1]) { /*backtrack to previous cell*/
+        switch (dp_from[26*pos0+pos1]) { //Backtrack to previous cell
             case 0:  prev_j1 = pos0-1; prev_j2 = pos1-1; break;
             case 2:  prev_j1 = pos0;   prev_j2 = pos1-1; break;
             default: prev_j1 = pos0-1; prev_j2 = pos1;
         }
         if (dp_from[26*pos0+pos1] == 0)
-            if (dp_score[26*pos0+pos1] > dp_score[26*prev_j1+prev_j2]) /*match*/
+            if (dp_score[26*pos0+pos1] > dp_score[26*prev_j1+prev_j2]) //Match
                 consec_matches++;
             else
                 consec_matches = 0;
@@ -251,7 +252,7 @@ void backtrack_to_clump(struct cb_align_nw_memory *mem){
         pos0 = prev_j1;
         pos1 = prev_j2;
     }
-    /*Couldn't find a 4-mer clump*/
+    //Couldn't find a 4-mer clump
     if (consec_matches < consec_match_clump_size) {
         pos0 = 0;
         pos1 = 0;
@@ -325,20 +326,20 @@ struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
         switch (dp_from[26*cur_j1+cur_j2]) {
             char c1, c2;
         case 0:
-            prev_j1 = cur_j1-1; prev_j2 = cur_j2-1; /*match or substitution*/
-            c1 = rseq[i1+dir1*prev_j1]; /*comp if antisense*/
+            prev_j1 = cur_j1-1; prev_j2 = cur_j2-1; //Match or substitution
+            c1 = rseq[i1+dir1*prev_j1]; //Comp if antisense
             c2 = oseq[i2+dir2*prev_j2];
             if (dir_prod == -1) c2 = base_complement[c2-'A'];
             subs1_dp[num_steps] = c1;
             subs2_dp[num_steps] = c2;
             break;
-        case 2: prev_j1 = cur_j1; prev_j2 = cur_j2-1; /*advance 2; gap in 1*/
+        case 2: prev_j1 = cur_j1; prev_j2 = cur_j2-1; //Advance 2; gap in 1
             c2 = oseq[i2+dir2*prev_j2];
-            if (dir_prod == -1) c2 = base_complement[c2-'A']; /*comp if antisense*/
+            if (dir_prod == -1) c2 = base_complement[c2-'A']; //Comp if antisense
             subs1_dp[num_steps] = '-';
             subs2_dp[num_steps] = c2;
             break;
-        default: prev_j1 = cur_j1-1; prev_j2 = cur_j2; /*advance 1; gap in 2*/
+        default: prev_j1 = cur_j1-1; prev_j2 = cur_j2; //Advance 1; gap in 2
             c1 = rseq[i1+dir1*prev_j1];
             subs1_dp[num_steps] = c1;
             subs2_dp[num_steps] = '-';
@@ -348,14 +349,15 @@ struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
         num_steps++;
         cur_j1 = prev_j1; cur_j2 = prev_j2;
     }
-    for (i = 0; i < num_steps/2; i++) { /* flip order */
+    for (i = 0; i < num_steps/2; i++) { //Flip order
         bool temp = matches_to_add[num_steps-i-1];
         matches_to_add[num_steps-1-i] = matches_to_add[i];
         matches_to_add[i] = temp;
     }
 
     int m = *matches_index;
-    /*note: need to flip order*/
+
+    //Note: need to flip order
     for (i = m - 100; i < m; i++)
         if (matches[i])
             matches_count++;
@@ -392,10 +394,10 @@ struct cb_alignment cb_align_nw(struct cb_align_nw_memory *mem,
     return align;
 }
 
-/*Returns the number of non-gap characters in a string*/
+//Returns the number of non-gap characters in a string
 int32_t cb_align_length_nogaps(char *residues){
-    int i = 0, len = 0, rlen = strlen(residues);
-    for (i = 0; i < rlen; i++)
+    int len = 0, rlen = strlen(residues);
+    for (int i = 0; i < rlen; i++)
         if (residues[i] != '-')
             len++;
 

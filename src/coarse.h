@@ -1,7 +1,7 @@
 #ifndef __CABLAST_COARSE_H__
 #define __CABLAST_COARSE_H__
 
-/* Apparently this is required to make pthread_rwlock* stuff available. */
+//Apparently this is required to make pthread_rwlock* stuff available.
 #define __USE_UNIX98
 
 #include <pthread.h>
@@ -37,30 +37,30 @@ struct cb_coarse {
     uint64_t dbsize;
     pthread_rwlock_t lock_seq;
 
-    /*The FASTA file of the residues of each sequence in the coarse database*/
+    //The FASTA file of the residues of each sequence in the coarse database
     FILE *file_fasta;
 
-    /*The links to the compressed sequences in each coarse sequence*/
+    //The links to the compressed sequences in each coarse sequence
     FILE *file_links;
 
-    /*The byte index of the start of each coarse sequence in coarse.links*/
+    //The byte index of the start of each coarse sequence in coarse.links
     FILE *file_links_index;
 
     /*The indices into the bases of the coarse FASTA file for the coarse start
       and end of each link*/
     FILE *file_links_base_index;
 
-    /*The number of links to compressed sequences in each coarse sequence*/
+    //The number of links to compressed sequences in each coarse sequence
     FILE *file_links_count_index;
 
     /*The index of the start of the header of each FASTA sequence in the coarse
       FASTA file*/
     FILE *file_fasta_index;
 
-    /*The base index of the start of each sequence in the coarse FASTA file*/
+    //The base index of the start of each sequence in the coarse FASTA file
     FILE *file_fasta_base_index;
 
-    /*Contains the size of the original FASTA file*/
+    //Contains the size of the original FASTA file
     FILE *file_params;
 };
 

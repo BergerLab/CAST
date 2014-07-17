@@ -16,12 +16,12 @@ uint64_t make_mask(int bits){
     return mask-1;
 }
 
-/*Left shift for 64-bit integers*/
+//Left shift for 64-bit integers
 uint64_t shift_left(uint64_t x, int bits){
     return x<<bits;
 }
 
-/*Right shift for 64-bit integers*/
+//Right shift for 64-bit integers
 uint64_t shift_right(uint64_t x, int bits){
     uint64_t mask = make_mask(64-bits);
     x >>= bits;

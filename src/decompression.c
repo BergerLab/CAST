@@ -43,21 +43,19 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
             i = 0, j = 0, k = 0;
 
     for (i = first_block; i <= last_block; i++) {
-        /*Current block of links*/
+        //Current block of links
         struct DSVector *link_block = cb_coarse_r_get_block(coarse_db, i);
-        /*Indices in the current block*/
+        //Indices in the current block
         struct DSVector *ind_block =
           (struct DSVector *)ds_vector_get(coarse_db->link_inds_by_block, i);
-printf("block %d: %d\n", i, link_block->size);
         for (j = 0; j < link_block->size; j++){
             struct cb_link_to_compressed_data *link =
               (struct cb_link_to_compressed_data *)ds_vector_get(link_block, j);
-printf("    %d %d\n", link->coarse_start, link->coarse_end);
             int64_t link_ind     = *(int64_t *)ds_vector_get(ind_block, j),
                     coarse_start = link->coarse_start,
                     coarse_end   = link->coarse_end;
 
-            /*Determine which sequence the link belongs to*/
+            //Determine which sequence the link belongs to
             for (k = 0; k <= coarse_db->num_coarse_seqs; k++)
                 if (coarse_db->seq_link_counts[k] > link_ind)
                     break;
@@ -172,7 +170,7 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
         residues = coarsedb->all_residues +
                    coarsedb->seq_base_indices[link->coarse_seq_id];
 
-    /*The link represents an exact match so there are no edits to make*/
+    //The link represents an exact match so there are no edits to make
     if (diff[1] == '\0' && fwd) {
         int starting_i0 = -1, last_i0 = -1;
 
@@ -199,7 +197,7 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
 
     script_pos = 1;
 
-    /*We are decompressing a link from a forward match*/
+    //We are decompressing a link from a forward match.
     if (fwd) {
         i0 = link->original_start - original_start;
         while (next_edit(diff, &script_pos, edit)) {

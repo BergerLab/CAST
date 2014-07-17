@@ -25,7 +25,7 @@ char *get_kmer(char *DNA_string, int k){
     return kmer;
 }
 
-/*Takes in a k-mer and its length and returns the k-mer's reverse complement.*/
+//Takes in a k-mer and its length and returns the k-mer's reverse complement.
 char *kmer_revcomp(char *revcomp, char *kmer, int k){
     int i = 0;
 

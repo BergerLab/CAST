@@ -63,4 +63,5 @@ int check_and_update(bool *matches, int *matches_index, int *num_matches,
                      bool *temp, int temp_index);
 
 int max_dp_len(int i, int dir, int len);
+
 #endif

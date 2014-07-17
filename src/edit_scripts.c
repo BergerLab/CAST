@@ -10,7 +10,7 @@
 int minimum(int a, int b){return a<b?a:b;}
 int maximum(int a, int b){return a>b?a:b;}
 
-/*Converts an integer to a string containing its octal representation*/
+//Converts an integer to a string containing its octal representation
 char *to_octal_str(int i) {
     char *buf = malloc(16*sizeof(*buf));
     assert(buf);
@@ -46,13 +46,13 @@ char to_half_byte(char c){
         case '0' | (char)0x80: return (char)8;
         case '9' | (char)0x80: return (char)9;
 
-        default:  return (char)15; /*'N' is represented as the half byte 1111*/
+        default:  return (char)15; //'N' is represented as the half byte 1111.
     }
 }
 
-/*Converts a half-byte to its corresponding edit script character*/
+//Converts a half-byte to its corresponding edit script character
 char half_byte_to_char(char h){
-    if (h < 8) /*h is an octal digit*/
+    if (h < 8) //h is an octal digit.
         return '0' + h;
     switch (h) {
         case (char)8:  return 'A';
@@ -86,7 +86,7 @@ char *edit_script_to_half_bytes(char *edit_script){
         else
             half_bytes[i/2] <<= 4;
 
-        /*Insert the current half byte into the current byte*/
+        //Insert the current half byte into the current byte.
         half_bytes[i/2] |= to_half_byte(edit_script[i]);
         i++;
     }
@@ -110,7 +110,7 @@ char *half_bytes_to_ASCII(char *half_bytes, int length){
     assert(edit_script);
 
     for (i = 0; i < length; i++) {
-        /*Copy the left half-byte of the current byte*/
+        //Copy the left half-byte of the current byte.
         if (i % 2 == 0) {
             char left = half_bytes[i/2] & (((char)15) << 4);
             left >>= 4;
@@ -128,7 +128,7 @@ char *half_bytes_to_ASCII(char *half_bytes, int length){
                     edit_script[i] |= (char)0x80;
             }
         }
-        else /*Copy the right half-byte of the current byte*/
+        else //Copy the right half-byte of the current byte
             edit_script[i] = half_byte_to_char(half_bytes[i/2] & (char)15);
     }
     edit_script[length] = '\0';
@@ -157,12 +157,12 @@ char *make_edit_script(char *str, char *ref, bool dir, int length){
             insert_open = false;
             subdel_open = false;
         }
-        else { /* mismatch */
-            /* insertion in str relative to ref (i.e., gap in ref) */
+        else { //Mismatch
+            //Insertion in str relative to ref (i.e., gap in ref)
             if (ref[i] == '-') {
                 subdel_open = false;
 
-                /* indicate start of insertion */
+                //Indicate start of insertion
                 if (!insert_open) { 
                     insert_open = true;
                     octal = to_octal_str(i - last_edit);
@@ -173,12 +173,12 @@ char *make_edit_script(char *str, char *ref, bool dir, int length){
                 }
                 edit_script[current++] = str[i];
             }
-            /*substitution or deletion in str (represented in script by '-')
+            /*Substitution or deletion in str (represented in script by '-')
               relative to ref*/
             else {
                 insert_open = false;
 
-                /* indicate start of subdel */
+                //Indicate start of subdel.
                 if (!subdel_open) { 
                     subdel_open = true;
                     octal = to_octal_str(i - last_edit);
@@ -215,7 +215,7 @@ bool next_edit(char *edit_script, int *pos, struct edit_info *edit){
     edit->str        = "";
 
     while (isdigit(edit_script[(*pos)])) {
-        edit->last_dist *= 8; /*octal encoding*/
+        edit->last_dist *= 8; //Octal encoding
         edit->last_dist += edit_script[(*pos)++] - '0';
     }
     while (isupper(edit_script[(*pos)+edit_length]) ||
@@ -243,19 +243,19 @@ char *read_edit_script(char *edit_script, char *orig, int length){
     assert(str);
 
     while (next_edit(edit_script, &script_pos, &edit)) {
-        /*chunk after previous edit*/
+        //Chunk after previous edit
         for (i = 0; i < edit.last_dist - last_edit_str_len; i++)
             str[current++] = orig[orig_pos+i];
 
-        /*update position in original string*/
+        //Update position in original string.
         orig_pos += edit.last_dist - last_edit_str_len;
 
-        /*append replacement string in edit script; get rid of dashes*/
+        //Append replacement string in edit script; get rid of dashes.
         for (i = 0; i < edit.str_length; i++)
             if (edit.str[i] != '-')
                 str[current++] = edit.str[i];
 
-        /*skip subdel along original string*/
+        //Skip subdel along original string.
         if (edit.is_subdel) orig_pos += edit.str_length;
 
         last_edit_str_len = edit.str_length;
@@ -281,7 +281,7 @@ char *no_dashes(char *sequence){
     int length, bases = 0, i = 0, j = 0;
     char *n;
 
-    /*Get the length of the final string*/
+    //Get the length of the final string.
     for (length = 0; sequence[length] != '\0'; length++)
         if (sequence[length] != '-')
             bases++;

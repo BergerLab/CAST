@@ -3,6 +3,7 @@
 
 #ifndef __CABLAST_SEARCH_XML_H__
 #define __CABLAST_SEARCH_XML_H__
+
 struct blast {
     char *xml_name;
     struct DSVector *hits;
@@ -24,4 +25,5 @@ struct hsp {
     int32_t hit_from;
     int32_t hit_to;
 };
+
 #endif

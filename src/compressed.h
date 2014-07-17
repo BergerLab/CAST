@@ -32,10 +32,13 @@ struct cb_coarse;
 
 struct cb_compressed {
     uint64_t next_seq_to_write;
-    /*The sequences in the compressed database*/
+
+    //The sequences in the compressed database
     struct DSVector *seqs;
-    /*Binary representation of each compressed sequence*/
+
+    //Binary representation of each compressed sequence
     FILE *file_compressed;
+
     /*The byte index in the compressed file of the start of each compressed
       sequence*/
     FILE *file_index;
@@ -70,4 +73,5 @@ struct cb_compressed_seq *cb_compressed_read_seq_at(struct cb_compressed *comdb,
 
 int64_t cb_compressed_get_seq_length(FILE *f);
 int64_t *cb_compressed_get_lengths(struct cb_compressed *comdb);
+
 #endif
