@@ -37,12 +37,17 @@ static void *cb_compress_worker(void *data);
 
 static int32_t min(int32_t a, int32_t b);
 
+/*Takes in the database and the number of threads being used and creates a new
+ *compress worker for each processor being used and starts a new pthread for
+ *each one to start compression.
+ */
 struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
                                                       int32_t num_workers){
     struct DSQueue *jobs;
     struct cb_compress_workers *workers;
     struct worker_args **wargs;
     int32_t i, errno;
+
     jobs = ds_queue_create(20);
 
     wargs = malloc(num_workers*sizeof(*wargs));
@@ -52,20 +57,20 @@ struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
         wargs[i] = malloc(sizeof(*(wargs[i])));
         assert(wargs[i]);
 
-        wargs[i]->db = db;
+        wargs[i]->db   = db;
         wargs[i]->jobs = jobs;
-        wargs[i]->id = i;
+        wargs[i]->id   = i;
     }
 
     workers = malloc(sizeof(*workers));
     assert(workers);
 
-    workers->threads = malloc(num_workers*sizeof(*workers->threads));
+    workers->threads     = malloc(num_workers*sizeof(*workers->threads));
     assert(workers->threads);
 
     workers->num_workers = num_workers;
-    workers->jobs = jobs;
-    workers->args = (void *)wargs;
+    workers->jobs        = jobs;
+    workers->args        = (void *)wargs;
 
     for (i = 0; i < num_workers; i++) {
         errno = pthread_create(&workers->threads[i], NULL,
@@ -81,12 +86,13 @@ struct cb_compress_workers *cb_compress_start_workers(struct cb_database *db,
     return workers;
 }
 
+//Closes the jobs queue and joins the compression workers.
 void cb_compress_join_workers(struct cb_compress_workers *workers){
-    int i, errno;
+    int errno;
 
     ds_queue_close(workers->jobs);
 
-    for (i = 0; i < workers->num_workers; i++) {
+    for (int i = 0; i < workers->num_workers; i++) {
         errno = pthread_join(workers->threads[i], NULL);
         if (errno != 0) {
             fprintf(stderr,
@@ -97,6 +103,7 @@ void cb_compress_join_workers(struct cb_compress_workers *workers){
     }
 }
 
+//Frees the compression workers.
 void cb_compress_free_workers(struct cb_compress_workers *workers){
     ds_queue_free(workers->jobs);
     free(workers->args);
@@ -104,9 +111,11 @@ void cb_compress_free_workers(struct cb_compress_workers *workers){
     free(workers);
 }
 
+/*Takes in the compression workers struct and an original sequence and puts the
+  original sequence on the jobs queue.*/
 void cb_compress_send_job(struct cb_compress_workers *workers,
                           struct cb_seq *org_seq){
-    ds_queue_put(workers->jobs, (void*)org_seq);
+    ds_queue_put(workers->jobs, (void *)org_seq);
 }
 
 static void *cb_compress_worker(void *data){
@@ -137,6 +146,8 @@ static void *cb_compress_worker(void *data){
             cb_compressed_write_binary(args->db->com_db, current_seq);
             cb_compressed_seq_free(current_seq);
             ds_list_remove(seqs_to_write, seqs_to_write->first);
+
+            //Atmoically update which compressed sequence is the next to write.
             __sync_fetch_and_add(&(args->db->com_db->next_seq_to_write), 1);
         }
     }
