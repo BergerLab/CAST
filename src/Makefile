@@ -77,5 +77,4 @@ seeds.o: seeds.c seeds.h
 seq.o: seq.c seq.h
 uitl.o: util.c util.h
 
-loc:
-	find ./ -name '*.[ch]' -print0 | xargs -0 wc -l
+loc: find ./ -name '*.[ch]' -print0 | xargs -0 wc -l

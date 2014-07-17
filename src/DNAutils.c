@@ -25,14 +25,14 @@ char *get_kmer(char *DNA_string, int k){
     return kmer;
 }
 
-//Takes in a k-mer and its length and returns the k-mer's reverse complement.
-char *kmer_revcomp(char *revcomp, char *kmer, int k){
+/*Takes in a k-mer, its length, and a char * "revcomp" and puts the k-mer's
+  reverse complement in revcomp.*/
+void kmer_revcomp(char *revcomp, char *kmer, int k){
     int i = 0;
 
     for (i = 0; i < k; i++)
         revcomp[i] = base_complement[kmer[k-i-1]-'A'];
     revcomp[k] = '\0';
-    return revcomp;
 }
 
 /*Takes in a string representing a DNA sequence and its length and returns the
