@@ -221,6 +221,14 @@ void best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem){
         }
 }
 
+/*Takes in the alignment memory and follows the directions in the
+ *directions table dp_from from the Needleman-Wunsch alignment and uses the
+ *alignment's score table to find the last time in the alignment that there were
+ *consec_match_clump_size (default 4) consecutive matches, setting the "pos"
+ *coordinates in the align memory to the coordinates in the table of the end of
+ *the consecutive match clump.  If no consecutive match clump is found, the
+ *coordinates are set to (0, 0).
+ */
 void backtrack_to_clump(struct cb_align_nw_memory *mem){
     int consec_matches = 0,
         consec_match_clump_size = compress_flags.consec_match_clump_size;
@@ -251,7 +259,7 @@ void backtrack_to_clump(struct cb_align_nw_memory *mem){
         pos0 = prev_j1;
         pos1 = prev_j2;
     }
-    //Couldn't find a 4-mer clump
+    //Couldn't find a consecutive match clump
     if (consec_matches < consec_match_clump_size) {
         pos0 = 0;
         pos1 = 0;
