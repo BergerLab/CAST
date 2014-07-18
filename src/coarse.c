@@ -27,11 +27,11 @@ cb_coarse_init(int32_t seed_size,
     struct cb_coarse *coarse_db = malloc(sizeof(*coarse_db));
     assert(coarse_db);
 
-    coarse_db->seqs = ds_vector_create_capacity(10000000);
+    coarse_db->seqs  = ds_vector_create_capacity(10000000);
 
     /*Only create a seeds table if we are using this coarse database for
       compression.*/
-    coarse_db->seeds = read ? NULL : cb_seeds_init(seed_size);
+    coarse_db->seeds  = read ? NULL : cb_seeds_init(seed_size);
 
     coarse_db->dbsize = (uint64_t)0;
 
@@ -662,6 +662,11 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
     return links;
 }
 
+/*Takes in a coarse read database and the ID number of a sequence and gets the
+ *residues for that sequence.  Only works when --load-coarse-residues or
+ *--load-coarse-db is passed as a flag so the residues of the coarse sequences
+ *are loaded into memory.
+ */
 char *cb_coarse_r_get_seq_residues(struct cb_coarse_r *coarse_db,
                                    int64_t id){
     int64_t start = coarse_db->seq_base_indices[id],
@@ -672,7 +677,9 @@ char *cb_coarse_r_get_seq_residues(struct cb_coarse_r *coarse_db,
     if (all_residues == NULL) {
         fprintf(stderr, "cb_coarse_r_get_seq_residues only works if "
                         "all_residues was initialized in "
-                        "cb_coarse_read_init.\n");
+                        "cb_coarse_read_init.  To initialize all_residues, "
+                        "pass in the flag --load-coarse-residues or "
+                        "--load-coarse-db\n");
         return NULL;
     }
 
