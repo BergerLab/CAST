@@ -36,6 +36,7 @@ struct cb_seeds_add_memory {
 };
 
 struct cb_seeds_add_memory *cb_seeds_add_memory_init();
+void cb_seeds_add_memory_free(struct cb_seeds_add_memory *mem);
 
 struct cb_seeds *cb_seeds_init(int32_t seed_size);
 

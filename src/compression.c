@@ -159,6 +159,7 @@ static void *cb_compress_worker(void *data){
     }
 
     cb_align_nw_memory_free(mem);
+    cb_seeds_add_memory_free(seeds_mem);
 
     return NULL;
 }

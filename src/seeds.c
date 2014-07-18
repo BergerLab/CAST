@@ -267,3 +267,10 @@ struct cb_seeds_add_memory *cb_seeds_add_memory_init(){
     return mem;
 }
 
+/*Frees a cb_seeds_add_memory.*/
+void cb_seeds_add_memory_free(struct cb_seeds_add_memory *mem){
+    free(mem->hashes);
+    free(mem->locs);
+    free(mem);
+}
+
