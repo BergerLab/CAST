@@ -118,6 +118,11 @@ void cb_compress_send_job(struct cb_compress_workers *workers,
     ds_queue_put(workers->jobs, (void *)org_seq);
 }
 
+/*The compress worker function run on a pthread for running compression.  While
+ *the jobs queue is open and contains sequences, the compress worker gets
+ *sequences from the queue, compresses them, and writes them to the compressed
+ *database file in the order they are in in the original FASTA file.
+ */
 static void *cb_compress_worker(void *data){
     struct worker_args *args;
     struct cb_align_nw_memory *mem;
@@ -138,6 +143,7 @@ static void *cb_compress_worker(void *data){
             ds_list_append(seqs_to_write, (struct cb_compressed_seq *)cseq);
             cb_seq_free(s);
         }
+
         struct DSListNode *current_node = seqs_to_write->first;
         struct cb_compressed_seq *current_seq = current_node ?
           (struct cb_compressed_seq *)seqs_to_write->first->data : NULL;
