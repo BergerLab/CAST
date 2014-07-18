@@ -127,10 +127,11 @@ void cb_seeds_free(struct cb_seeds *seeds){
     free(seeds);
 }
 
-/*Takes in the seeds table and a coarse sequence and adds a new seed location
- *in the seeds table for each k-mer in the sequence.  If a k-mer has more seed
- *locations than the number specified with the --max-kmer-freq flag
- *(default 500), then no new seed locations will be added for that k-mer.
+/*Takes in the seeds table, a coarse sequence, and a compress worker's seeds_add
+ *memory and adds a new seed location in the seeds table for each k-mer in the
+ *sequence.  If a k-mer has more seed locations than the number specified with
+ *the --max-kmer-freq flag (default 500), then no new seed locations will be
+ *added for that k-mer.
  */
 void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
                   struct cb_seeds_add_memory *mem){
@@ -164,6 +165,7 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
         hash = hashes[i];
         if (locs[hash] == NULL) {
             pthread_rwlock_wrlock(&(seeds->alloc_locks[hash%256]));
+
             /*Make sure the locations array was not allocated by another thread
               before this thread got the lock.*/
             if (locs[hash] == NULL)

@@ -87,10 +87,10 @@ void cb_coarse_free(struct cb_coarse *coarse_db){
     free(coarse_db);
 }
 
-/*Takes in the coarse database and the residues and original start and end
- *indices for a sequence to be added to a coarse database and adds a sequence
- *created from those residues while also adding the sequence's k-mers to the
- *seeds table.
+/*Takes in the coarse database, the residues and original start and end indices
+ *for a sequence to be added to a coarse database, and a compress worker's
+ *seeds_add memory and adds a sequence created from the residues while also
+ *adding the sequence's k-mers to the seeds table.
  */
 struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
                                     int32_t start, int32_t end,
