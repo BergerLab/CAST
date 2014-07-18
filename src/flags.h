@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "opt.h"
+#include "clibs/include/opt.h"
 
 struct compress_flags {
     int32_t gapped_window_size;

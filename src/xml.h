@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "ds.h"
+#include "clibs/include/ds.h"
 
 #ifndef __CABLAST_SEARCH_XML_H__
 #define __CABLAST_SEARCH_XML_H__

@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "ds.h"
+#include "clibs/include/ds.h"
 
 #define FASTA_INITIAL_SEQUENCE_LENGTH 1000
 #define FASTA_MAX_LINE 1024

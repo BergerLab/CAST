@@ -9,8 +9,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "ds.h"
-#include "opt.h"
+#include "clibs/include/ds.h"
+#include "clibs/include/opt.h"
 
 #include "bitpack.h"
 #include "coarse.h"
@@ -18,7 +18,6 @@
 #include "compression.h"
 #include "database.h"
 #include "decompression.h"
-#include "DNAalphabet.h"
 #include "fasta.h"
 #include "flags.h"
 #include "progress-bar.h"

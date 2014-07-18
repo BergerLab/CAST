@@ -6,7 +6,6 @@
 
 #include "DNAutils.h"
 #include "align.h"
-#include "DNAalphabet.h"
 #include "flags.h"
 
 //Global string of base complements of all leters of the alphabet

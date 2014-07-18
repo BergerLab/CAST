@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ds.h"
+#include "clibs/include/ds.h"
 #include "compression.h"
 #include "DNAutils.h"
 #include "edit_scripts.h"

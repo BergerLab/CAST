@@ -1,4 +1,4 @@
-all: lib include lib/libds.so lib/libopt.so include/ds.h include/opt.h
+all: lib include lib/libds.a lib/libopt.a include/ds.h include/opt.h
 
 lib:
 	mkdir -p lib
@@ -6,17 +6,17 @@ lib:
 include:
 	mkdir -p include
 
-lib/libds.so: libds/libds.so
-	cp libds/libds.so lib/libds.so
+lib/libds.a: libds/libds.a
+	cp libds/libds.a lib/libds.a
 
-libds/libds.so:
-	(cd libds && make libds.so)
+libds/libds.a:
+	(cd libds && make libds.a)
 
-lib/libopt.so: libopt/libopt.so
-	cp libopt/libopt.so lib/libopt.so
+lib/libopt.a: libopt/libopt.a
+	cp libopt/libopt.a lib/libopt.a
 
-libopt/libopt.so:
-	(cd libopt && make libopt.so)
+libopt/libopt.a:
+	(cd libopt && make libopt.a)
 
 include/ds.h: libds/ds.h
 	cp libds/ds.h include/
@@ -30,7 +30,7 @@ include/opt.h: libopt/opt.h
 clean:
 	(cd libds && make clean)
 	(cd libopt && make clean)
-	rm -rf lib/libds.so lib/libopt.so
+	rm -rf lib/libds.a lib/libopt.a
 	rm -rf include/ds.h include/opt.h
 
 push:

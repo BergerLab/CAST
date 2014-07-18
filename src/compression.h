@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <stdint.h>
 
-#include "ds.h"
+#include "clibs/include/ds.h"
 
 #include "align.h"
 #include "coarse.h"

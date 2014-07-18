@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "ds.h"
+#include "clibs/include/ds.h"
 
 #include "link_to_compressed.h"
 #include "seeds.h"

@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "opt.h"
+#include "clibs/include/opt.h"
 
 #include "coarse.h"
 #include "compressed.h"

@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+
 #include "bitpack.h"
 
 /*Takes in as input a number of bits and returns a 64-bit mask with that

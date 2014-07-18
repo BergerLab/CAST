@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "ds.h"
+#include "clibs/include/ds.h"
 #include "stdbool.h"
 
 #include "coarse.h"

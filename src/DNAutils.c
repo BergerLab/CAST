@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
 #include "DNAutils.h"
 
 //Global string of base complements of all leters of the alphabet

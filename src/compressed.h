@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "ds.h"
+#include "clibs/include/ds.h"
 
 #include "align.h"
 #include "bitpack.h"

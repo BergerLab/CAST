@@ -6,12 +6,11 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "opt.h"
+#include "clibs/include/opt.h"
 
 #include "coarse.h"
 #include "compression.h"
 #include "database.h"
-#include "DNAalphabet.h"
 #include "fasta.h"
 #include "flags.h"
 #include "seq.h"
