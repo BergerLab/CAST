@@ -21,19 +21,16 @@ c_cablast depends on three libraries: `opt`, `ds` and `pthread`. `pthread`
 should be installed via your system's package manager. `opt` and `ds` can be 
 found in Andrew Gallant's [clibs respository]
 (https://github.com/BurntSushi/clibs), which is included in the clibs directory
-in src.
+in src but modified to produce .a files instead of .so files.
 
 Briefly, the following commands should get c_cablast into a working state:
 
 ```bash
 mkdir c_cablast
-git clone git://github.com/BurntSushi/clibs
 git clone git://github.com/BergerLab/c_cablast
-cd clibs
+cd c_cablast/src/clibs
 make
-export C_INCLUDE_PATH=$(pwd)/include
-export LIBRARY_PATH=$(pwd)/lib
-cd ../c_cablast
+cd ..
 make
 ./cablast-compress --help
 ```
