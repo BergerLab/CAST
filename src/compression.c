@@ -157,6 +157,23 @@ static void *cb_compress_worker(void *data){
     return NULL;
 }
 
+/*@param coarse_db: The coarse database
+ *@param org_seq: The original sequence to compress
+ *@param mem: The compress worker's alignment memory
+ *@param seeds_mem: The compress worker's seeds_add memory
+ *
+ *@return: A compressed sequence struct with links to the the coarse database
+ *  representing parts of the original sequence that aligned well with a
+ *  sequence in the coarse database.
+ *
+ *Goes through a sequence from the FASTA file passed in and finds locations in
+ *the sequence that align well with sequences in the coarse database, adding
+ *links to them in the compressed sequence that is returned.  New coarse
+ *sequences are added to the coarse database if more than max_chunk_size
+ *(default 10000) have been traversed without finding a match or when there are
+ *bases before a match that do not align well with a coarse sequence.  For more
+ *detail read the comments in the function.
+ */
 struct cb_compressed_seq *
 cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
             struct cb_align_nw_memory *mem,
@@ -601,7 +618,8 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
  *
  *Extends a match found with attempt_ext by making alternating calls to
  *cb_align_ungapped and cb_align_nw until a bad window is found or the end of
- *one of the sequences is reached.
+ *one of the sequences is reached.  For more detail read the comments in the
+ *function.
  */
 struct extend_match
 extend_match(struct cb_align_nw_memory *mem,
