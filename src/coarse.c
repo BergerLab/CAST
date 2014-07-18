@@ -597,15 +597,22 @@ void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
 
 int32_t lt(void *a, void *b){return *(int *)a - *(int *)b;}
 
+/*Takes in a coarse read database and the index of a block of links and returns
+  a vector of all of the links in the block.*/
 struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
                                        int32_t index){
+    /*Initialize the links vector and get the vector of link indices for the
+      requested block.*/
     struct DSVector *links = ds_vector_create(),
                     *block = (struct DSVector *)ds_vector_get(
-                               coarse_db->link_inds_by_block,
-                               index);
+                               coarse_db->link_inds_by_block, index);
     int32_t i, j;
     bool fread_success;
 
+    /*If the coarse database's links were loaded into memory 
+     *(--load-coarse-links or --load-coarse-db was passed in as a flag),
+     *simply get the links in the block from the links vector.
+     */
     if (coarse_db->links != NULL)
         for (i = 0; i < block->size; i++) {
             int32_t link_index = *(int32_t *)ds_vector_get(block, i);
@@ -620,6 +627,8 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
         int32_t min_index = -1, max_index = -1, links_to_read;
         bool fseek_success;
 
+        /*Get all of the link indices in the block and find the minimum and
+          maximum indices*/
         for (i = 0; i < block->size; i++) {
             int32_t *link_index = malloc(sizeof(*link_index));
             assert(link_index);
@@ -643,6 +652,9 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
             fprintf(stderr, "Error in seeking to link %d\n", min_index);
 
         j = 0;
+
+        /*Read in every link in the range of indices from the links file and put
+          the links in the block into the vector of links to be returned.*/
         for (i = min_index; i <= max_index && j < block->size; i++) {
             link = malloc(sizeof(*link));
             assert(link);
@@ -659,6 +671,7 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
                 free(link);
         }
     }
+
     return links;
 }
 
