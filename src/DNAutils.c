@@ -14,11 +14,15 @@ extern inline bool bases_match(char a, char b, int dir_prod){
 }
 
 /*Takes in a k-mer, its length, and a char * "revcomp" and puts the k-mer's
-  reverse complement in revcomp.*/
+ *reverse complement in revcomp.
+ *
+ *Please note that this function does not null-terminate the reverse complement
+ *since a null terminator is never needed in any of the code that uses the
+ *reverse complement of a k-mer.
+ */
 void kmer_revcomp(char *revcomp, char *kmer, int k){
     for (int i = 0; i < k; i++)
         revcomp[i] = base_complement[kmer[k-i-1]-'A'];
-    revcomp[k] = '\0';
 }
 
 /*Takes in a string representing a DNA sequence and its length and returns the

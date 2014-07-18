@@ -181,7 +181,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                    org_seq_len),
             end_of_section = min(start_of_section + max_section_size,
                                    org_seq_len),
-            org_seq_id = org_seq->id;
+            org_seq_id = org_seq->id, *loc_counts = coarse_seeds->loc_counts;
     char *kmer, revcomp[seed_size+1], *org_seq_residues = org_seq->residues;
     bool *matches, *matches_temp, found_match;
 
@@ -231,17 +231,17 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
         kmer = org_seq_residues+current;
         kmer_revcomp(revcomp, kmer, seed_size);
 
-        /*The locations of all seeds in the database that start with the
-          current k-mer.*/
-        int32_t seeds_count = cb_seeds_lookup(coarse_seeds, kmer);
-
-        /*The locations of all seeds in the database that start with the
-          current k-mer's reverse complement.*/
-        int32_t seeds_r_count = cb_seeds_lookup(coarse_seeds, revcomp);
-
         struct cb_seed_loc ***locs = coarse_seeds->locs;
         int32_t hash         = hash_kmer(coarse_seeds, kmer),
                 hash_revcomp = hash_kmer(coarse_seeds, revcomp);
+
+        /*The locations of all seeds in the database that start with the
+          current k-mer.*/
+        int32_t seeds_count = loc_counts[hash];
+
+        /*The locations of all seeds in the database that start with the
+          current k-mer's reverse complement.*/
+        int32_t seeds_r_count = loc_counts[hash_revcomp];
 
         for (i = 0; i < seeds_count; i++) {
             if (found_match)
