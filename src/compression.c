@@ -587,6 +587,22 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
     return cseq;
 }
 
+/*@param mem: A compress worker's alignment memory
+ *@param rseq, oseq: The coarse and original sequences
+ *@param rstart, rend, ostart, oend: The start and end of the sections of the
+ *  sequences being aligned.
+ *@param resind, current: The starting base indices in the coarse and original
+ *  sequences.
+ *@param dir1, dir2: The direction of the match extension for the coarse and
+ *  original sequences (1 = forward, -1 = reverse)
+ *
+ *@return: An extend_match struct containing the aligned sequences and their
+ *  lengths, including gaps from Needleman-Wunsch alignment.
+ *
+ *Extends a match found with attempt_ext by making alternating calls to
+ *cb_align_ungapped and cb_align_nw until a bad window is found or the end of
+ *one of the sequences is reached.
+ */
 struct extend_match
 extend_match(struct cb_align_nw_memory *mem,
              char *rseq, int32_t rstart, int32_t rend, int32_t resind,
@@ -680,6 +696,7 @@ extend_match(struct cb_align_nw_memory *mem,
                                 oseq, dp_len2, current, dir2,
                                 matches, &matches_index);
 
+        //End the extension if we found a bad window in ungapped alignment.
         if (alignment.length == -1)
             break;
 
