@@ -36,6 +36,8 @@ static char *path_join(char *a, char *b){
     return joined;
 }
 
+char *get_blast_args(struct opt_args *args);
+
 /*Runs BLAST on the coarse database and stores the results in a temporary
   XML file.*/
 void blast_coarse(struct opt_args *args, uint64_t dbsize){
@@ -66,27 +68,28 @@ void blast_coarse(struct opt_args *args, uint64_t dbsize){
 //Runs BLAST on the fine FASTA file
 void blast_fine(struct opt_args *args, uint64_t dbsize){
     char *blastn,
-         *blastn_command =
-           "blastn  CaBLAST_fine.fasta -query  "
-           "-dbsize  -task blastn -outfmt 5 -evalue 1e-30 > "
-           "CaBLAST_results.xml";
-    int command_length = strlen(blastn_command) + 40;
+         *blast_args      = get_blast_args(args),
+         *fine_blast_args = is_substring("-evalue", blast_args) ?
+                              blast_args : "-evalue 1e-30";
+
+    int command_length = 1024;
 
     blastn = malloc(command_length*sizeof(*blastn));
     assert(blastn);
 
     sprintf(blastn,
             "blastn %s CaBLAST_fine.fasta -query %s "
-            "-dbsize %lu -task blastn -outfmt 5 -evalue 1e-30 > "
+            "-dbsize %lu -task blastn -outfmt 5 %s > "
             "CaBLAST_results.xml",
             search_flags.fine_blast_db ? "-db" : "-subject", args->args[1],
-            dbsize);
+            dbsize, fine_blast_args);
 
     if (!search_flags.hide_progress)
           fprintf(stderr, "\n%s\n", blastn);
 
     system(blastn); //Run fine BLAST
 
+    free(blast_args);
     free(blastn);
 }
 
@@ -263,14 +266,13 @@ char *get_blast_args(struct opt_args *args){
         if (index >= 0)
             length += strlen(args->args[i]) + 1;
         else
-            index = strcmp(args->args[i], "--blast-args") == 0 ? i : -1;
+            index = strcmp(args->args[i], "--blast_args") == 0 ? i : -1;
 
     blast_args = malloc(length*sizeof(*args));
     assert(blast_args);
 
-    if (index == -1)
-        *blast_args = '\0';
-    else
+    *blast_args = '\0';
+    if (index != -1)
         for (i = index + 1; i < args->nargs; i++) {
             blast_args = strcat(blast_args, args->args[i]);
             if (i < args->nargs - 1)
@@ -346,6 +348,8 @@ int main(int argc, char **argv){
 
     if (!search_flags.hide_progress)
         fprintf(stderr, "Loading database data\n\n");
+
+
     db = cb_database_r_init(args->args[0], search_flags.map_seed_size,
                             (search_flags.load_coarse_db ||
                              search_flags.load_coarse_residues),
