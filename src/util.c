@@ -119,3 +119,19 @@ char *str_slice(char *str, int32_t start, int32_t end){
 
     return ret;
 }
+
+/*Takes in two strings and checks if sub occurs in str*/
+bool is_substring(char *sub, char *str){
+    assert(sub != NULL && str != NULL);
+
+    int len_sub = strlen(sub), len_str = strlen(str), i, j;
+    for (i = 0; i < len_str-len_sub; i++) {
+        for (j = 0; j < len_sub; j++)
+            if (sub[j] != str[i+j])
+                break;
+        if (j == len_sub)
+            return true;
+    }
+
+    return false;
+}
