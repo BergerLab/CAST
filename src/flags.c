@@ -30,7 +30,9 @@ struct opt_config *load_compress_args(){
         "The maximum number of entries for a k-mer in the seeds table.");
     opt_flag_int(conf,
         &compress_flags.overlap, "overlap", 100,
-        "The maximum number of entries for a k-mer in the seeds table.");
+        "The number of bases to backtrack by when starting a new chunk during "
+        "compression and the number of bases to include in the chunk of DNA "
+        "before a match.");
     opt_flag_int(conf,
         &compress_flags.max_chunk_size, "max-chunk-size", 10000,
         "The maximum number of bases that are checked before adding a "
@@ -83,11 +85,11 @@ struct opt_config *load_search_args(){
         "arguments to pass into BLAST during fine search.");
     opt_flag_bool(conf,
         &search_flags.no_cleanup, "no-cleanup",
-        "Pass this flag to keep the coarse search results XML file, the fine "
-        "database FASTA file, and the last fine query FASTA file.");
+        "Pass this flag to keep the coarse search results XML file.");
     opt_flag_bool(conf,
         &search_flags.show_hit_info, "show-hit-info",
-        "Pass this flag to output information on each fine BLAST hit.");
+        "Pass this flag to output information on each fine BLAST hit in "
+        "CaBLAST_hits.txt.");
     opt_flag_bool(conf,
         &search_flags.hide_progress, "hide-progress",
         "Pass this flag to hide messages about the progress of CaBLAST as well "
