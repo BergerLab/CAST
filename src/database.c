@@ -130,8 +130,7 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size){
  *Loads a CaBLAST database for reading
  */
 struct cb_database_r *
-cb_database_r_init(char *dir, int32_t seed_size,
-                   bool load_coarse_residues, bool load_coarse_links,
+cb_database_r_init(char *dir, bool load_coarse_residues, bool load_coarse_links,
                    bool load_compressed_db, int32_t link_block_size){
     struct cb_database_r *db;
     struct stat buf;
@@ -178,7 +177,7 @@ cb_database_r_init(char *dir, int32_t seed_size,
     findex_compressed         = open_db_file(pindex_compressed, "rb");
     findex_params             = open_db_file(pindex_params, "rb");
 
-    db->coarse_db = cb_coarse_r_init(seed_size, ffasta, flinks,
+    db->coarse_db = cb_coarse_r_init(-1, ffasta, flinks,
                                      findex_coarse_links,
                                      findex_coarse_links_base,
                                      findex_coarse_links_count,

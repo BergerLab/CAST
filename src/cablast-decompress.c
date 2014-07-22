@@ -49,8 +49,7 @@ int main(int argc, char **argv){
         exit(1);
     }
 
-    db = cb_database_r_init(args->args[0], compress_flags.map_seed_size,
-                            false, false, false, 30000);
+    db = cb_database_r_init(args->args[0], false, false, false, 30000);
 
     org_seq_id = 0;
     gettimeofday(&start, NULL);

@@ -350,7 +350,7 @@ int main(int argc, char **argv){
         fprintf(stderr, "Loading database data\n\n");
 
 
-    db = cb_database_r_init(args->args[0], search_flags.map_seed_size,
+    db = cb_database_r_init(args->args[0],
                             (search_flags.load_coarse_db ||
                              search_flags.load_coarse_residues),
                             (search_flags.load_coarse_db ||

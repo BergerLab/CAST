@@ -75,9 +75,6 @@ struct opt_config *load_search_args(){
     conf = opt_config_init();
     cpus = num_cpus();
 
-    opt_flag_int(conf,
-        &search_flags.map_seed_size, "map-seed-size", 10,
-        "The size of a seed in the k-mer map.");
     opt_flag_string(conf,
         &search_flags.coarse_evalue, "coarse-evalue", "1e-20",
         "The e-value used during coarse search.  To set the e-value for fine "
