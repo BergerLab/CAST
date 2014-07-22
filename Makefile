@@ -1,4 +1,9 @@
+prefix=/usr/local
+
 all: cablast-compress cablast-decompress cablast-search
+install:
+	make
+	install -m 0755 cablast-compress cablast-decompress cablast-search $(prefix)/bin
 
 cablast-compress: src/cablast-compress
 	cp src/cablast-compress .
