@@ -156,9 +156,8 @@ void cb_align_nw_memory_free(struct cb_align_nw_memory *mem){
 
 /*Makes the tables used in Needleman-Wunsch alignment; takes in two sequences,
  *the lengths of the sections of the sequences that we are aligning, indices
- *into these sequences, and the directions of the sequences and returns a
- *struct containing a table of the scores in the alignment and a table of
- *directions for backtracking to the start of the alignment.
+ *into these sequences, and the directions of the sequences and fills the
+ *alignment tables for the compress worker's alignment memory.
  */
 void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
                     char *oseq, int dp_len2, int i2, int dir2,
@@ -184,24 +183,26 @@ void make_nw_tables(char *rseq, int dp_len1, int i1, int dir1,
 
             if (score0 - m >= 0) {
                 dp_score[26*j1+j2] = score0;
-                dp_from[26*j1+j2] = 0;
+                dp_from[26*j1+j2]  = 0;
                 continue;
             }
 
             if (m - score2 == 0) {
                 dp_score[26*j1+j2] = score2;
-                dp_from[26*j1+j2] = 2;
+                dp_from[26*j1+j2]  = 2;
                 continue;
             }
 
             dp_score[26*j1+j2] = score1;
-            dp_from[26*j1+j2] = 1;
+            dp_from[26*j1+j2]  = 1;
         }
     }
 }
 
 /*Finds the space on the bottom and right edges of a Needleman-Wunsch score
-  table with the best score, returning it as an array of two ints.*/
+ *table with the best score, storing it in the worker's alignment memory's
+ *"pos" coordinates.
+ */
 void best_edge(int dp_len1, int dp_len2, struct cb_align_nw_memory *mem){
     int j1, j2, max_dp_score = -1000;
     int *dp_score = mem->dp_score;
