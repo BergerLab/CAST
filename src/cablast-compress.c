@@ -48,6 +48,8 @@ int main(int argc, char **argv){
         exit(1);
     }
 
+    assert(compress_flags.map_seed_size > 0 &&
+           compress_flags.map_seed_size < 16);
     db = cb_database_init(args->args[0], compress_flags.map_seed_size);
     workers = cb_compress_start_workers(db, compress_flags.procs);
 

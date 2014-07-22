@@ -18,7 +18,7 @@ struct opt_config *load_compress_args(){
         "The number of total CPUs to use to divide work.");
     opt_flag_int(conf,
         &compress_flags.map_seed_size, "map-seed-size", 10,
-        "The size of a seed in the k-mer map.");
+        "The size of a seed in the k-mer map.  Must be less than 16.");
     opt_flag_int(conf,
         &compress_flags.ext_seq_id_threshold, "ext-seq-id-threshold", 50,
         "The sequence identity threshold of [un]gapped extension.");
