@@ -47,7 +47,7 @@ int main(int argc, char **argv){
         exit(1);
     }
 
-    db = cb_database_init(args->args[0], compress_flags.map_seed_size, false);
+    db = cb_database_init(args->args[0], compress_flags.map_seed_size);
     workers = cb_compress_start_workers(db, compress_flags.procs);
 
     org_seq_id = 0;

@@ -29,7 +29,7 @@ struct cb_database_r {
     struct cb_compressed *com_db;
 };
 
-struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add);
+struct cb_database *cb_database_init(char *dir, int32_t seed_size);
 
 struct cb_database_r *
 cb_database_r_init(char *dir, int32_t seed_size,

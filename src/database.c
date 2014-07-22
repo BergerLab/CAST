@@ -20,11 +20,10 @@ static char *basename(char *path);
 
 /*@param dir: The name of the directory to store the database in
  *@param seed_size: The size of the k-mers in the database
- *@param add: Whether or not we are adding to a database
  *
  *Initializes a new CaBLAST database and its coarse and compressed databases.
  */
-struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
+struct cb_database *cb_database_init(char *dir, int32_t seed_size){
     struct cb_database *db;
     struct stat buf;
     FILE *ffasta, *flinks, *fcompressed, *findex_coarse_links,
@@ -49,8 +48,8 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
          *pindex_compressed         = path_join(dir, CABLAST_COMPRESSED_INDEX),
          *pindex_params             = path_join(dir, CABLAST_PARAMS);
 
-    //If we're not adding to a database, make sure `dir` does not exist.
-    if (!add && 0 == stat(dir, &buf)) {
+    //Make sure `dir` does not exist.
+    if (0 == stat(dir, &buf)) {
         fprintf(stderr,
                 "The directory '%s' already exists. A new compressed "
                 "database cannot be created in the same directory as an "
@@ -69,11 +68,6 @@ struct cb_database *cb_database_init(char *dir, int32_t seed_size, bool add){
         unlink(pindex_compressed);
         unlink(pindex_params);
         rmdir(dir);
-    }
-    //Otherwise, check to make sure it *does* exist.
-    if (add && 0 != stat(dir, &buf)) {
-        fprintf(stderr, "Could not open '%s' database for appending.", dir);
-        exit(1);
     }
 
     if (0 != mkdir(dir, 0777)) {

@@ -20,9 +20,10 @@ struct cb_compressed *cb_compressed_init(FILE *file_compressed,
     com_db = malloc(sizeof(*com_db));
     assert(com_db);
 
-    com_db->file_compressed = file_compressed;
-    com_db->file_index      = file_index;
-    com_db->seqs            = ds_vector_create();
+    com_db->file_compressed   = file_compressed;
+    com_db->file_index        = file_index;
+    com_db->seqs              = ds_vector_create();
+    com_db->next_seq_to_write = 0;
 
     if (populate) {
         int64_t num_sequences;
@@ -42,11 +43,8 @@ struct cb_compressed *cb_compressed_init(FILE *file_compressed,
         }
 
         for (i = 0; i < num_sequences; i++)
-            ds_vector_append(com_db->seqs,
-                             cb_compressed_read_seq_at(com_db, i));
+            ds_vector_append(com_db->seqs, cb_compressed_read_seq_at(com_db,i));
     }
-
-    com_db->next_seq_to_write = 0;
 
     return com_db;
 }
@@ -86,9 +84,9 @@ void cb_compressed_write(struct cb_compressed *com_db,
     fprintf(com_db->file_compressed, "> %ld; %s\n", seq->id, seq->name);
     for (link = seq->links; link != NULL; link = link->next)
         fprintf(com_db->file_compressed,
-          "reference sequence id: %ld, reference range: (%d, %d)\n%s\n",
-          link->coarse_seq_id, link->coarse_start, link->coarse_end,
-          link->diff);
+                "reference sequence id: %ld, reference range: (%d, %d)\n%s\n",
+                link->coarse_seq_id, link->coarse_start, link->coarse_end,
+                link->diff);
 }
 
 /*Outputs a compressed sequence in the compressed database to the database's
@@ -159,7 +157,7 @@ struct cb_compressed_seq *cb_compressed_seq_init(int32_t id, char *name){
     seq->links     = NULL;
     seq->last_link = NULL;
 
-    seq->name  = malloc((1+strlen(name))*sizeof(*seq->name));
+    seq->name      = malloc((1+strlen(name))*sizeof(*seq->name));
     assert(seq->name);
 
     strcpy(seq->name, name);
