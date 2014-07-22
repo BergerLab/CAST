@@ -27,7 +27,7 @@ cb_coarse_init(int32_t seed_size,
     struct cb_coarse *coarse_db = malloc(sizeof(*coarse_db));
     assert(coarse_db);
 
-    coarse_db->seqs  = ds_vector_create_capacity(10000000);
+    coarse_db->seqs   = ds_vector_create_capacity(10000000);
 
     /*Only create a seeds table if we are using this coarse database for
       compression.*/
@@ -77,7 +77,7 @@ void cb_coarse_free(struct cb_coarse *coarse_db){
     //Free each coarse sequence
     for (i = 0; i < coarse_db->seqs->size; i++)
         cb_coarse_seq_free(
-            (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i));
+          (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i));
     ds_vector_free_no_data(coarse_db->seqs);
 
     //Free the seeds table
@@ -198,9 +198,8 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
 void cb_coarse_save_plain(struct cb_coarse *coarse_db){
     struct cb_coarse_seq *seq;
     struct cb_link_to_compressed *link;
-    int32_t i;
 
-    for (i = 0; i < coarse_db->seqs->size; i++) {
+    for (int32_t i = 0; i < coarse_db->seqs->size; i++) {
         seq = (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i);
         fprintf(coarse_db->file_fasta, "> %d\n%s\n", i, seq->seq->residues);
 
@@ -218,7 +217,7 @@ void cb_coarse_save_plain(struct cb_coarse *coarse_db){
 /*Loads the data of each link in the coarse database's links file into the
   coarse database's links vector.*/
 void cb_coarse_r_read_all_links(struct cb_coarse_r *coarse_db){
-    FILE *links_file = coarse_db->db->file_links,
+    FILE *links_file  = coarse_db->db->file_links,
          *links_index = coarse_db->db->file_links_index;
     struct DSVector *link_vectors = ds_vector_create();
     int64_t *seq_link_counts = coarse_db->seq_link_counts, links_count;
@@ -314,9 +313,9 @@ struct cb_coarse_seq *cb_coarse_seq_init(int32_t id, char *residues,
     seq = malloc(sizeof(*seq));
     assert(seq);
 
-    seq->id = id;
-    seq->seq = cb_seq_init_range(id, "", residues, start, end);
-    seq->links = NULL;
+    seq->id        = id;
+    seq->seq       = cb_seq_init_range(id, "", residues, start, end);
+    seq->links     = NULL;
     seq->last_link = NULL;
 
     if (0 != (errno = pthread_rwlock_init(&seq->lock_links, NULL))) {
@@ -496,6 +495,7 @@ cb_coarse_r_init(int32_t seed_size,
       in, load the coarse residues into coarse_db->all_residues.*/
     if (load_coarse_residues)
         cb_coarse_r_read_all_residues(coarsedb);
+
     /*If the --load-coarse-links or --load-coarse-db search flag was passed in,
       load the coarse residues into coarse_db->all_residues.*/
     if (load_coarse_links)
@@ -565,6 +565,7 @@ void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
 
     while (!feof(file_links_base_index)) {
         int64_t current_start, current_end;
+
         fread_success =
           fread(&current_start, sizeof(current_start),
                 1, file_links_base_index) == 1;
@@ -683,9 +684,11 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
 char *cb_coarse_r_get_seq_residues(struct cb_coarse_r *coarse_db,
                                    int64_t id){
     int64_t start = coarse_db->seq_base_indices[id],
-            end = coarse_db->seq_base_indices[id+1], i;
-    char *residues = malloc((end-start+1)*sizeof(*residues)),
-         *all_residues = coarse_db->all_residues;
+            end   = coarse_db->seq_base_indices[id+1], i;
+    char *all_residues = coarse_db->all_residues;
+
+    char *residues = malloc((end-start+1)*sizeof(*residues));
+    assert(residues);
 
     if (all_residues == NULL) {
         fprintf(stderr, "cb_coarse_r_get_seq_residues only works if "
