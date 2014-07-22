@@ -16,6 +16,7 @@
 #include "fasta.h"
 #include "seq.h"
 
+//Joins two strings to create a new file path string.
 static char *path_join(char *a, char *b){
     char *joined;
 

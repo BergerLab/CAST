@@ -40,3 +40,8 @@ The usage of `cablast-compress` is:
 ```bash
 cablast-compress [flags] database-directory fasta-file [fasta-file ...]
 ```
+
+The usage of `cablast-search` is:
+```bash
+./cablast-search [flags] database-dir fasta-file [ --blast_args BLASTN_ARGUMENTS ]
+```

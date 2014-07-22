@@ -16,6 +16,7 @@
 #include "seq.h"
 #include "util.h"
 
+//Joins two strings to create a new file path string.
 static char *path_join(char *a, char *b){
     char *joined;
 
@@ -32,7 +33,7 @@ int main(int argc, char **argv){
     struct fasta_seq_gen *fsg;
     struct fasta_seq *seq;
     struct cb_seq *org_seq;
-    int i, org_seq_id, len_command;
+    int org_seq_id, len_command;
     struct timeval start, current;
     long double elapsed;
     char *coarse_filename, *makeblastdb;
@@ -52,7 +53,7 @@ int main(int argc, char **argv){
 
     org_seq_id = 0;
     gettimeofday(&start, NULL);
-    for (i = 1; i < args->nargs; i++) {
+    for (int i = 1; i < args->nargs; i++) {
         fsg = fasta_generator_start(args->args[i], "", 100);
 
         while (NULL != (seq = fasta_generator_next(fsg))) {
