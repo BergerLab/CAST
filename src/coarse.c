@@ -219,7 +219,6 @@ void cb_coarse_save_plain(struct cb_coarse *coarse_db){
 void cb_coarse_r_read_all_links(struct cb_coarse_r *coarse_db){
     FILE *links_file  = coarse_db->db->file_links,
          *links_index = coarse_db->db->file_links_index;
-    struct DSVector *link_vectors = ds_vector_create();
     int64_t *seq_link_counts = coarse_db->seq_link_counts, links_count;
     int32_t num_link_vectors = 0, i = 0, j = 0;
 
@@ -391,7 +390,7 @@ struct DSVector *read_coarse_links(FILE *f, int64_t num_links){
   sequence in the corresponding database file that the user wants to seek to
   and returns the byte offset of the sequence in its database file.*/
 int64_t cb_coarse_find_offset(FILE *index_file, int id){
-    int64_t mask = make_mask(8), offset = (int64_t)(-1), try_off = id * 8;
+    int64_t offset = (int64_t)(-1), try_off = id * 8;
     bool fread_success, fseek_success = fseek(index_file,try_off,SEEK_SET) == 0;
 
     if (!fseek_success) {
@@ -533,8 +532,7 @@ void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
     FILE *file_fasta_base_index = coarse_db->db->file_fasta_base_index,
          *file_links_base_index = coarse_db->db->file_links_base_index;
     int64_t num_link_blocks, current_link, *current_link_ptr = NULL;
-    int32_t current_seq = 0, link_count = 0, i = 0,
-            block_size = coarse_db->link_block_size;
+    int32_t i = 0, block_size = coarse_db->link_block_size;
     bool fseek_success, fread_success;
 
     //Initialize link_inds_by_block

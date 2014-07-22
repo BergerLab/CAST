@@ -28,12 +28,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
                                   struct cb_compressed *comdb,
                                   int32_t id, int32_t hit_from, int32_t hit_to,
                                   int32_t hit_pad_length){
-    struct cb_coarse *coarsedb = coarse_db->db;
-    FILE *links              = coarsedb->file_links,
-         *coarse_links_index = coarsedb->file_links_index,
-         *fasta              = coarsedb->file_fasta,
-         *compressed         = comdb->file_compressed;
-    struct DSVector *oseqs = ds_vector_create(), *coarse_seq_links = NULL;
+    struct DSVector *oseqs = ds_vector_create();
     int64_t *seq_lengths      = cb_compressed_get_lengths(comdb),
             *seq_base_indices = coarse_db->seq_base_indices,
             hit_from_ind      = hit_from + seq_base_indices[id],

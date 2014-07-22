@@ -91,8 +91,8 @@ int main(int argc, char **argv){
              */
             decompressed += overlap;
             if (overlap < link->original_end - link->original_start ||
-                  overlap == link->original_end - link->original_start &&
-                  !link->next)
+                  (overlap == link->original_end - link->original_start &&
+                  !link->next))
                 printf("%s", decompressed);
             decompressed -= overlap;
 

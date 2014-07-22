@@ -331,7 +331,7 @@ int main(int argc, char **argv){
     xmlDoc *doc = NULL;
     xmlNode *root = NULL;
     uint64_t dbsize = 0;
-    int i = 0, j = 0, k = 0, l = 0;
+    int i = 0, j = 0;
 
     conf = load_search_args();
     args = opt_config_parse(conf, argc, argv);
