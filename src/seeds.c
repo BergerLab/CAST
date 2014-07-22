@@ -221,8 +221,8 @@ static inline int32_t residue_value(char residue){
     return cb_seeds_alpha_size[residue-'A'];
 }
 
-/*Takes in as input a seeds table and a k-mer and returns the k-mer's index
-  in the seeds table*/
+/*Takes in the seeds table and a k-mer and returns the k-mer's index in the
+  seeds table*/
 int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
     int32_t key = 0, seed_size = seeds->seed_size, *powers = seeds->powers;
 
@@ -236,8 +236,8 @@ int32_t hash_kmer(struct cb_seeds *seeds, char *kmer){
     return key;
 }
 
-/*Takes in as input a seeds table and a k-mer and returns the k-mer's index
-  in the seeds table*/
+/*Takes in the seeds table, a k-mer, and the key of the previous hashed k-mer
+  updates the key with the last base of the k-mer.*/
 int32_t update_kmer(struct cb_seeds *seeds, char *kmer, int32_t key){
     int32_t seed_size = seeds->seed_size,
             val       = residue_value(kmer[seed_size-1]);
@@ -251,7 +251,7 @@ int32_t update_kmer(struct cb_seeds *seeds, char *kmer, int32_t key){
     return key;
 }
 
-/*Allocates a new seeds_add_memory for a compression worker, which contains
+/*Allocates a new seeds_add memory for a compression worker, which contains
   an array of k-mers as integers and an array of seed locations.*/
 struct cb_seeds_add_memory *cb_seeds_add_memory_init(){
     struct cb_seeds_add_memory *mem = malloc(sizeof(*mem));

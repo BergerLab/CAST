@@ -11,9 +11,11 @@ struct cb_seq *cb_seq_init(int32_t id, char *name, char *residues){
     return cb_seq_init_range(id, name, residues, 0, strlen(residues));
 }
 
-/*Takes in the ID number, name, and residues of a sequence and starting and
- *ending indices of the part of the sequence to copy and returns
- *a new sequence data structure for the sequence copied.
+/*@param id, name, residues: The ID number, name, and residues of a sequence
+ *@param start, end: The starting and ending indices of the part of the sequence
+ *to copy
+ *
+ *@return: A new sequence data structure for the sequence copied
  */
 struct cb_seq *cb_seq_init_range(int32_t id, char *name, char *residues,
                                  int32_t start, int32_t end){
@@ -52,14 +54,14 @@ struct cb_seq *cb_seq_init_range(int32_t id, char *name, char *residues,
     return seq;
 }
 
-//Freeing function for a cb_seq struct
+//Frees a cb_seq struct
 void cb_seq_free(struct cb_seq *seq){
     free(seq->name);
     free(seq->residues);
     free(seq);
 }
 
-//Freeing function for a hit expansion
+//Frees a hit expansion
 void cb_hit_expansion_free(struct cb_hit_expansion *expansion){
     cb_seq_free(expansion->seq);
     free(expansion);
