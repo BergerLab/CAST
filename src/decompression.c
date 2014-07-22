@@ -108,11 +108,14 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
 
                 for (k = 0; k < exp_range; exp_str[k++]='?');
 
-                /*Run decode_edit_script for each link_to_coarse in the compressed
-                  sequence to re-create the section of the original string.*/
+                /*Run decode_edit_script for each cb_link_to_coarse in the
+                 *compressed sequence to re-create the section of the original
+                 *string.
+                 */
                 current = seq->links;
                 for (; current; current = current->next) {
-                    int coarse_range = current->coarse_end - current->coarse_start,
+                    int coarse_range =
+                          current->coarse_end - current->coarse_start,
                         init_i0 = current->original_start-(int32_t)exp_start,
                         last_i0 = init_i0 + coarse_range;
 
@@ -126,7 +129,8 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
                 assert(expansion);
 
                 expansion->offset = (int64_t)exp_start;
-                expansion->seq = cb_seq_init(link->org_seq_id, seq->name, exp_str);
+                expansion->seq   = cb_seq_init(link->org_seq_id, seq->name,
+                                               exp_str);
                 ds_vector_append(oseqs, (void *)expansion);
 
                 free(exp_str);
@@ -145,7 +149,7 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
 }
 
 /*An implementation of decode_edit_script that is used in Po-Ru's C++ version
- *used in search for expanding coarse BLAST hits.
+ *of CaBLAST search for expanding coarse BLAST hits.
  *
  *Takes in a string orig, which is the section of the original sequence we want
  *to re-create, the length of this section of the string, the index in the

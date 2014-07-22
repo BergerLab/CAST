@@ -15,9 +15,9 @@ static void *fasta_generator(void *gen);
 
 /*Takes in a FASTA file pointer and an array of residue characters to exclude
  *and reads in the next FASTA sequence to create a FASTA sequence struct
- *that excludes the characters passed into "exclude".  If the file pointer is
- *not at the start of a FASTA sequence or the sequence id is not read in, a NULL
- *pointer is returned. 
+ *that excludes the characters passed into "exclude", returning it as a
+ *fasta_seq struct.  If the file pointer is not at the start of a FASTA sequence
+ *or the sequence id is not read in, a NULL pointer is returned. 
  */
 struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     struct fasta_seq *fs;
@@ -34,6 +34,7 @@ struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     }
 
     line = trim(line, "> \n\r\t");
+
     fs = malloc(sizeof(*fs));
     assert(fs);
 

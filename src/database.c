@@ -186,8 +186,8 @@ cb_database_r_init(char *dir, int32_t seed_size,
                                      findex_coarse_fasta_base,
                                      findex_params, load_coarse_residues,
                                      load_coarse_links, link_block_size);
-    db->com_db = cb_compressed_init(fcompressed, findex_compressed,
-                                    load_compressed_db);
+    db->com_db    = cb_compressed_init(fcompressed, findex_compressed,
+                                       load_compressed_db);
 
     return db;
 }

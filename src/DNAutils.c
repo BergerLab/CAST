@@ -44,5 +44,6 @@ char *string_revcomp(char *sequence, int length){
     for (i = 0; i < length; i++)
         revcomp[i] = base_complement[sequence[length-i-1]-'A'];
     revcomp[length] = '\0';
+
     return revcomp;
 }

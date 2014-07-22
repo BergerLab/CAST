@@ -10,7 +10,7 @@
 int minimum(int a, int b){return a<b?a:b;}
 int maximum(int a, int b){return a>b?a:b;}
 
-//Converts an integer to a string containing its octal representation
+//Converts an integer to a string containing its octal representation.
 char *to_octal_str(int i) {
     char *buf = malloc(16*sizeof(*buf));
     assert(buf);
@@ -74,7 +74,7 @@ char *edit_script_to_half_bytes(char *edit_script){
 
     while (edit_script[length] != '\0')
         length++;
-    odd = length % 2;
+    odd    = length % 2;
     length = length / 2 + odd;
 
     half_bytes = malloc(length*sizeof(*half_bytes));
@@ -104,12 +104,10 @@ char *edit_script_to_half_bytes(char *edit_script){
 /*Takes in an edit script in half-byte format and returns a new string
   containing the edit script in ASCII format.*/
 char *half_bytes_to_ASCII(char *half_bytes, int length){
-    int i = 0;
-
     char *edit_script = malloc((length+1)*sizeof(*edit_script));
     assert(edit_script);
 
-    for (i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++) {
         //Copy the left half-byte of the current byte.
         if (i % 2 == 0) {
             char left = half_bytes[i/2] & (((char)15) << 4);
@@ -135,9 +133,9 @@ char *half_bytes_to_ASCII(char *half_bytes, int length){
     return edit_script;
 }
 
-/*Takes in as input two strings, a bool representing whether or not they are
- *in the same direction, and the length of the strings and returns an edit
- *script that can convert the reference string to the original string.
+/*Takes in two strings, a bool representing whether or not they are in the same
+ *direction, and the length of the strings and returns an edit script that can
+ *convert the reference string to the original string.
  */
 char *make_edit_script(char *str, char *ref, bool dir, int length){
     /*direction has its first bit set to 1 to indicate that the edit script
