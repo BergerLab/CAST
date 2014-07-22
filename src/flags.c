@@ -14,15 +14,11 @@ struct opt_config *load_compress_args(){
         &compress_flags.gapped_window_size, "gapped-window-size", 100,
         "The size of the gapped match window.");
     opt_flag_int(conf,
-        &compress_flags.match_kmer_size, "match-kmer-size", 10,
-        "The size of the k-mer fragments to match in ungapped extension.");
-    opt_flag_int(conf,
         &compress_flags.procs, "procs", cpus,
         "The number of total CPUs to use to divide work.");
     opt_flag_int(conf,
         &compress_flags.map_seed_size, "map-seed-size", 10,
-        "The size of a seed in the k-mer map. This size combined with "
-        "'ext-seed-size' forms the total seed size.");
+        "The size of a seed in the k-mer map.");
     opt_flag_int(conf,
         &compress_flags.ext_seq_id_threshold, "ext-seq-id-threshold", 50,
         "The sequence identity threshold of [un]gapped extension.");
@@ -79,8 +75,7 @@ struct opt_config *load_search_args(){
 
     opt_flag_int(conf,
         &search_flags.map_seed_size, "map-seed-size", 10,
-        "The size of a seed in the k-mer map. This size combined with "
-        "'ext-seed-size' forms the total seed size.");
+        "The size of a seed in the k-mer map.");
     opt_flag_string(conf,
         &search_flags.coarse_evalue, "coarse-evalue", "1e-20",
         "The e-value used during coarse search.  To set the e-value for fine "

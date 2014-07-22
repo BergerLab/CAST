@@ -8,7 +8,6 @@
 
 struct compress_flags {
     int32_t gapped_window_size;
-    int32_t match_kmer_size;
     int32_t min_match_len;
     int32_t procs;
     int32_t map_seed_size;
