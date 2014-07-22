@@ -53,8 +53,7 @@ int main(int argc, char **argv){
     org_seq_id = 0;
     gettimeofday(&start, NULL);
     for (i = 1; i < args->nargs; i++) {
-        fsg = fasta_generator_start(args->args[i],
-                                    FASTA_EXCLUDE_NCBI_BLOSUM62, 100);
+        fsg = fasta_generator_start(args->args[i], "", 100);
 
         while (NULL != (seq = fasta_generator_next(fsg))) {
             org_seq = cb_seq_init(org_seq_id, seq->name, seq->seq);

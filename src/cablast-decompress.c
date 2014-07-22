@@ -30,18 +30,16 @@ int main(int argc, char **argv){
     struct cb_database_r *db;
     struct fasta_seq_gen *fsg;
     struct fasta_seq *seq;
-    int i, org_seq_id;
     struct timeval start;
-    char *compressed_filename;
     struct fasta_seq **coarse_sequences;
-    uint64_t num_coarse_sequences = 0;
-    uint64_t last_end;
-    int overlap;
     struct cb_link_to_coarse *link;
+    struct opt_config *conf = load_compress_args();
+    struct cb_compressed_seq **compressed;
+    uint64_t last_end, num_coarse_sequences = 0;
+    int i, org_seq_id, overlap;
+    char *compressed_filename;
 
     FILE *compressed_file;
-    struct cb_compressed_seq **compressed;
-    struct opt_config *conf = load_compress_args();
 
     struct opt_args *args = opt_config_parse(conf, argc, argv);
     if (args->nargs < 2) {
@@ -62,8 +60,8 @@ int main(int argc, char **argv){
     coarse_sequences = malloc(10000*sizeof(*coarse_sequences));
     assert(coarse_sequences);
 
-    fsg = fasta_generator_start(path_join(args->args[0], CABLAST_COARSE_FASTA),
-                                FASTA_EXCLUDE_NCBI_BLOSUM62, 100);
+    fsg = fasta_generator_start(path_join(args->args[0],
+                                CABLAST_COARSE_FASTA), "", 100);
     while (NULL != (seq = fasta_generator_next(fsg)))
         coarse_sequences[num_coarse_sequences++] = seq;
     for (i = 0; compressed[i] != NULL; i++) {
@@ -93,9 +91,11 @@ int main(int argc, char **argv){
              */
             decompressed += overlap;
             if (overlap < link->original_end - link->original_start ||
-                overlap == link->original_end - link->original_start && !link->next)
+                  overlap == link->original_end - link->original_start &&
+                  !link->next)
                 printf("%s", decompressed);
             decompressed -= overlap;
+
             free(decompressed);
 
             if (link->original_end > last_end)

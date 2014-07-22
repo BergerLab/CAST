@@ -1,8 +1,9 @@
-#include <stdlib.h>
-#include "clibs/include/ds.h"
-
 #ifndef __CABLAST_SEARCH_XML_H__
 #define __CABLAST_SEARCH_XML_H__
+
+#include <stdlib.h>
+
+#include "clibs/include/ds.h"
 
 struct blast {
     char *xml_name;

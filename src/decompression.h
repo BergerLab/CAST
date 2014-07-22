@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "clibs/include/ds.h"
-#include "stdbool.h"
 
 #include "coarse.h"
 #include "compressed.h"

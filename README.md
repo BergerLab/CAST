@@ -21,7 +21,7 @@ c_cablast depends on three libraries: `opt`, `ds` and `pthread`. `pthread`
 should be installed via your system's package manager. `opt` and `ds` can be 
 found in Andrew Gallant's [clibs respository]
 (https://github.com/BurntSushi/clibs), which is included in the clibs directory
-in src but modified to produce .a files instead of .so files.
+in src but is modified to produce .a files instead of .so files.
 
 Briefly, the following commands should get c_cablast into a working state:
 

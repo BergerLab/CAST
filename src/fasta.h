@@ -8,10 +8,6 @@
 
 #include "clibs/include/ds.h"
 
-#define FASTA_INITIAL_SEQUENCE_LENGTH 1000
-#define FASTA_MAX_LINE 1024
-#define FASTA_EXCLUDE_NCBI_BLOSUM62 "JOU"
-
 struct fasta_seq {
     char *name;
     char *seq;
