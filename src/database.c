@@ -188,6 +188,17 @@ cb_database_r_init(char *dir, bool load_coarse_residues, bool load_coarse_links,
     db->com_db    = cb_compressed_init(fcompressed, findex_compressed,
                                        load_compressed_db);
 
+    free(pfasta);
+    free(plinks);
+    free(pindex_coarse_links);
+    free(pindex_coarse_links_base);
+    free(pindex_coarse_links_count);
+    free(pindex_coarse_fasta);
+    free(pindex_coarse_fasta_base);
+    free(pcompressed);
+    free(pindex_compressed);
+    free(pindex_params);
+
     return db;
 }
 

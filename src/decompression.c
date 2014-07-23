@@ -140,6 +140,8 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
         ds_vector_free_no_data(link_block);
     }
 
+    free(seq_lengths);
+
     return oseqs;
 }
 

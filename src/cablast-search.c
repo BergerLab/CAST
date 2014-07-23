@@ -439,6 +439,7 @@ int main(int argc, char **argv){
             free(h);
         }
     }
+    ds_vector_free_no_data(iterations);
 
     cb_database_r_free(db);
     xmlFreeDoc(doc);
@@ -447,5 +448,8 @@ int main(int argc, char **argv){
       used.*/
     if (!search_flags.no_cleanup)
         system("rm CaBLAST_temp_blast_results.xml");
+
+    opt_config_free(conf);
+
     return 0;
 }
