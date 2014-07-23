@@ -196,6 +196,8 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
     edit = malloc(sizeof(*edit));
     assert(edit);
 
+    edit->str = NULL;
+
     script_pos = 1;
 
     //We are decompressing a link from a forward match.
@@ -269,6 +271,7 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
             i0 += dir;
         }
     }
+
     free(edit);
     if (fasta != NULL)
         fasta_free_seq(fasta);

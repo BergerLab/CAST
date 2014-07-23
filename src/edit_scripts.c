@@ -216,7 +216,9 @@ bool next_edit(char *edit_script, int *pos, struct edit_info *edit){
     edit->is_subdel  = edit_script[(*pos)++] == 's';
     edit->last_dist  = 0;
     edit->str_length = 0;
-    edit->str        = "";
+
+    if (edit->str != NULL)
+        free(edit->str);
 
     while (isdigit(edit_script[(*pos)])) {
         edit->last_dist *= 8; //Octal encoding
@@ -274,6 +276,7 @@ char *read_edit_script(char *edit_script, char *orig, int length){
     str[current] = '\0';
     if ((edit_script[0] & ((char)0x7f)) == '1') {
         char *str_fwd = str;
+
         str = string_revcomp(str_fwd, -1);
         free(str_fwd);
     }
