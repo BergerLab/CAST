@@ -62,6 +62,7 @@ void blast_coarse(struct opt_args *args, uint64_t dbsize){
 
     system(blastn);
 
+    free(input_path);
     free(blastn);
 }
 
@@ -449,6 +450,7 @@ int main(int argc, char **argv){
     if (!search_flags.no_cleanup)
         system("rm CaBLAST_temp_blast_results.xml");
 
+    opt_args_free(args);
     opt_config_free(conf);
 
     return 0;

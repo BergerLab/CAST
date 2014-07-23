@@ -223,6 +223,7 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
             last_edit_str_len = edit->str_length;
 
             if (i0 >= dest_len) {
+                free(edit->str);
                 free(edit);
                 if (fasta != NULL)
                     fasta_free_seq(fasta);
@@ -272,6 +273,7 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
         }
     }
 
+    free(edit->str);
     free(edit);
     if (fasta != NULL)
         fasta_free_seq(fasta);
