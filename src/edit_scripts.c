@@ -171,6 +171,7 @@ char *make_edit_script(char *str, char *ref, bool dir, int length){
                     for (j = 0; octal[j] != '\0'; j++)
                         edit_script[current++] = octal[j];
                     last_edit = i;
+                    free(octal);
                 }
                 edit_script[current++] = str[i];
             }
@@ -187,6 +188,7 @@ char *make_edit_script(char *str, char *ref, bool dir, int length){
                     for (j = 0; octal[j] != '\0'; j++)
                         edit_script[current++] = octal[j];
                     last_edit = i;
+                    free(octal);
                 }
                 edit_script[current++] = str[i];
             }
