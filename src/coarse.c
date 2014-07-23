@@ -270,9 +270,8 @@ void cb_coarse_r_read_all_residues(struct cb_coarse_r *coarse_db){
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA base index file\n");
 
-    fread_success =
-      fread(&num_bases, sizeof(num_bases), 1,
-            coarse_db->db->file_fasta_base_index) == 1;
+    fread_success = fread(&num_bases, sizeof(num_bases), 1,
+                          coarse_db->db->file_fasta_base_index) == 1;
     assert(fread_success);
 
     fseek_success =
@@ -297,9 +296,8 @@ void cb_coarse_r_read_all_residues(struct cb_coarse_r *coarse_db){
         line = malloc((line_length+1)*sizeof(*line));
         assert(line);
 
-        fread_success =
-          fread(line, sizeof(*line), line_length + 1,
-                coarse_db->db->file_fasta) == line_length + 1;
+        fread_success = fread(line, sizeof(*line), line_length + 1,
+                              coarse_db->db->file_fasta) == line_length + 1;
         assert(fread_success);
 
         for (j = 0; line[j] != '\0' && line[j] != '\n'; j++)
@@ -408,8 +406,7 @@ int64_t cb_coarse_find_offset(FILE *index_file, int id){
         return (int64_t)(-1);
     }
 
-    fread_success =
-      fread(&offset, sizeof(offset), 1, index_file) == 1;
+    fread_success = fread(&offset, sizeof(offset), 1, index_file) == 1;
     assert(fread_success);
 
     return offset;
@@ -482,9 +479,8 @@ cb_coarse_r_init(int32_t seed_size,
     assert(coarsedb->seq_base_indices);
 
     for (i = 0; i < coarsedb->num_coarse_seqs; i++) {
-        fread_success =
-          fread(&links_in_sequence, sizeof(links_in_sequence),
-                1, file_links_count_index) == 1;
+        fread_success = fread(&links_in_sequence, sizeof(links_in_sequence),
+                              1, file_links_count_index) == 1;
         assert(fread_success);
 
         link_count += links_in_sequence;
@@ -559,9 +555,8 @@ void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
     if (!fseek_success)
         fprintf(stderr, "Error in seeking to end of FASTA base index file\n");
 
-    fread_success =
-      fread(&num_link_blocks, sizeof(num_link_blocks),
-            1, file_fasta_base_index) == 1;
+    fread_success = fread(&num_link_blocks, sizeof(num_link_blocks),
+                          1, file_fasta_base_index) == 1;
     assert(fread_success);
 
     num_link_blocks = num_link_blocks / block_size + 1;
@@ -580,14 +575,12 @@ void cb_coarse_r_init_blocks(struct cb_coarse_r *coarse_db){
     while (!feof(file_links_base_index)) {
         int64_t current_start, current_end;
 
-        fread_success =
-          fread(&current_start, sizeof(current_start),
-                1, file_links_base_index) == 1;
+        fread_success = fread(&current_start, sizeof(current_start),
+                              1, file_links_base_index) == 1;
         assert(fread_success || feof(file_links_base_index));
 
-        fread_success =
-          fread(&current_end, sizeof(current_end),
-                1, file_links_base_index) == 1;
+        fread_success = fread(&current_end, sizeof(current_end),
+                              1, file_links_base_index) == 1;
         assert(fread_success || feof(file_links_base_index));
 
         if (feof(file_links_base_index))

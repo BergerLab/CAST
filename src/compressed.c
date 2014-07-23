@@ -350,6 +350,8 @@ int64_t cb_compressed_get_seq_length(FILE *f){
     free(h);
 
     fread_success = fread(&length, sizeof(length), 1, f) == 1;
+    assert(fread_success);
+
     return length;
 }
 
@@ -492,5 +494,7 @@ int64_t cb_compressed_link_offset(struct cb_compressed *comdb, int id){
     }
 
     fread_success = fread(&offset, sizeof(offset), 1, comdb->file_index) == 1;
+    assert(fread_success);
+
     return offset;
 }
