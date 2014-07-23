@@ -75,6 +75,7 @@ struct fasta_seq *fasta_read_next(FILE *f, const char *exclude){
     seq[seq_length] = '\0';
 
     fs->seq = seq;
+
     return fs;
 }
 

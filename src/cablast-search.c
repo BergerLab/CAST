@@ -421,7 +421,11 @@ int main(int argc, char **argv){
 
     if (!search_flags.hide_progress)
         fprintf(stderr, "\n"); //Make a newline after the progress bar
+
+    for (i = 0; i < queries->size; i++)
+        fasta_free_seq((struct fasta_seq *)ds_vector_get(queries, i));
     ds_vector_free_no_data(queries);
+
     if (search_flags.show_hit_info)
         fclose(test_hits_file);
 
