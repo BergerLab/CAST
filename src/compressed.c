@@ -211,8 +211,10 @@ char *get_compressed_header(FILE *f){
                 assert(header);
             }
         }
-        if (c == EOF)
+        if (c == EOF) {
+            free(header);
             return NULL;
+        }
     }
     header[i] = '\0';
 
@@ -482,8 +484,7 @@ struct cb_compressed_seq **read_compressed(FILE *f){
 }
 
 /*Gets the offset in the compressed database's compressed.cb file for the
- *link whose index is passed into id.
- */
+  link whose index is passed into id.*/
 int64_t cb_compressed_link_offset(struct cb_compressed *comdb, int id){
     int64_t offset;
     int32_t try_off = id * 8;

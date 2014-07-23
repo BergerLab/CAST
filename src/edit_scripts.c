@@ -249,6 +249,8 @@ char *read_edit_script(char *edit_script, char *orig, int length){
     char *str = malloc((2*length+1)*sizeof(*str));
     assert(str);
 
+    edit.str = NULL;
+
     while (next_edit(edit_script, &script_pos, &edit)) {
         //Chunk after previous edit
         for (i = 0; i < edit.last_dist - last_edit_str_len; i++)
@@ -267,6 +269,8 @@ char *read_edit_script(char *edit_script, char *orig, int length){
 
         last_edit_str_len = edit.str_length;
     }
+    free(edit.str);
+
     while (orig_pos < length)
         str[current++] = orig[orig_pos++];
 
