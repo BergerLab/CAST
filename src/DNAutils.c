@@ -20,7 +20,7 @@ extern inline bool bases_match(char a, char b, int dir_prod){
  *since a null terminator is never needed in any of the code that uses the
  *reverse complement of a k-mer.
  */
-void kmer_revcomp(char *revcomp, char *kmer, int k){
+extern inline void kmer_revcomp(char *revcomp, char *kmer, int k){
     for (int i = 0; i < k; i++)
         revcomp[i] = base_complement[kmer[k-i-1]-'A'];
 }

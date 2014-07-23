@@ -16,6 +16,7 @@ char *to_octal_str(int i) {
     assert(buf);
 
     sprintf(buf, "%o", i);
+
     return buf;
 }
 
@@ -98,6 +99,7 @@ char *edit_script_to_half_bytes(char *edit_script){
         half_bytes[i/2] <<= 4;
         half_bytes[i/2] |= (char)1;
     }
+
     return half_bytes;
 }
 
@@ -130,6 +132,7 @@ char *half_bytes_to_ASCII(char *half_bytes, int length){
             edit_script[i] = half_byte_to_char(half_bytes[i/2] & (char)15);
     }
     edit_script[length] = '\0';
+
     return edit_script;
 }
 
@@ -194,6 +197,7 @@ char *make_edit_script(char *str, char *ref, bool dir, int length){
     assert(edit_script);
 
     edit_script[current] = '\0';
+
     return edit_script;
 }
 
@@ -226,6 +230,7 @@ bool next_edit(char *edit_script, int *pos, struct edit_info *edit){
     edit->str_length = edit_length;
     while (isupper(edit_script[(*pos)]) || edit_script[(*pos)] == '-')
         edit->str[i++] = edit_script[(*pos)++];
+
     return true;
 }
 
@@ -270,6 +275,7 @@ char *read_edit_script(char *edit_script, char *orig, int length){
         str = string_revcomp(str_fwd, -1);
         free(str_fwd);
     }
+
     return str;
 }
 
@@ -291,5 +297,6 @@ char *no_dashes(char *sequence){
     for (i = 0; i < length; i++)
         if (sequence[i] != '-')
             n[j++] = sequence[i];
+
     return n;
 }
