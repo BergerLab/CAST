@@ -15,9 +15,7 @@
  */
 struct cb_compressed *cb_compressed_init(FILE *file_compressed,
                                          FILE *file_index, bool populate){
-    struct cb_compressed *com_db;
-
-    com_db = malloc(sizeof(*com_db));
+    struct cb_compressed *com_db = malloc(sizeof(*com_db));
     assert(com_db);
 
     com_db->file_compressed   = file_compressed;
@@ -324,6 +322,7 @@ struct cb_compressed_seq *cb_compressed_read_seq_at(struct cb_compressed *comdb,
 
     if (offset < 0)
         return NULL;
+
     fseek_success = fseek(links, offset, SEEK_SET) == 0;
     if (!fseek_success) { 
         fprintf(stderr, "Error in seeking to offset %lu\n", offset);
@@ -365,7 +364,9 @@ int64_t *cb_compressed_get_lengths(struct cb_compressed *comdb){
         fprintf(stderr, "Error in seeking to end of compressed.cb.index\n");
         return NULL;
     }
+
     num_sequences = ftell(index) / 8;
+
     fseek_success = fseek(index, 0, SEEK_SET) == 0;
     if (!fseek_success) {
         fprintf(stderr, "Error in seeking to start of compressed.cb.index\n");
@@ -392,8 +393,20 @@ int64_t *cb_compressed_get_lengths(struct cb_compressed *comdb){
         }
     }
 
-    fseek(links, 0, SEEK_SET);
-    fseek(index, 0, SEEK_SET);
+    fseek_success = fseek(links, 0, SEEK_SET) == 0;
+    if (!fseek_success) {
+        fprintf(stderr, "error in seeking to start of compressed.cb.index");
+        free(lengths);
+        return NULL;
+    }
+
+    fseek_success = fseek(index, 0, SEEK_SET) == 0;
+    if (!fseek_success) {
+        fprintf(stderr, "error in seeking to start of compressed.cb");
+        free(lengths);
+        return NULL;
+    }
+
     return lengths;
 }
 
