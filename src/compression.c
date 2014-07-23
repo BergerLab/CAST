@@ -106,6 +106,8 @@ void cb_compress_join_workers(struct cb_compress_workers *workers){
 //Frees the compression workers.
 void cb_compress_free_workers(struct cb_compress_workers *workers){
     ds_queue_free(workers->jobs);
+    for (int i = 0; i < workers->num_workers; i++)
+        free(((struct worker_args **)workers->args)[i]);
     free(workers->args);
     free(workers->threads);
     free(workers);

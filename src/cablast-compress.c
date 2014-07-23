@@ -92,10 +92,12 @@ int main(int argc, char **argv){
 
     system(makeblastdb);
 
+    free(coarse_filename);
     free(makeblastdb);
     cb_database_free(db);
     opt_config_free(conf);
     opt_args_free(args);
+
     cb_compress_free_workers(workers);
 
     return 0;
