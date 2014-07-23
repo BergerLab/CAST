@@ -26,11 +26,10 @@ in src but is modified to produce .a files instead of .so files.
 Briefly, the following commands should get c_cablast into a working state:
 
 ```bash
-mkdir c_cablast
 git clone git://github.com/BergerLab/c_cablast
 cd c_cablast/src/clibs
 make
-cd ..
+cd ../..
 make
 ./cablast-compress --help
 ```
