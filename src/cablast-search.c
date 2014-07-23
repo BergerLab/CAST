@@ -409,7 +409,14 @@ int main(int argc, char **argv){
             ds_vector_append(oseqs, ds_vector_get(expanded_hits, j));
         ds_vector_free_no_data(expanded_hits);
     }
+
     write_fine_fasta(oseqs);
+
+    for (i = 0; i < oseqs->size; i++)
+        cb_hit_expansion_free(
+          (struct cb_hit_expansion *)ds_vector_get(oseqs, i));
+    ds_vector_free_no_data(oseqs);
+
     blast_fine(args, dbsize);
 
     if (!search_flags.hide_progress)
