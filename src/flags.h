@@ -48,7 +48,7 @@ struct cablat_flags {
 
 
 struct opt_config *load_compress_args();
-
 struct opt_config *load_search_args();
+struct opt_config *load_cablat_args();
 
 #endif

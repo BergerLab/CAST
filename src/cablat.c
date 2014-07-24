@@ -35,6 +35,20 @@ static char *path_join(char *a, char *b){
     return joined;
 }
 
+void blat_coarse(struct opt_args *args){
+    char *input_path = path_join(args->args[0], CABLAST_COARSE_FASTA),
+         *coarse_blat_command =
+      malloc((strlen("$HOME/bin/$MACHTYPE/blat    -noHead -minIdentity=80")+
+                     strlen(args->args[1])+strlen(input_path)+
+                     strlen(args->args[2])+1)*sizeof(*coarse_blat_command));
+    sprintf(coarse_blat_command,
+            "$HOME/bin/$MACHTYPE/blat %s %s %s -noHead -minIdentity=80",
+            args->args[1], input_path, args->args[2]);
+    fprintf(stderr, "%s\n", coarse_blat_command);
+
+    system(coarse_blat_command);
+}
+
 int main(int argc, char **argv){
     FILE *query_file = NULL;
     struct cb_database_r *db = NULL;
@@ -45,7 +59,7 @@ int main(int argc, char **argv){
     uint64_t dbsize = 0;
     int i = 0, j = 0;
 
-    conf = load_search_args();
+    conf = load_cablat_args();
     args = opt_config_parse(conf, argc, argv);
 
     if (args->nargs < 3) {
@@ -56,10 +70,6 @@ int main(int argc, char **argv){
         exit(1);
     }
 
-    /*if (!search_flags.hide_progress)
-        fprintf(stderr, "Loading database data\n\n");*/
-
-
     db = cb_database_r_init(args->args[0],
                             (search_flags.load_coarse_db ||
                              search_flags.load_coarse_residues),
@@ -69,9 +79,7 @@ int main(int argc, char **argv){
                             search_flags.link_block_size);
     dbsize = read_int_from_file(8, db->coarse_db->db->file_params);
 
-    /*if (!search_flags.hide_progress)
-        fprintf(stderr, "Running coarse BLAST\n\n");*/
-    //blat_coarse(args, dbsize);
+    blat_coarse(args);
 
     query_file = fopen(args->args[1], "r");
     queries = ds_vector_create();
