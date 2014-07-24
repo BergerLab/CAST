@@ -35,12 +35,15 @@ static char *path_join(char *a, char *b){
     return joined;
 }
 
+/*Runs BLAT on the coarse FASTA file and stores the results in a temporary
+  psl file.*/
 void blat_coarse(struct opt_args *args){
     char *input_path = path_join(args->args[0], CABLAST_COARSE_FASTA),
          *coarse_blat_command =
       malloc((strlen("$HOME/bin/$MACHTYPE/blat    -noHead -minIdentity=80")+
                      strlen(args->args[1])+strlen(input_path)+
-                     strlen(args->args[2])+1)*sizeof(*coarse_blat_command));
+                     strlen("coarse-blat.psl")*sizeof(*coarse_blat_command));
+
     sprintf(coarse_blat_command,
             "$HOME/bin/$MACHTYPE/blat %s %s %s -noHead -minIdentity=80",
             args->args[1], input_path, args->args[2]);
