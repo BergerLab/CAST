@@ -37,6 +37,15 @@ struct search_flags {
     int32_t link_block_size;
 } search_flags;
 
+struct cablat_flags {
+    bool    load_coarse_residues;
+    bool    load_coarse_links;
+    bool    load_coarse_db;
+    bool    load_compressed_db;
+    bool    fine_blat_db;
+    int32_t link_block_size;
+} cablat_flags;
+
 
 struct opt_config *load_compress_args();
 
