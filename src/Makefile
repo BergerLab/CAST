@@ -57,6 +57,23 @@ cablast-search: cablast-search.o $(SEARCH_HEADERS) $(SEARCH_OBJS)
 cablast-search.o: cablast-search.c database.h fasta.h
 
 
+
+CABLAT_OBJS=align.o bitpack.o coarse.o compressed.o compression.o database.o \
+            decompression.o DNAutils.o edit_scripts.o fasta.o \
+            flags.o link_to_coarse.o link_to_compressed.o progress-bar.o \
+            seeds.o seq.o util.o
+
+CABLAT_HEADERS=align.o coarse.h compressed.h compression.h database.h \
+               decompression.h fasta.h flags.h link_to_coarse.h \
+               link_to_compressed.h progress-bar.h seeds.h seq.h util.h xml.h
+
+cablat-search: cablat
+
+cablat: cablat.o $(CABLAT_HEADERS) $(CABLAT_OBJS)
+
+cablat.o: cablat.c database.h fasta.h
+
+
 align.o: DNAutils.c DNAutils.h align.c align.h
 bitpack.o: bitpack.c bitpack.h
 coarse.o: coarse.c coarse.h link_to_compressed.h seq.h
