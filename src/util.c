@@ -159,6 +159,8 @@ char **split_spaces(char *line){
     }
 
     char **words = malloc((num_sections/2+1)*sizeof(*words));
+    assert(words);
+
     words[num_sections/2] = NULL;
 
     for (int i = 0; i < num_sections-1; i++)
