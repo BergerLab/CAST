@@ -8,53 +8,77 @@
 #include "psl.h"
 #include "util.h"
 
+struct psl_entry *
+psl_entry_init(int matches, int mismatches, int rep_matches, int n_count,
+               int q_num_insert, int q_base_insert, int t_num_insert,
+               int t_base_insert, char *strand, char *q_name, unsigned q_size,
+               int q_start, int q_end, char *t_name, unsigned t_size,
+               int t_start, int t_end, unsigned block_count,
+               unsigned block_size, unsigned q_starts, unsigned t_starts){
+    struct psl_entry *entry = malloc(sizeof(*entry));
+    assert(entry);
+
+    entry->matches       = matches;
+    entry->mismatches    = mismatches;
+    entry->rep_matches   = rep_matches;
+    entry->n_count       = n_count;
+    entry->q_num_insert  = q_num_insert;
+    entry->q_base_insert = q_base_insert;
+    entry->t_num_insert  = t_num_insert;
+    entry->t_base_insert = t_base_insert;
+
+    entry->strand        = malloc((strlen(strand)+1)*sizeof(*(entry->strand)));
+    assert(entry->strand);
+
+    strcpy(entry->strand, strand);
+
+    entry->q_name        = malloc((strlen(q_name)+1)*sizeof(*(entry->q_name)));
+    assert(entry->q_name);
+
+    strcpy(entry->q_name, q_name);
+
+    entry->q_size        = q_size;
+    entry->q_start       = q_start;
+    entry->q_end         = q_end;
+
+    entry->t_name        = t_name;
+    entry->t_name        = malloc((strlen(t_name)+1)*sizeof(*(entry->t_name)));
+    assert(entry->t_name);
+
+    strcpy(entry->t_name, t_name);
+
+    entry->t_size        = t_size;
+    entry->t_start       = t_start;
+    entry->t_end         = t_end;
+    entry->block_count   = block_count;
+    entry->block_size    = block_size;
+    entry->q_starts      = q_starts;
+    entry->t_starts      = t_starts;
+
+    return entry;
+}
+
+//Frees a psl entry struct
+void psl_free(struct psl_entry *entry){
+    free(entry->strand);
+    free(entry->q_name);
+    free(entry->t_name);
+    free(entry);
+}
+
 /*Load a psl entry from a row parsed with split_space, based on psl_load in Jim
   Kent's BLAT.*/
 struct psl_entry *psl_load(char **row){
-
-    struct psl_entry *ret = malloc(sizeof(*ret));
-    assert(ret);
-
-    ret->matches       = atoi(row[0]);
-    ret->mismatches    = atoi(row[1]);
-    ret->rep_matches   = atoi(row[2]);
-    ret->n_count       = atoi(row[3]);
-    ret->q_num_insert  = atoi(row[4]);
-    ret->q_base_insert = atoi(row[5]);
-    ret->t_num_insert  = atoi(row[6]);
-    ret->t_base_insert = atoi(row[7]);
-
-    ret->strand        = malloc((strlen(row[8])+1)*sizeof(*(ret->strand)));
-    assert(ret->strand);
-
-    strcpy(ret->strand, row[8]);
-
-    ret->q_name        = malloc((strlen(row[9])+1)*sizeof(*(ret->q_name)));
-    assert(ret->q_name);
-
-    strcpy(ret->q_name, row[9]);
-
-    ret->q_size        = atoi(row[10]);
-    ret->q_start       = atoi(row[11]);
-    ret->q_end         = atoi(row[12]);
-
-    ret->t_name        = row[13];
-    ret->t_name        = malloc((strlen(row[13])+1)*sizeof(*(ret->q_name)));
-    assert(ret->t_name);
-
-    strcpy(ret->t_name, row[13]);
-
-    ret->t_size        = atoi(row[14]);
-    ret->t_start       = atoi(row[15]);
-    ret->t_end         = atoi(row[16]);
-    ret->block_count   = atoi(row[17]);
-    ret->block_size    = atoi(row[18]);
-    ret->q_starts      = atoi(row[19]);
-    ret->t_starts      = atoi(row[20]);
-
-    return NULL;
+    return psl_entry_init(
+      atoi(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), atoi(row[4]),
+      atoi(row[5]), atoi(row[6]), atoi(row[7]), row[8], row[9], atoi(row[10]),
+      atoi(row[11]), atoi(row[12]), row[13], atoi(row[14]), atoi(row[15]),
+      atoi(row[16]), atoi(row[17]), atoi(row[18]), atoi(row[19]),
+      atoi(row[20]));
 }
 
+/*Takes in a file pointer for a .psl file and parses each of its lines with
+  psl_load to create a psl_entry struct, which is stored in a vector.*/
 struct DSVector *psl_read(FILE *f){
     struct DSVector *entries = ds_vector_create();
     char *line = NULL;
