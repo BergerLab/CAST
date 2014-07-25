@@ -60,12 +60,13 @@ cablast-search.o: cablast-search.c database.h fasta.h
 
 CABLAT_OBJS=align.o bitpack.o coarse.o compressed.o compression.o database.o \
             decompression.o DNAutils.o edit_scripts.o fasta.o \
-            flags.o link_to_coarse.o link_to_compressed.o progress-bar.o \
+            flags.o link_to_coarse.o link_to_compressed.o progress-bar.o psl.o \
             seeds.o seq.o util.o
 
 CABLAT_HEADERS=align.o coarse.h compressed.h compression.h database.h \
                decompression.h fasta.h flags.h link_to_coarse.h \
-               link_to_compressed.h progress-bar.h seeds.h seq.h util.h xml.h
+               link_to_compressed.h progress-bar.h psl.h seeds.h seq.h util.h \
+               xml.h
 
 cablat-search: cablat
 
@@ -89,6 +90,7 @@ flags.o: flags.c flags.h util.h
 link_to_coarse.o: link_to_coarse.c link_to_coarse.h
 link_to_compressed.o: link_to_compressed.c link_to_compressed.h
 progress-bar.o: progress-bar.c progress-bar.h
+psl.o: psl.c psl.h
 seeds.o: seeds.c seeds.h
 seq.o: seq.c seq.h
 uitl.o: util.c util.h

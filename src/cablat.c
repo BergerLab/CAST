@@ -40,9 +40,9 @@ static char *path_join(char *a, char *b){
 void blat_coarse(struct opt_args *args){
     char *input_path = path_join(args->args[0], CABLAST_COARSE_FASTA),
          *coarse_blat_command =
-      malloc((strlen("$HOME/bin/$MACHTYPE/blat    -noHead -minIdentity=80")+
-                     strlen(args->args[1])+strlen(input_path)+
-                     strlen("coarse-blat.psl")*sizeof(*coarse_blat_command));
+      malloc(strlen("$HOME/bin/$MACHTYPE/blat    -noHead -minIdentity=80")+
+                    strlen(args->args[1])+strlen(input_path)+
+                    strlen("coarse-blat.psl")*sizeof(*coarse_blat_command));
 
     sprintf(coarse_blat_command,
             "$HOME/bin/$MACHTYPE/blat %s %s %s -noHead -minIdentity=80",

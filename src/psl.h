@@ -29,4 +29,6 @@ struct psl_entry {
     unsigned t_starts;
 };
 
+struct psl_entry *psl_load(char **row);
+
 #endif
