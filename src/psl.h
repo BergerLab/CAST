@@ -40,7 +40,7 @@ psl_entry_init(int matches, int mismatches, int rep_matches, int n_count,
                int t_start, int t_end, unsigned block_count,
                unsigned block_size, unsigned q_starts, unsigned t_starts);
 
-void psl_free(struct psl_entry *entry);
+void psl_entry_free(struct psl_entry *entry);
 
 struct psl_entry *psl_load(char **row);
 struct DSVector *psl_read(FILE *f);

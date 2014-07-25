@@ -59,7 +59,7 @@ psl_entry_init(int matches, int mismatches, int rep_matches, int n_count,
 }
 
 //Frees a psl entry struct
-void psl_free(struct psl_entry *entry){
+void psl_entry_free(struct psl_entry *entry){
     free(entry->strand);
     free(entry->q_name);
     free(entry->t_name);
