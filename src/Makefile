@@ -12,7 +12,7 @@ COMPRESS_HEADERS=align.o coarse.h compressed.h compression.h database.h \
                  fasta.h flags.h link_to_coarse.h \
                  link_to_compressed.h progress-bar.h seeds.h seq.h util.h
 
-all: cablast-compress cablast-decompress cablast-search
+all: cablast-compress cablast-decompress cablast-search cablat-search
 
 compress: cablast-compress
 
