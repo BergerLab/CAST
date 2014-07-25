@@ -1,7 +1,10 @@
 #ifndef __CABLAT_PSL_H__
 #define __CABLAT_PSL_H__
 
+#include <stdio.h>
 #include <stdlib.h>
+
+#include "clibs/include/ds.h"
 
 /*Summary info about a patSpace alignment, modified from psl.h in Jim Kent's
   BLAT*/
@@ -30,5 +33,6 @@ struct psl_entry {
 };
 
 struct psl_entry *psl_load(char **row);
+struct DSVector *psl_read(FILE *f);
 
 #endif

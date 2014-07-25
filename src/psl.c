@@ -1,6 +1,9 @@
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "clibs/include/ds.h"
 
 #include "psl.h"
 #include "util.h"
@@ -9,7 +12,7 @@
   Kent's BLAT.*/
 struct psl_entry *psl_load(char **row){
 
-    struct psl_entry *ret = malloc(sizeof(ret));
+    struct psl_entry *ret = malloc(sizeof(*ret));
     assert(ret);
 
     ret->matches       = atoi(row[0]);
@@ -49,5 +52,18 @@ struct psl_entry *psl_load(char **row){
     ret->q_starts      = atoi(row[19]);
     ret->t_starts      = atoi(row[20]);
 
-    return ret;
+    return NULL;
+}
+
+struct DSVector *psl_read(FILE *f){
+    struct DSVector *entries = ds_vector_create();
+    char *line = NULL;
+
+    while (0 != (readline(f, &line))) {
+        char *no_newline = trim_space(line);
+        struct psl_entry *entry = psl_load(split_spaces(no_newline));
+        ds_vector_append(entries, (void *)entry);
+    }
+
+    return entries;
 }

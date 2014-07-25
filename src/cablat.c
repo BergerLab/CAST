@@ -21,6 +21,7 @@
 #include "fasta.h"
 #include "flags.h"
 #include "progress-bar.h"
+#include "psl.h"
 #include "seq.h"
 #include "util.h"
 
@@ -40,13 +41,13 @@ static char *path_join(char *a, char *b){
 void blat_coarse(struct opt_args *args){
     char *input_path = path_join(args->args[0], CABLAST_COARSE_FASTA),
          *coarse_blat_command =
-      malloc(strlen("$HOME/bin/$MACHTYPE/blat    -noHead -minIdentity=80")+
-                    strlen(args->args[1])+strlen(input_path)+
-                    strlen("coarse-blat.psl")*sizeof(*coarse_blat_command));
+            malloc(strlen("$HOME/bin/$MACHTYPE/blat    -noHead -minIdentity=80")
+                   +strlen(args->args[1])+strlen(input_path)
+                   +strlen("coarse-blat.psl")*sizeof(*coarse_blat_command));
 
     sprintf(coarse_blat_command,
             "$HOME/bin/$MACHTYPE/blat %s %s %s -noHead -minIdentity=80",
-            args->args[1], input_path, args->args[2]);
+            args->args[1], input_path, "coarse-blat.psl");
     fprintf(stderr, "%s\n", coarse_blat_command);
 
     system(coarse_blat_command);
@@ -83,6 +84,10 @@ int main(int argc, char **argv){
     dbsize = read_int_from_file(8, db->coarse_db->db->file_params);
 
     blat_coarse(args);
+
+    FILE *coarse_blat_output = fopen("coarse-blat.psl", "r");
+    psl_read(coarse_blat_output);
+    fclose(coarse_blat_output);
 
     query_file = fopen(args->args[1], "r");
     queries = ds_vector_create();
