@@ -78,6 +78,32 @@ void blat_coarse(struct opt_args *args){
     system(coarse_blat_command);
 }
 
+//Runs BLAT on the fine FASTA file
+void blat_fine(struct opt_args *args, uint64_t dbsize){
+    char *blat/*,
+         *blat_args      = get_blast_args(args),
+         *fine_blat_args = is_substring("-evalue", blat_args) ?
+                           blat_args : "-evalue 1e-30"*/;
+
+    int command_length = 1024;
+
+    blat = malloc(command_length*sizeof(*blat));
+    assert(blat);
+
+    sprintf(blat,
+            "$HOME/bin/$MACHTYPE/blat CaBLAT_fine.fasta %s %s",
+            args->args[1], args->args[2]);
+
+    if (!search_flags.hide_progress)
+        fprintf(stderr, "\n%s\n", blat);
+
+    system(blat); //Run fine BLAT
+
+    //free(blat_args);
+    free(blat);
+}
+
+
 /*Takes in a vector of expansion structs for the expanded BLAT hits from a
   query and outputs them to the FASTA file CaBLAT_fine.fasta.*/
 void write_fine_fasta(struct DSVector *oseqs){
@@ -140,16 +166,7 @@ int main(int argc, char **argv){
     struct DSVector *expanded_hits = expand_blat_hits(coarse_hits, db);
     write_fine_fasta(expanded_hits);
 
-    query_file = fopen(args->args[1], "r");
-    queries = ds_vector_create();
-    query = fasta_read_next(query_file, "");
-
-    while (query) {
-        ds_vector_append(queries, (void *)query);
-        query = fasta_read_next(query_file, "");
-    }
-
-    fclose(query_file);
+    blat_fine(args, dbsize);
 
     opt_args_free(args);
     opt_config_free(conf);
