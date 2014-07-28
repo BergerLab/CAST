@@ -78,6 +78,29 @@ void blat_coarse(struct opt_args *args){
     system(coarse_blat_command);
 }
 
+/*Takes in a vector of expansion structs for the expanded BLAT hits from a
+  query and outputs them to the FASTA file CaBLAT_fine.fasta.*/
+void write_fine_fasta(struct DSVector *oseqs){
+    FILE *temp = fopen("CaBLAT_fine.fasta", "w");
+    int i;
+
+    if (!temp) {
+        fprintf(stderr, "Could not open CaBLAT_fine.fasta for writing\n");
+        return;
+    }
+    for (i = 0; i < oseqs->size; i++) {
+        struct cb_seq *current_seq =
+          ((struct cb_hit_expansion *)ds_vector_get(oseqs, i))->seq;
+        fprintf(temp, "> %s\n%s\n", current_seq->name, current_seq->residues);
+    }
+    fclose(temp);
+
+    if (search_flags.fine_blast_db)
+        system("makeblastdb -dbtype nucl -in CaBLAT_fine.fasta -out "
+               "CaBLAST_fine.fasta");
+}
+
+
 int main(int argc, char **argv){
     FILE *query_file = NULL;
     struct cb_database_r *db = NULL;
@@ -115,6 +138,7 @@ int main(int argc, char **argv){
     fclose(coarse_blat_output);
 
     struct DSVector *expanded_hits = expand_blat_hits(coarse_hits, db);
+    write_fine_fasta(expanded_hits);
 
     query_file = fopen(args->args[1], "r");
     queries = ds_vector_create();
