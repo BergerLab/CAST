@@ -50,12 +50,6 @@ struct DSVector *expand_blat_hits(struct DSVector *hits,
           cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
                            coarse_start, coarse_end, 10);
 
-for (int j = 0; j < oseqs->size; j++){
-    struct cb_hit_expansion *expansion =
-      (struct cb_hit_expansion *)ds_vector_get(oseqs, j);
-    fprintf(stderr, "%s\n", expansion->seq->residues);
-}
-
         for (int j = 0; j < oseqs->size; j++)
             ds_vector_append(expanded_hits, ds_vector_get(oseqs, j));
 
@@ -121,7 +115,6 @@ int main(int argc, char **argv){
     fclose(coarse_blat_output);
 
     struct DSVector *expanded_hits = expand_blat_hits(coarse_hits, db);
-    fprintf(stderr, "%d\n", expanded_hits->size);
 
     query_file = fopen(args->args[1], "r");
     queries = ds_vector_create();
