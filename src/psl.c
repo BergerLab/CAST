@@ -29,22 +29,18 @@ psl_entry_init(int matches, int mismatches, int rep_matches, int n_count,
 
     entry->strand        = malloc((strlen(strand)+1)*sizeof(*(entry->strand)));
     assert(entry->strand);
-
     strcpy(entry->strand, strand);
 
     entry->q_name        = malloc((strlen(q_name)+1)*sizeof(*(entry->q_name)));
     assert(entry->q_name);
-
     strcpy(entry->q_name, q_name);
 
     entry->q_size        = q_size;
     entry->q_start       = q_start;
     entry->q_end         = q_end;
 
-    entry->t_name        = t_name;
     entry->t_name        = malloc((strlen(t_name)+1)*sizeof(*(entry->t_name)));
     assert(entry->t_name);
-
     strcpy(entry->t_name, t_name);
 
     entry->t_size        = t_size;

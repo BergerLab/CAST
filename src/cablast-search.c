@@ -301,8 +301,7 @@ struct DSVector *expand_blast_hits(struct DSVector *iterations, int index,
         for (j = 0; j < hsps->size; j++) {
             struct DSVector *oseqs;
             struct hsp *h = (struct hsp *)ds_vector_get(hsps, j);
-            int32_t coarse_start  = h->hit_from-1,
-                    coarse_end    = h->hit_to-1,
+            int32_t coarse_start  = h->hit_from-1, coarse_end = h->hit_to-1,
                     coarse_seq_id = current_hit->accession;
 
             oseqs = cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,

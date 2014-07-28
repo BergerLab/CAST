@@ -7,7 +7,7 @@
 #include "clibs/include/ds.h"
 
 /*Summary info about a patSpace alignment, modified from psl.h in Jim Kent's
-  BLAT*/
+  BLAT.*/
 struct psl_entry {
     int matches;
     int mismatches;

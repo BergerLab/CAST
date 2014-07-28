@@ -36,6 +36,31 @@ static char *path_join(char *a, char *b){
     return joined;
 }
 
+struct DSVector *expand_blat_hits(struct DSVector *hits, int index,
+                                  struct cb_database_r *db){
+    struct DSVector *expanded_hits = ds_vector_create();
+
+    for (int i = 0; i < hits->size; i++) {
+        struct psl_entry *h = (struct psl_entry *)ds_vector_get(hits, i);
+
+        /*int32_t coarse_start  = h->t_end-1, coarse_end = h->t_start-1,
+                coarse_seq_id = h->accession;
+
+        struct DSVector *oseqs =
+          cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
+                           coarse_start, coarse_end, 50);
+        for (int j = 0; j < oseqs->size; j++)
+            ds_vector_append(expanded_hits, ds_vector_get(oseqs, j));
+
+        ds_vector_free_no_data(oseqs);
+
+        psl_entry_free(current_hit);*/
+    }
+
+    return expanded_hits;
+}
+
+
 /*Runs BLAT on the coarse FASTA file and stores the results in a temporary
   psl file.*/
 void blat_coarse(struct opt_args *args){
@@ -86,7 +111,7 @@ int main(int argc, char **argv){
     blat_coarse(args);
 
     FILE *coarse_blat_output = fopen("coarse-blat.psl", "r");
-    psl_read(coarse_blat_output);
+    struct DSVector *psl_entries = psl_read(coarse_blat_output);
     fclose(coarse_blat_output);
 
     query_file = fopen(args->args[1], "r");
