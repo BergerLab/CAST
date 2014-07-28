@@ -36,25 +36,24 @@ static char *path_join(char *a, char *b){
     return joined;
 }
 
-struct DSVector *expand_blat_hits(struct DSVector *hits, int index,
+struct DSVector *expand_blat_hits(struct DSVector *hits,
                                   struct cb_database_r *db){
     struct DSVector *expanded_hits = ds_vector_create();
 
     for (int i = 0; i < hits->size; i++) {
         struct psl_entry *h = (struct psl_entry *)ds_vector_get(hits, i);
 
-        /*int32_t coarse_start  = h->t_end-1, coarse_end = h->t_start-1,
-                coarse_seq_id = h->accession;
+        int32_t coarse_start  = h->t_end-1, coarse_end = h->t_start-1,
+                coarse_seq_id = atoi(h->t_name);
 
         struct DSVector *oseqs =
           cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
                            coarse_start, coarse_end, 50);
+
         for (int j = 0; j < oseqs->size; j++)
             ds_vector_append(expanded_hits, ds_vector_get(oseqs, j));
 
         ds_vector_free_no_data(oseqs);
-
-        psl_entry_free(current_hit);*/
     }
 
     return expanded_hits;
@@ -111,12 +110,15 @@ int main(int argc, char **argv){
     blat_coarse(args);
 
     FILE *coarse_blat_output = fopen("coarse-blat.psl", "r");
-    struct DSVector *psl_entries = psl_read(coarse_blat_output);
+    struct DSVector *coarse_hits = psl_read(coarse_blat_output);
     fclose(coarse_blat_output);
+
+    expand_blat_hits(coarse_hits, db);
 
     query_file = fopen(args->args[1], "r");
     queries = ds_vector_create();
     query = fasta_read_next(query_file, "");
+
     while (query) {
         ds_vector_append(queries, (void *)query);
         query = fasta_read_next(query_file, "");
