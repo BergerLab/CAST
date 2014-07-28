@@ -63,7 +63,10 @@ char *get_blat_args(struct opt_args *args){
     return blat_args;
 }
 
-
+/*Takes in the vector of hits from coarse BLAT and the database we are using
+ *for CaBLAT and returns a vector of every original sequence section re-created
+ *from the calls to cb_coarse_expand for the hits we are expanding.
+ */
 struct DSVector *expand_blat_hits(struct DSVector *hits,
                                   struct cb_database_r *db){
     struct DSVector *expanded_hits = ds_vector_create();
