@@ -36,6 +36,34 @@ static char *path_join(char *a, char *b){
     return joined;
 }
 
+/*Takes in the arguments for the program and returns a string of all of the
+ *arguments for fine BLAT (the arguments after --blat-args) concatenated and
+ *separated by a space.
+ */
+char *get_blat_args(struct opt_args *args){
+    int i = 0, index = -1, length = 1;
+    char *blat_args = NULL;
+
+    for (i = 0; i < args->nargs; i++)
+        if (index >= 0)
+            length += strlen(args->args[i]) + 1;
+        else
+            index = strcmp(args->args[i], "--blat_args") == 0 ? i : -1;
+
+    blat_args = malloc(length*sizeof(*args));
+    assert(blat_args);
+
+    *blat_args = '\0';
+    if (index != -1)
+        for (i = index + 1; i < args->nargs; i++) {
+            blat_args = strcat(blat_args, args->args[i]);
+            if (i < args->nargs - 1)
+                blat_args = strcat(blat_args, " ");
+        }
+    return blat_args;
+}
+
+
 struct DSVector *expand_blat_hits(struct DSVector *hits,
                                   struct cb_database_r *db){
     struct DSVector *expanded_hits = ds_vector_create();
@@ -80,26 +108,25 @@ void blat_coarse(struct opt_args *args){
 
 //Runs BLAT on the fine FASTA file
 void blat_fine(struct opt_args *args, uint64_t dbsize){
-    char *blat/*,
-         *blat_args      = get_blast_args(args),
-         *fine_blat_args = is_substring("-evalue", blat_args) ?
-                           blat_args : "-evalue 1e-30"*/;
-
+    char *blat, *blat_args = get_blat_args(args);
     int command_length = 1024;
 
     blat = malloc(command_length*sizeof(*blat));
     assert(blat);
 
-    sprintf(blat,
-            "$HOME/bin/$MACHTYPE/blat CaBLAT_fine.fasta %s %s",
-            args->args[1], args->args[2]);
+    if (blat_args[0] == '\0')
+        sprintf(blat, "$HOME/bin/$MACHTYPE/blat CaBLAT_fine.fasta %s %s",
+                args->args[1], args->args[2]);
+    else
+        sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s CaBLAT_fine.fasta %s %s",
+                blat_args, args->args[1], args->args[2]);
 
     if (!search_flags.hide_progress)
         fprintf(stderr, "\n%s\n", blat);
 
     system(blat); //Run fine BLAT
 
-    //free(blat_args);
+    free(blat_args);
     free(blat);
 }
 
