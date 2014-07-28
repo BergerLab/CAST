@@ -14,6 +14,7 @@ completely different. There may be other, subtler differences as well.
 The official Go implementation of CaBLASTP can be found here:
 https://github.com/BurntSushi/cablastp
 
+**CaBLAT is currently under development.**
 
 Installation
 ============
