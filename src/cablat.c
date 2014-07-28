@@ -43,12 +43,18 @@ struct DSVector *expand_blat_hits(struct DSVector *hits,
     for (int i = 0; i < hits->size; i++) {
         struct psl_entry *h = (struct psl_entry *)ds_vector_get(hits, i);
 
-        int32_t coarse_start  = h->t_end-1, coarse_end = h->t_start-1,
+        int32_t coarse_start  = h->t_start, coarse_end = h->t_end,
                 coarse_seq_id = atoi(h->t_name);
 
         struct DSVector *oseqs =
           cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
-                           coarse_start, coarse_end, 50);
+                           coarse_start, coarse_end, 10);
+
+for (int j = 0; j < oseqs->size; j++){
+    struct cb_hit_expansion *expansion =
+      (struct cb_hit_expansion *)ds_vector_get(oseqs, j);
+    fprintf(stderr, "%s\n", expansion->seq->residues);
+}
 
         for (int j = 0; j < oseqs->size; j++)
             ds_vector_append(expanded_hits, ds_vector_get(oseqs, j));
@@ -63,15 +69,16 @@ struct DSVector *expand_blat_hits(struct DSVector *hits,
 /*Runs BLAT on the coarse FASTA file and stores the results in a temporary
   psl file.*/
 void blat_coarse(struct opt_args *args){
-    char *input_path = path_join(args->args[0], CABLAST_COARSE_FASTA),
+    char *target_path = path_join(args->args[0], CABLAST_COARSE_FASTA),
          *coarse_blat_command =
-            malloc(strlen("$HOME/bin/$MACHTYPE/blat    -noHead -minIdentity=80")
-                   +strlen(args->args[1])+strlen(input_path)
-                   +strlen("coarse-blat.psl")*sizeof(*coarse_blat_command));
+            malloc(
+              (strlen("$HOME/bin/$MACHTYPE/blat    -noHead -minIdentity=80")
+               +strlen(target_path)+strlen(args->args[1])
+               +strlen("coarse-blat.psl"))*sizeof(*coarse_blat_command));
 
     sprintf(coarse_blat_command,
             "$HOME/bin/$MACHTYPE/blat %s %s %s -noHead -minIdentity=80",
-            args->args[1], input_path, "coarse-blat.psl");
+            target_path, args->args[1], "coarse-blat.psl");
     fprintf(stderr, "%s\n", coarse_blat_command);
 
     system(coarse_blat_command);
@@ -113,7 +120,8 @@ int main(int argc, char **argv){
     struct DSVector *coarse_hits = psl_read(coarse_blat_output);
     fclose(coarse_blat_output);
 
-    expand_blat_hits(coarse_hits, db);
+    struct DSVector *expanded_hits = expand_blat_hits(coarse_hits, db);
+    fprintf(stderr, "%d\n", expanded_hits->size);
 
     query_file = fopen(args->args[1], "r");
     queries = ds_vector_create();
