@@ -677,6 +677,8 @@ struct DSVector *cb_coarse_r_get_block(struct cb_coarse_r *coarse_db,
             else
                 free(link);
         }
+
+        ds_vector_free(indices);
     }
 
     return links;
