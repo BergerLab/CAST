@@ -221,8 +221,18 @@ int main(int argc, char **argv){
         write_fine_fasta(expanded_hits,
                          cablat_flags.output_expanded_fasta, true);
 
+    for (int i = 0; i < expanded_hits->size; i++)
+        cb_hit_expansion_free(
+          (struct cb_hit_expansion *)ds_vector_get(expanded_hits, i));
+    ds_vector_free_no_data(expanded_hits);
+
+    for (int i = 0; i < coarse_hits->size; i++)
+        psl_entry_free((struct psl_entry *)ds_vector_get(coarse_hits, i));
+    ds_vector_free_no_data(coarse_hits);
+
     blat_fine(args, dbsize);
 
+    cb_database_r_free(db);
     opt_args_free(args);
     opt_config_free(conf);
 

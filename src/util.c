@@ -169,5 +169,7 @@ char **split_tabs(char *line){
             strncpy(words[i/2], line+indices[i], indices[i+1]-indices[i]);
         }
 
+    free(indices);
+
     return words;
 }
