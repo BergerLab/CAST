@@ -110,6 +110,9 @@ void blat_coarse(struct opt_args *args){
         fprintf(stderr, "%s\n", coarse_blat_command);
 
     system(coarse_blat_command);
+
+    free(target_path);
+    free(coarse_blat_command);
 }
 
 //Runs BLAT on the fine FASTA file

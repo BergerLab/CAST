@@ -92,5 +92,7 @@ struct DSVector *psl_read(FILE *f){
         free(no_newline);
     }
 
+    free(line);
+
     return entries;
 }
