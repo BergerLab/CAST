@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <math.h>
@@ -236,8 +237,14 @@ struct DSVector *get_blast_iterations(xmlNode *node){
 /*Takes in a vector of expansion structs for the expanded BLAST hits from a
   query and outputs them to the FASTA file CaBLAST_fine.fasta.*/
 void write_fine_fasta(struct DSVector *oseqs){
-    FILE *temp = fopen("CaBLAST_fine.fasta", "w");
+    FILE *temp;
     int i;
+
+    if (NULL == (temp = fopen("CaBLAST_fine.fasta", "w"))) {
+        fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                "CaBLAST_fine.fasta", strerror(errno));
+        exit(1);
+    }
 
     if (!temp) {
         fprintf(stderr, "Could not open CaBLAST_fine.fasta for writing\n");
@@ -363,7 +370,12 @@ int main(int argc, char **argv){
         fprintf(stderr, "Running coarse BLAST\n\n");
     blast_coarse(args, dbsize);
 
-    query_file = fopen(args->args[1], "r");
+    if (NULL == (query_file = fopen(args->args[1], "r"))) {
+        fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                args->args[1], strerror(errno));
+        exit(1);
+    }
+
     queries = ds_vector_create();
     query = fasta_read_next(query_file, "");
     while (query) {
@@ -376,7 +388,11 @@ int main(int argc, char **argv){
     if (!search_flags.hide_progress)
         fprintf(stderr, "Processing coarse BLAST hits for fine BLAST\n\n");
     if (search_flags.show_hit_info)
-        test_hits_file = fopen("CaBLAST_hits.txt", "w");
+        if (NULL == (test_hits_file = fopen("CaBLAST_hits.txt", "w"))) {
+            fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                    "CaBLAST_hits.txt", strerror(errno));
+            exit(1);
+        }
 
     //Parse the XML file generated from coarse BLAST and get its iterations.
     doc = xmlReadFile("CaBLAST_temp_blast_results.xml", NULL, 0);

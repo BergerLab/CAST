@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <math.h>
@@ -143,11 +144,11 @@ void blat_fine(struct opt_args *args, uint64_t dbsize){
  *the offset at the end of the FASTA header if show_offsets is true.
  */
 void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
-    FILE *temp = fopen(dest, "w");
+    FILE *temp;
 
-    if (!temp) {
-        fprintf(stderr, "Could not open CaBLAT_fine.fasta for writing\n");
-        return;
+    if (NULL == (temp = fopen(dest, "w"))) {
+        fprintf(stderr,"fopen: 'fopen %s' failed: %s\n",dest,strerror(errno));
+        exit(1);
     }
 
     for (int i = 0; i < oseqs->size; i++) {
@@ -162,11 +163,12 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
         else
             fprintf(temp,"> %s\n%s\n",current_seq->name,current_seq->residues);
     }
+
     fclose(temp);
 
-    if (cablat_flags.fine_blat_db)
+    /*if (cablat_flags.fine_blat_db)
         system("makeblastdb -dbtype nucl -in CaBLAT_fine.fasta -out "
-               "CaBLAST_fine.fasta");
+               "CaBLAST_fine.fasta");*/
 }
 
 int main(int argc, char **argv){
@@ -201,7 +203,14 @@ int main(int argc, char **argv){
 
     blat_coarse(args);
 
-    FILE *coarse_blat_output = fopen("coarse-blat.psl", "r");
+    FILE *coarse_blat_output;
+
+    if (NULL == (coarse_blat_output = fopen("coarse-blat.psl", "r"))) {
+        fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                        "coarse-blat.psl", strerror(errno));
+        exit(1);
+    }
+
     struct DSVector *coarse_hits = psl_read(coarse_blat_output);
     fclose(coarse_blat_output);
 

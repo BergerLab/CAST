@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,7 +56,11 @@ int main(int argc, char **argv){
     gettimeofday(&start, NULL);
     fasta_filename      = path_join(args->args[0], CABLAST_COARSE_FASTA);
     compressed_filename = path_join(args->args[0], CABLAST_COMPRESSED);
-    compressed_file = fopen(compressed_filename, "r");
+    if (NULL == (compressed_file = fopen(compressed_filename, "r"))) {
+        fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                compressed_filename, strerror(errno));
+        exit(1);
+    }
     compressed = read_compressed(compressed_file);
 
     coarse_sequences = malloc(10000*sizeof(*coarse_sequences));
