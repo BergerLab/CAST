@@ -208,6 +208,10 @@ int main(int argc, char **argv){
     struct DSVector *expanded_hits = expand_blat_hits(coarse_hits, db);
     write_fine_fasta(expanded_hits, "CaBLAT_fine.fasta", false);
 
+    if (strcmp(cablat_flags.output_expanded_fasta, "") != 0)
+        write_fine_fasta(expanded_hits,
+                         cablat_flags.output_expanded_fasta, true);
+
     blat_fine(args, dbsize);
 
     opt_args_free(args);
