@@ -137,19 +137,30 @@ void blat_fine(struct opt_args *args, uint64_t dbsize){
 
 
 /*Takes in a vector of expansion structs for the expanded BLAT hits from a
-  query and outputs them to the FASTA file CaBLAT_fine.fasta.*/
-void write_fine_fasta(struct DSVector *oseqs){
-    FILE *temp = fopen("CaBLAT_fine.fasta", "w");
-    int i;
+ *query, a destination filename, and a bool telling whether or not to include
+ *the offsets in the original sequence of each expanded hit in the file,
+ *and outputs the expanded hits to the specified file in FASTA format, putting
+ *the offset at the end of the FASTA header if show_offsets is true.
+ */
+void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
+    FILE *temp = fopen(dest, "w");
 
     if (!temp) {
         fprintf(stderr, "Could not open CaBLAT_fine.fasta for writing\n");
         return;
     }
-    for (i = 0; i < oseqs->size; i++) {
-        struct cb_seq *current_seq =
-          ((struct cb_hit_expansion *)ds_vector_get(oseqs, i))->seq;
-        fprintf(temp, "> %s\n%s\n", current_seq->name, current_seq->residues);
+
+    for (int i = 0; i < oseqs->size; i++) {
+        struct cb_hit_expansion *current_expansion =
+          ((struct cb_hit_expansion *)ds_vector_get(oseqs, i));
+        struct cb_seq *current_seq = current_expansion->seq;
+        int64_t offset             = current_expansion->offset;
+
+        if (show_offsets)
+            fprintf(temp, "> %s (offset %ld)\n%s\n", current_seq->name, offset,
+                    current_seq->residues);
+        else
+            fprintf(temp,"> %s\n%s\n",current_seq->name,current_seq->residues);
     }
     fclose(temp);
 
@@ -195,7 +206,7 @@ int main(int argc, char **argv){
     fclose(coarse_blat_output);
 
     struct DSVector *expanded_hits = expand_blat_hits(coarse_hits, db);
-    write_fine_fasta(expanded_hits);
+    write_fine_fasta(expanded_hits, "CaBLAT_fine.fasta", false);
 
     blat_fine(args, dbsize);
 
