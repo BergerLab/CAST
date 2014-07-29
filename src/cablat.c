@@ -124,8 +124,8 @@ void blat_fine(struct opt_args *args, uint64_t dbsize){
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s CaBLAT_fine.fasta %s %s",
                 blat_args, args->args[1], args->args[2]);
 
-    if (!search_flags.hide_progress)
-        fprintf(stderr, "\n%s\n", blat);
+    /*if (!cablat_flags.hide_progress)
+        fprintf(stderr, "\n%s\n", blat);*/
 
     system(blat); //Run fine BLAT
 
@@ -151,7 +151,7 @@ void write_fine_fasta(struct DSVector *oseqs){
     }
     fclose(temp);
 
-    if (search_flags.fine_blast_db)
+    if (cablat_flags.fine_blat_db)
         system("makeblastdb -dbtype nucl -in CaBLAT_fine.fasta -out "
                "CaBLAST_fine.fasta");
 }
@@ -179,11 +179,11 @@ int main(int argc, char **argv){
     }
 
     db = cb_database_r_init(args->args[0],
-                            (search_flags.load_coarse_db ||
-                             search_flags.load_coarse_residues),
-                            (search_flags.load_coarse_db ||
-                             search_flags.load_coarse_links),
-                            search_flags.load_compressed_db,
+                            (cablat_flags.load_coarse_db ||
+                             cablat_flags.load_coarse_residues),
+                            (cablat_flags.load_coarse_db ||
+                             cablat_flags.load_coarse_links),
+                            cablat_flags.load_compressed_db,
                             search_flags.link_block_size);
     dbsize = read_int_from_file(8, db->coarse_db->db->file_params);
 
