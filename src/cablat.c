@@ -168,10 +168,6 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
     }
 
     fclose(temp);
-
-    /*if (cablat_flags.fine_blat_db)
-        system("makeblastdb -dbtype nucl -in CaBLAT_fine.fasta -out "
-               "CaBLAST_fine.fasta");*/
 }
 
 int main(int argc, char **argv){

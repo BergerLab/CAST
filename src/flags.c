@@ -135,10 +135,6 @@ struct opt_config *load_cablat_args(){
         &cablat_flags.load_compressed_db, "load-compressed-db",
         "Pass this flag to load all compressed sequences from compressed.cb."
         "Not recommended for machines with limited memory.");
-    opt_flag_bool(conf,
-        &cablat_flags.fine_blat_db, "fine-blat-db",
-        "Pass this flag to run makeblastdb on the expanded hits before running"
-        "fine BLAT.");
     opt_flag_int(conf,
         &cablat_flags.link_block_size, "link-block-size", 30000,
         "The number of bases in the coarse FASTA file each vector used for "

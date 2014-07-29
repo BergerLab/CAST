@@ -42,7 +42,6 @@ struct cablat_flags {
     bool    load_coarse_links;
     bool    load_coarse_db;
     bool    load_compressed_db;
-    bool    fine_blat_db;
     int32_t link_block_size;
     char    *output_expanded_fasta;
     bool    hide_progress;
