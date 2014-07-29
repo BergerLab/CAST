@@ -104,7 +104,9 @@ void blat_coarse(struct opt_args *args){
     sprintf(coarse_blat_command,
             "$HOME/bin/$MACHTYPE/blat %s %s %s -noHead -minIdentity=80",
             target_path, args->args[1], "coarse-blat.psl");
-    fprintf(stderr, "%s\n", coarse_blat_command);
+
+    if (!cablat_flags.hide_progress)
+        fprintf(stderr, "%s\n", coarse_blat_command);
 
     system(coarse_blat_command);
 }
@@ -124,8 +126,8 @@ void blat_fine(struct opt_args *args, uint64_t dbsize){
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s CaBLAT_fine.fasta %s %s",
                 blat_args, args->args[1], args->args[2]);
 
-    /*if (!cablat_flags.hide_progress)
-        fprintf(stderr, "\n%s\n", blat);*/
+    if (!cablat_flags.hide_progress)
+        fprintf(stderr, "\n%s\n", blat);
 
     system(blat); //Run fine BLAT
 

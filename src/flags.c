@@ -148,7 +148,9 @@ struct opt_config *load_cablat_args(){
         "Pass this flag to output the FASTA file used as the target for fine "
         "BLAT with each expanded sequence's offset in the original "
         "uncompressed sequence in the header.");
-
+    opt_flag_bool(conf,
+        &cablat_flags.hide_progress, "hide-progress",
+        "Pass this flag to hide messages about the progress of CaBLAT.");
 
     return conf;
 }
