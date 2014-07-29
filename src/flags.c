@@ -143,6 +143,12 @@ struct opt_config *load_cablat_args(){
         &cablat_flags.link_block_size, "link-block-size", 30000,
         "The number of bases in the coarse FASTA file each vector used for "
         "grouping the links in the coarse database represents.");
+    opt_flag_string(conf,
+        &cablat_flags.output_expanded_fasta, "output-expanded-fasta", "",
+        "Pass this flag to output the FASTA file used as the target for fine "
+        "BLAT with each expanded sequence's offset in the original "
+        "uncompressed sequence in the header.");
+
 
     return conf;
 }
