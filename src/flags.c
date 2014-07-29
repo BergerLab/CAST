@@ -118,29 +118,29 @@ struct opt_config *load_cablat_args(){
     struct opt_config *conf = opt_config_init();
 
     opt_flag_bool(conf,
-        &search_flags.load_coarse_residues, "load-coarse-residues",
+        &cablat_flags.load_coarse_residues, "load-coarse-residues",
         "Pass this flag to load all residues from the coarse FASTA file into "
         "memory.  Not recommended for machines with limited memory.");
     opt_flag_bool(conf,
-        &search_flags.load_coarse_links, "load-coarse-links",
+        &cablat_flags.load_coarse_links, "load-coarse-links",
         "Pass this flag to load all links from the coarse links file into "
         "memory.  Not recommended for machines with limited memory.");
     opt_flag_bool(conf,
-        &search_flags.load_coarse_db, "load-coarse-db",
+        &cablat_flags.load_coarse_db, "load-coarse-db",
         "Pass this flag to load all residues from the coarse FASTA file and "
         "all links from the coarse links file into memory.  Equivalent to "
         "passing both --load-coarse-residues and --load-coarse-links.  Not "
         "recommended for machines with limited memory.");
     opt_flag_bool(conf,
-        &search_flags.load_compressed_db, "load-compressed-db",
+        &cablat_flags.load_compressed_db, "load-compressed-db",
         "Pass this flag to load all compressed sequences from compressed.cb."
         "Not recommended for machines with limited memory.");
     opt_flag_bool(conf,
-        &search_flags.fine_blast_db, "fine-blat-db",
+        &cablat_flags.fine_blat_db, "fine-blat-db",
         "Pass this flag to run makeblastdb on the expanded hits before running"
         "fine BLAT.");
     opt_flag_int(conf,
-        &search_flags.link_block_size, "link-block-size", 30000,
+        &cablat_flags.link_block_size, "link-block-size", 30000,
         "The number of bases in the coarse FASTA file each vector used for "
         "grouping the links in the coarse database represents.");
 

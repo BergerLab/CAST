@@ -156,7 +156,6 @@ void write_fine_fasta(struct DSVector *oseqs){
                "CaBLAST_fine.fasta");
 }
 
-
 int main(int argc, char **argv){
     FILE *query_file = NULL;
     struct cb_database_r *db = NULL;
@@ -184,7 +183,7 @@ int main(int argc, char **argv){
                             (cablat_flags.load_coarse_db ||
                              cablat_flags.load_coarse_links),
                             cablat_flags.load_compressed_db,
-                            search_flags.link_block_size);
+                            cablat_flags.link_block_size);
     dbsize = read_int_from_file(8, db->coarse_db->db->file_params);
 
     blat_coarse(args);
