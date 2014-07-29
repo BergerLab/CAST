@@ -137,15 +137,13 @@ bool is_substring(char *sub, char *str){
 }
 
 /*Takes in a line and returns an array containing a string for each section of
- *non-whitespace characters in the line with an array element after the last
- *string that contains a NULL pointer.
- */
-char **split_spaces(char *line){
+  non-tab characters in the line with NULL pointer as the last array element.*/
+char **split_tabs(char *line){
     assert(line);
 
     int len = strlen(line);
 
-    bool w = line[0] != ' ' && line[0] != '\t' && line[0] != '\0', l = false;
+    bool w = line[0] != '\t' && line[0] != '\0', l = false;
     int num_sections = 0, m = w ? 1 : 0;
 
     int *indices = malloc((len+1)*sizeof(*indices));
@@ -153,7 +151,7 @@ char **split_spaces(char *line){
     
     for (int i = 0; i <= len; i++) {
         l = w;
-        w = line[i] != ' ' && line[i] != '\t' && line[i] != '\0';
+        w = line[i] != '\t' && line[i] != '\0';
         if (w != l || (l && i == len) || i == 0)
             indices[num_sections++] = i;
     }

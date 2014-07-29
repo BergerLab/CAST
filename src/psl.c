@@ -81,7 +81,7 @@ struct DSVector *psl_read(FILE *f){
 
     while (0 != (readline(f, &line))) {
         char *no_newline = trim_space(line);
-        struct psl_entry *entry = psl_load(split_spaces(no_newline));
+        struct psl_entry *entry = psl_load(split_tabs(no_newline));
         ds_vector_append(entries, (void *)entry);
     }
 
