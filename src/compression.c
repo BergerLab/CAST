@@ -195,7 +195,7 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
     struct cb_seed_loc *seedLoc;
     struct cb_alignment alignment;
     int32_t seed_size = coarse_db->seeds->seed_size,
-            resind = -1, current = 0, i = 0, new_coarse_seq_id = -1,
+            resind = -1, current = 0, i = 0, j = 0, new_coarse_seq_id = -1,
             fwd_rlen, rev_rlen, fwd_olen, rev_olen, index,
             chunks = 0,
             max_chunk_size = compress_flags.max_chunk_size,
@@ -332,12 +332,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                         sizeof(*(alignment.ref)));
                 assert(alignment.ref);
 
-                for (i = 0; mseqs_rev.rseq[i] != '\0'; i++)
-                    alignment.ref[index++] = mseqs_rev.rseq[i];
-                for (i = 0; i < seed_size; i++)
-                    alignment.ref[index++] = kmer[i];
-                for (i = 0; mseqs_fwd.rseq[i] != '\0'; i++)
-                    alignment.ref[index++] = mseqs_fwd.rseq[i];
+                for (j = 0; mseqs_rev.rseq[j] != '\0'; j++)
+                    alignment.ref[index++] = mseqs_rev.rseq[j];
+                for (j = 0; j < seed_size; j++)
+                    alignment.ref[index++] = kmer[j];
+                for (j = 0; mseqs_fwd.rseq[j] != '\0'; j++)
+                    alignment.ref[index++] = mseqs_fwd.rseq[j];
                 alignment.ref[index] = '\0';
 
                 /*Concatenate the extensions and the k-mer for the original
@@ -349,12 +349,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                         sizeof(*(alignment.org)));
                 assert(alignment.org);
 
-                for (i = 0; mseqs_rev.oseq[i] != '\0'; i++)
-                    alignment.org[index++] = mseqs_rev.oseq[i];
-                for (i = 0; i < seed_size; i++)
-                    alignment.org[index++] = kmer[i];
-                for (i = 0; mseqs_fwd.oseq[i] != '\0'; i++)
-                    alignment.org[index++] = mseqs_fwd.oseq[i];
+                for (j = 0; mseqs_rev.oseq[j] != '\0'; j++)
+                    alignment.org[index++] = mseqs_rev.oseq[j];
+                for (j = 0; j < seed_size; j++)
+                    alignment.org[index++] = kmer[j];
+                for (j = 0; mseqs_fwd.oseq[j] != '\0'; j++)
+                    alignment.org[index++] = mseqs_fwd.oseq[j];
                 alignment.org[index] = '\0';
 
                 alignment.length = mseqs_rev.olen + seed_size + mseqs_fwd.olen;
@@ -488,12 +488,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                         sizeof(*(alignment.ref)));
                 assert(alignment.ref);
 
-                for (i = 0; mseqs_rev.rseq[i] != '\0'; i++)
-                    alignment.ref[index++] = mseqs_rev.rseq[i];
-                for (i = 0; i < seed_size; i++)
-                    alignment.ref[index++] = revcomp[i];
-                for (i = 0; mseqs_fwd.rseq[i] != '\0'; i++)
-                    alignment.ref[index++] = mseqs_fwd.rseq[i];
+                for (j = 0; mseqs_rev.rseq[j] != '\0'; j++)
+                    alignment.ref[index++] = mseqs_rev.rseq[j];
+                for (j = 0; j < seed_size; j++)
+                    alignment.ref[index++] = revcomp[j];
+                for (j = 0; mseqs_fwd.rseq[j] != '\0'; j++)
+                    alignment.ref[index++] = mseqs_fwd.rseq[j];
                 alignment.ref[index] = '\0';
 
                 /*Concatenate the extensions and the k-mer's reverse complement
@@ -505,12 +505,12 @@ cb_compress(struct cb_coarse *coarse_db, struct cb_seq *org_seq,
                                         sizeof(*(alignment.org)));
                 assert(alignment.org);
 
-                for (i = 0; mseqs_rev.oseq[i] != '\0'; i++)
-                    alignment.org[index++] = mseqs_rev.oseq[i];
-                for (i = 0; i < seed_size; i++)
-                    alignment.org[index++] = revcomp[i];
-                for (i = 0; mseqs_fwd.oseq[i] != '\0'; i++)
-                    alignment.org[index++] = mseqs_fwd.oseq[i];
+                for (j = 0; mseqs_rev.oseq[j] != '\0'; j++)
+                    alignment.org[index++] = mseqs_rev.oseq[j];
+                for (j = 0; j < seed_size; j++)
+                    alignment.org[index++] = revcomp[j];
+                for (j = 0; mseqs_fwd.oseq[j] != '\0'; j++)
+                    alignment.org[index++] = mseqs_fwd.oseq[j];
                 alignment.org[index] = '\0';
 
                 alignment.length = mseqs_rev.olen + seed_size + mseqs_fwd.olen;
