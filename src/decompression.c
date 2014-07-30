@@ -34,16 +34,15 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
             hit_from_ind      = hit_from + seq_base_indices[id],
             hit_to_ind        = hit_to + seq_base_indices[id];
     int32_t first_block = hit_from_ind / coarse_db->link_block_size,
-            last_block  = hit_to_ind / coarse_db->link_block_size,
-            i = 0, j = 0, k = 0;
+            last_block  = hit_to_ind / coarse_db->link_block_size, k = 0;
 
-    for (i = first_block; i <= last_block; i++) {
+    for (int i = first_block; i <= last_block; i++) {
         //Current block of links
         struct DSVector *link_block = cb_coarse_r_get_block(coarse_db, i);
         //Indices in the current block
         struct DSVector *ind_block =
           (struct DSVector *)ds_vector_get(coarse_db->link_inds_by_block, i);
-        for (j = 0; j < link_block->size; j++){
+        for (int j = 0; j < link_block->size; j++){
             struct cb_link_to_compressed_data *link =
               (struct cb_link_to_compressed_data *)ds_vector_get(link_block, j);
             int64_t link_ind     = *(int64_t *)ds_vector_get(ind_block, j),
@@ -162,7 +161,7 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
                         struct cb_link_to_coarse *link){
     struct fasta_seq *fasta = NULL;
     struct edit_info *edit = NULL;
-    int i = 0, i0 = 0, i1 = 0, coarse_pos, last_edit_str_len, script_pos;
+    int i0 = 0, i1 = 0, coarse_pos, last_edit_str_len, script_pos;
     char *diff = link->diff, *residues;
     bool fwd = (diff[0] & ((char)0x7f)) == '0';
 
@@ -215,7 +214,7 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
 
             i0 += edit->last_dist - last_edit_str_len;
             coarse_pos += edit->last_dist - last_edit_str_len;
-            for (i = 0; i < edit->str_length; i++)
+            for (int i = 0; i < edit->str_length; i++)
                 if (edit->str[i] != '-') {
                     if (0 <= i0 && i0 < dest_len)
                         orig[i0] = edit->str[i];
@@ -246,7 +245,7 @@ void decode_edit_script(char *orig, int dest_len, int original_start,
 
             i0 -= edit->last_dist - last_edit_str_len;
             coarse_pos += edit->last_dist - last_edit_str_len;
-            for (i = 0; i < edit->str_length; i++)
+            for (int i = 0; i < edit->str_length; i++)
                 if (edit->str[i] != '-') {
                     if (0 <= i0 && i0 < dest_len)
                         orig[i0] = base_complement[edit->str[i]-'A'];
