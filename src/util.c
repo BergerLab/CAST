@@ -136,38 +136,42 @@ bool is_substring(char *sub, char *str){
     return false;
 }
 
-/*Takes in a line and returns an array containing a string for each section of
-  non-tab characters in the line with NULL pointer as the last array element.*/
-char **split_tabs(char *line){
+/*Takes in a line and a character to split the line on and splits the line on
+ *that character, returning a string for each section of the original string
+ *separated by that character.
+ */
+char **split_char(char *line, char split){
     assert(line);
 
-    int len = strlen(line);
+    int len = strlen(line), num_sections = 1;
 
-    bool w = line[0] != '\t' && line[0] != '\0', l = false;
-    int num_sections = 0, m = w ? 1 : 0;
+    for (int i = 0; i < len; i++)
+        if (line[i] == split)
+            num_sections++;
 
-    int *indices = malloc((len+1)*sizeof(*indices));
+    int *indices = malloc((num_sections+1)*sizeof(*indices));
     assert(indices);
+
+    char **words = malloc((num_sections+1)*sizeof(*words));
+    assert(words);
+   
+    indices[0] = -1;
+    indices[num_sections] = len;
     
-    for (int i = 0; i <= len; i++) {
-        l = w;
-        w = line[i] != '\t' && line[i] != '\0';
-        if (w != l || (l && i == len) || i == 0)
-            indices[num_sections++] = i;
+    for (int i = 0, j = 1; i < len; i++) {
+        if (line[i] == split)
+            indices[j++] = i;
     }
 
-    char **words = malloc((num_sections/2+1)*sizeof(*words));
-    assert(words);
+    words[num_sections] = NULL;
 
-    words[num_sections/2] = NULL;
+    for (int i = 0; i < num_sections; i++) {
+        words[i] = malloc((indices[i+1]-indices[i]+1)*sizeof(*words));
+        assert(words[i]);
 
-    for (int i = 0; i < num_sections-1; i++)
-        if (i % 2 != m) {
-            words[i/2] = malloc((indices[i+1]-indices[i]+1)*sizeof(*words));
-            assert(words[i/2]);
-
-            strncpy(words[i/2], line+indices[i], indices[i+1]-indices[i]);
-        }
+        strncpy(words[i], line+indices[i]+1, indices[i+1]-indices[i]-1);
+        words[i][indices[i+1]-indices[i]-1] = '\0';
+    }
 
     free(indices);
 
