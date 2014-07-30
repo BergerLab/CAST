@@ -143,7 +143,7 @@ char *half_bytes_to_ASCII(char *half_bytes, int length){
 char *make_edit_script(char *str, char *ref, bool dir, int length){
     /*direction has its first bit set to 1 to indicate that the edit script
       was made from a match*/
-    int i, j, last_edit = 0, current = 1;
+    int last_edit = 0, current = 1;
     char *edit_script, *octal, direction = dir ? '0' : '1';
     bool insert_open = false, subdel_open = false;
 
@@ -153,7 +153,7 @@ char *make_edit_script(char *str, char *ref, bool dir, int length){
     direction |= ((char)0x80);
 
     edit_script[0] = direction;
-    for (i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++) {
         if (str[i] == ref[i]) {
             insert_open = false;
             subdel_open = false;
@@ -168,7 +168,7 @@ char *make_edit_script(char *str, char *ref, bool dir, int length){
                     insert_open = true;
                     octal = to_octal_str(i - last_edit);
                     edit_script[current++] = 'i';
-                    for (j = 0; octal[j] != '\0'; j++)
+                    for (int j = 0; octal[j] != '\0'; j++)
                         edit_script[current++] = octal[j];
                     last_edit = i;
                     free(octal);
@@ -185,7 +185,7 @@ char *make_edit_script(char *str, char *ref, bool dir, int length){
                     subdel_open = true;
                     octal = to_octal_str(i - last_edit);
                     edit_script[current++] = 's';
-                    for (j = 0; octal[j] != '\0'; j++)
+                    for (int j = 0; octal[j] != '\0'; j++)
                         edit_script[current++] = octal[j];
                     last_edit = i;
                     free(octal);
@@ -244,7 +244,7 @@ bool next_edit(char *edit_script, int *pos, struct edit_info *edit){
  */
 char *read_edit_script(char *edit_script, char *orig, int length){
     struct edit_info edit;
-    int i, orig_pos = 0, last_edit_str_len = 0, current = 0, script_pos = 1;
+    int orig_pos = 0, last_edit_str_len = 0, current = 0, script_pos = 1;
 
     char *str = malloc((2*length+1)*sizeof(*str));
     assert(str);
@@ -253,14 +253,14 @@ char *read_edit_script(char *edit_script, char *orig, int length){
 
     while (next_edit(edit_script, &script_pos, &edit)) {
         //Chunk after previous edit
-        for (i = 0; i < edit.last_dist - last_edit_str_len; i++)
+        for (int i = 0; i < edit.last_dist - last_edit_str_len; i++)
             str[current++] = orig[orig_pos+i];
 
         //Update position in original string.
         orig_pos += edit.last_dist - last_edit_str_len;
 
         //Append replacement string in edit script; get rid of dashes.
-        for (i = 0; i < edit.str_length; i++)
+        for (int i = 0; i < edit.str_length; i++)
             if (edit.str[i] != '-')
                 str[current++] = edit.str[i];
 
@@ -291,7 +291,7 @@ char *read_edit_script(char *edit_script, char *orig, int length){
 /*Takes in as input a string and returns a copy of the string with the '-'
   characters removed*/
 char *no_dashes(char *sequence){
-    int length, bases = 0, i = 0, j = 0;
+    int length, bases = 0, j = 0;
     char *n;
 
     //Get the length of the final string.
@@ -303,7 +303,7 @@ char *no_dashes(char *sequence){
     assert(n);
 
     n[bases] = '\0';
-    for (i = 0; i < length; i++)
+    for (int i = 0; i < length; i++)
         if (sequence[i] != '-')
             n[j++] = sequence[i];
 
