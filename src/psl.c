@@ -91,6 +91,9 @@ void psl_entry_free(struct psl_entry *entry){
     free(entry->strand);
     free(entry->q_name);
     free(entry->t_name);
+    free(entry->block_sizes);
+    free(entry->q_starts);
+    free(entry->t_starts);
     free(entry);
 }
 
