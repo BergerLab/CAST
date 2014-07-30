@@ -81,13 +81,12 @@ void blast_fine(struct opt_args *args, uint64_t dbsize){
 
     sprintf(blastn,
             "blastn %s CaBLAST_fine.fasta -query %s "
-            "-dbsize %lu -task blastn -outfmt 5 %s > "
-            "CaBLAST_results.xml",
+            "-dbsize %lu -task blastn -outfmt 5 %s > CaBLAST_results.xml",
             search_flags.fine_blast_db ? "-db" : "-subject", args->args[1],
             dbsize, fine_blast_args);
 
     if (!search_flags.hide_progress)
-          fprintf(stderr, "\n%s\n", blastn);
+        fprintf(stderr, "\n%s\n", blastn);
 
     system(blastn); //Run fine BLAST
 

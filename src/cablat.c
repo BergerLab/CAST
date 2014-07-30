@@ -73,6 +73,20 @@ struct DSVector *expand_blat_hits(struct DSVector *hits,
     struct DSVector *expanded_hits = ds_vector_create();
 
     for (int i = 0; i < hits->size; i++) {
+        if (!cablat_flags.hide_progress) {
+            int32_t digits_full = floor(log10((double)hits->size)),
+                    digits_i    = floor(log10((double)i)),
+                    spaces      = digits_full - digits_i;
+            char *bar = progress_bar(i, hits->size);
+            fprintf(stderr, "\r");
+            fprintf(stderr, "Expanding coarse BLAT hit: %d/%d",
+                            i+1, hits->size);
+            for (int j = 0; j < spaces; j++)
+                putc(' ', stderr);
+            fprintf(stderr, " %s ", bar);
+            free(bar);
+        }
+
         struct psl_entry *h = (struct psl_entry *)ds_vector_get(hits, i);
 
         int32_t coarse_start  = h->t_start, coarse_end = h->t_end,
