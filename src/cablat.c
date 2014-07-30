@@ -100,7 +100,7 @@ void blat_coarse(struct opt_args *args){
             malloc(
               (strlen("$HOME/bin/$MACHTYPE/blat    -noHead -minIdentity=80")
                +strlen(target_path)+strlen(args->args[1])
-               +strlen("coarse-blat.psl"))*sizeof(*coarse_blat_command));
+               +strlen("coarse-blat.psl")+1)*sizeof(*coarse_blat_command));
 
     sprintf(coarse_blat_command,
             "$HOME/bin/$MACHTYPE/blat %s %s %s -noHead -minIdentity=80",
