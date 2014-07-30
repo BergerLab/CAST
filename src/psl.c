@@ -13,8 +13,8 @@ psl_entry_init(int matches, int mismatches, int rep_matches, int n_count,
                int q_num_insert, int q_base_insert, int t_num_insert,
                int t_base_insert, char *strand, char *q_name, unsigned q_size,
                int q_start, int q_end, char *t_name, unsigned t_size,
-               int t_start, int t_end, unsigned block_count,
-               unsigned block_size, unsigned q_starts, unsigned t_starts){
+               int t_start, int t_end, unsigned block_count, char *block_sizes,
+               char *q_starts, char *t_starts){
     struct psl_entry *entry = malloc(sizeof(*entry));
     assert(entry);
 
@@ -47,9 +47,41 @@ psl_entry_init(int matches, int mismatches, int rep_matches, int n_count,
     entry->t_start       = t_start;
     entry->t_end         = t_end;
     entry->block_count   = block_count;
-    entry->block_size    = block_size;
-    entry->q_starts      = q_starts;
-    entry->t_starts      = t_starts;
+
+    char **block_size_array = split_char(block_sizes, ','),
+         **q_starts_array   = split_char(q_starts, ','),
+         **t_starts_array   = split_char(t_starts, ',');
+
+    unsigned *block_size_ints = malloc(block_count*sizeof(*block_size_ints));
+    assert(block_size_ints);
+
+    unsigned *q_starts_ints = malloc(block_count*sizeof(*q_starts_ints));
+    assert(q_starts_ints);
+
+    unsigned *t_starts_ints = malloc(block_count*sizeof(*t_starts_ints));
+    assert(t_starts_ints);
+
+    for (unsigned i = 0; i < block_count; i++) {
+        block_size_ints[i] = (unsigned)atoi(block_size_array[i]);
+        q_starts_ints[i]   = (unsigned)atoi(q_starts_array[i]);
+        t_starts_ints[i]   = (unsigned)atoi(t_starts_array[i]);
+    }
+
+    entry->block_sizes    = block_size_ints;
+    entry->q_starts       = q_starts_ints;
+    entry->t_starts       = t_starts_ints;
+
+    for (int i = 0; block_size_array[i] != NULL; i++)
+        free(block_size_array[i]);
+    free(block_size_array);
+
+    for (int i = 0; q_starts_array[i] != NULL; i++)
+        free(q_starts_array[i]);
+    free(q_starts_array);
+
+    for (int i = 0; t_starts_array[i] != NULL; i++)
+        free(t_starts_array[i]);
+    free(t_starts_array);
 
     return entry;
 }
@@ -69,8 +101,7 @@ struct psl_entry *psl_load(char **row){
       atoi(row[0]), atoi(row[1]), atoi(row[2]), atoi(row[3]), atoi(row[4]),
       atoi(row[5]), atoi(row[6]), atoi(row[7]), row[8], row[9], atoi(row[10]),
       atoi(row[11]), atoi(row[12]), row[13], atoi(row[14]), atoi(row[15]),
-      atoi(row[16]), atoi(row[17]), atoi(row[18]), atoi(row[19]),
-      atoi(row[20]));
+      atoi(row[16]), atoi(row[17]), row[18], row[19], row[20]);
 }
 
 /*Takes in a file pointer for a .psl file and parses each of its lines with
