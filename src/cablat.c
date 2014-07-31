@@ -126,7 +126,7 @@ void blat_coarse(struct opt_args *args){
 }
 
 //Runs BLAT on the fine FASTA file
-void blat_fine(struct opt_args *args, uint64_t dbsize){
+void blat_fine(struct opt_args *args){
     char *blat, *blat_args = get_blat_args(args);
     int command_length = 1024;
 
@@ -185,7 +185,6 @@ int main(int argc, char **argv){
     struct cb_database_r *db = NULL;
     struct opt_config *conf;
     struct opt_args *args;
-    uint64_t dbsize = 0;
 
     conf = load_cablat_args();
     args = opt_config_parse(conf, argc, argv);
@@ -205,7 +204,6 @@ int main(int argc, char **argv){
                              cablat_flags.load_coarse_links),
                             cablat_flags.load_compressed_db,
                             cablat_flags.link_block_size);
-    dbsize = read_int_from_file(8, db->coarse_db->db->file_params);
 
     blat_coarse(args);
 
@@ -236,7 +234,7 @@ int main(int argc, char **argv){
         psl_entry_free((struct psl_entry *)ds_vector_get(coarse_hits, i));
     ds_vector_free_no_data(coarse_hits);
 
-    blat_fine(args, dbsize);
+    blat_fine(args);
 
     cb_database_r_free(db);
     opt_args_free(args);
