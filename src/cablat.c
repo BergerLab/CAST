@@ -191,8 +191,8 @@ int main(int argc, char **argv){
 
     if (args->nargs < 3) {
         fprintf(stderr, 
-                "Usage: %s [flags] database-dir fasta-file results-file\n",
-                argv[0]);
+                "Usage: %s [flags] database-dir fasta-file results-file "
+                "[ --blat-args BLAT_ARGUMENTS ]\n", argv[0]);
         opt_config_print_usage(conf);
         exit(1);
     }
