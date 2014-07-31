@@ -1,19 +1,15 @@
 #include <assert.h>
 #include <errno.h>
-#include <libxml/parser.h>
-#include <libxml/tree.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
 #include <unistd.h>
 
 #include "clibs/include/ds.h"
 #include "clibs/include/opt.h"
 
-#include "bitpack.h"
 #include "coarse.h"
 #include "compressed.h"
 #include "compression.h"
@@ -175,24 +171,21 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
         int64_t offset             = current_expansion->offset;
 
         if (show_offsets)
-            fprintf(temp, "> %s (offset %ld)\n%s\n", current_seq->name, offset,
-                    current_seq->residues);
+            fprintf(temp, "> %d.%s (offset %ld)\n%s\n", i+1, current_seq->name,
+                          offset, current_seq->residues);
         else
-            fprintf(temp,"> %s\n%s\n",current_seq->name,current_seq->residues);
+            fprintf(temp, "> %d.%s\n%s\n", i+1, current_seq->name,
+                          current_seq->residues);
     }
 
     fclose(temp);
 }
 
 int main(int argc, char **argv){
-    FILE *query_file = NULL;
     struct cb_database_r *db = NULL;
     struct opt_config *conf;
     struct opt_args *args;
-    struct DSVector *queries = NULL;
-    struct fasta_seq *query = NULL;
     uint64_t dbsize = 0;
-    int i = 0, j = 0;
 
     conf = load_cablat_args();
     args = opt_config_parse(conf, argc, argv);
