@@ -184,6 +184,30 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
     fclose(temp);
 }
 
+/*Takes in the query FASTA file's name and returns a vector of fasta_seq
+  structs for each query.*/
+struct DSVector *read_queries(char *filename){
+    FILE *query_file;
+    if (NULL == (query_file = fopen(filename, "r"))) {
+        fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                filename, strerror(errno));
+        exit(1);
+    }
+
+    struct DSVector *queries = ds_vector_create();
+    struct fasta_seq *query = NULL;
+
+    query = fasta_read_next(query_file, "");
+    while (query) {
+        ds_vector_append(queries, (void *)query);
+        query = fasta_read_next(query_file, "");
+    }
+
+    fclose(query_file);
+
+    return queries;
+}
+
 int main(int argc, char **argv){
     struct cb_database_r *db = NULL;
     struct opt_config *conf;
