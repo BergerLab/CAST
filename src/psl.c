@@ -8,6 +8,7 @@
 #include "psl.h"
 #include "util.h"
 
+//Takes in the data for a .psl entry and uses it to create a psl_entry struct. 
 struct psl_entry *
 psl_entry_init(int matches, int mismatches, int rep_matches, int n_count,
                int q_num_insert, int q_base_insert, int t_num_insert,
@@ -67,9 +68,9 @@ psl_entry_init(int matches, int mismatches, int rep_matches, int n_count,
         t_starts_ints[i]   = (unsigned)atoi(t_starts_array[i]);
     }
 
-    entry->block_sizes    = block_size_ints;
-    entry->q_starts       = q_starts_ints;
-    entry->t_starts       = t_starts_ints;
+    entry->block_sizes   = block_size_ints;
+    entry->q_starts      = q_starts_ints;
+    entry->t_starts      = t_starts_ints;
 
     for (int i = 0; block_size_array[i] != NULL; i++)
         free(block_size_array[i]);
