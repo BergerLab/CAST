@@ -184,6 +184,41 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
     fclose(temp);
 }
 
+/*Takes in the name of a FASTA file and the name of a destination file and
+ *converts the FASTA file to a file at that destination with its headers
+ *numbered.
+ */
+void write_numbered_fasta(char *fname, char *dest){
+    assert(fname);
+    assert(dest);
+
+    FILE *f, *d;
+    if (NULL == (f = fopen(fname, "r"))) {
+        fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                fname, strerror(errno));
+        exit(1);
+    }
+    if (NULL == (d = fopen(dest, "w"))) {
+        fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                dest, strerror(errno));
+        exit(1);
+    }
+
+    struct fasta_seq *s = NULL;
+    int index = 1;
+
+    s = fasta_read_next(f, "");
+    while (s) {
+        fprintf(d, ">%d %s\n%s\n", index, s->name, s->seq);
+        fasta_free_seq(s);
+        s = fasta_read_next(f, "");
+        index++;
+    }
+
+    fclose(f);
+    fclose(d);
+}
+
 /*Takes in the query FASTA file's name and returns a vector of fasta_seq
   structs for each query.*/
 struct DSVector *read_queries(char *filename){
@@ -232,6 +267,8 @@ int main(int argc, char **argv){
                             cablat_flags.load_compressed_db,
                             cablat_flags.link_block_size);
 
+    write_numbered_fasta(args->args[1], "CaBLAT_numbered_queries.fasta");
+
     blat_coarse(args);
 
     FILE *coarse_blat_output;
@@ -270,6 +307,7 @@ int main(int argc, char **argv){
     if (!cablat_flags.no_cleanup) {
         system("rm coarse-blat.psl");
         system("rm CaBLAT_fine.fasta");
+        system("rm CaBLAT_numbered_queries.fasta");
     }
 
     return 0;
