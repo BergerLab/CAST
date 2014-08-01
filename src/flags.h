@@ -45,6 +45,7 @@ struct cablat_flags {
     int32_t link_block_size;
     char    *output_expanded_fasta;
     bool    hide_progress;
+    bool    no_cleanup;
 } cablat_flags;
 
 

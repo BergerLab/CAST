@@ -267,5 +267,10 @@ int main(int argc, char **argv){
     opt_args_free(args);
     opt_config_free(conf);
 
+    if (!cablat_flags.no_cleanup) {
+        system("rm coarse-blat.psl");
+        system("rm CaBLAT_fine.fasta");
+    }
+
     return 0;
 }
