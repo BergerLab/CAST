@@ -107,17 +107,17 @@ struct DSVector *expand_blat_hits(struct DSVector *hits,
 
 /*Runs BLAT on the coarse FASTA file and stores the results in a temporary
   psl file.*/
-void blat_coarse(struct opt_args *args){
-    char *target_path = path_join(args->args[0], CABLAST_COARSE_FASTA),
+void blat_coarse(char *db, char *queries){
+    char *target_path = path_join(db, CABLAST_COARSE_FASTA),
          *coarse_blat_command =
             malloc(
               (strlen("$HOME/bin/$MACHTYPE/blat    -noHead -minIdentity=80")
-               +strlen(target_path)+strlen(args->args[1])
-               +strlen("coarse-blat.psl")+1)*sizeof(*coarse_blat_command));
+               +strlen(target_path)+strlen(queries)+strlen("coarse-blat.psl")+1)
+              *sizeof(*coarse_blat_command));
 
     sprintf(coarse_blat_command,
             "$HOME/bin/$MACHTYPE/blat %s %s %s -noHead -minIdentity=80",
-            target_path, args->args[1], "coarse-blat.psl");
+            target_path, queries, "coarse-blat.psl");
 
     if (!cablat_flags.hide_progress)
         fprintf(stderr, "%s\n", coarse_blat_command);
@@ -269,7 +269,7 @@ int main(int argc, char **argv){
 
     write_numbered_fasta(args->args[1], "CaBLAT_numbered_queries.fasta");
 
-    blat_coarse(args);
+    blat_coarse(args->args[0], "CaBLAT_numbered_queries.fasta");
 
     FILE *coarse_blat_output;
 
