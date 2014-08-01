@@ -85,6 +85,9 @@ struct DSVector *expand_blat_hits(struct DSVector *hits,
 
         struct psl_entry *h = (struct psl_entry *)ds_vector_get(hits, i);
 
+        if (h->t_end - h->t_start > 1000)
+            continue;
+
         int32_t coarse_start  = h->t_start, coarse_end = h->t_end,
                 coarse_seq_id = atoi(h->t_name);
 
