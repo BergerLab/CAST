@@ -12,6 +12,7 @@ struct cb_seq {
 
 struct cb_hit_expansion {
     struct cb_seq *seq;
+    char strand;
     int64_t offset;
 };
 

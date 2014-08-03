@@ -271,6 +271,8 @@ int main(int argc, char **argv){
 
     blat_coarse(args->args[0], "CaBLAT_numbered_queries.fasta");
 
+    struct DSVector *queries = read_queries(args->args[1]);
+
     FILE *coarse_blat_output;
 
     if (NULL == (coarse_blat_output = fopen("coarse-blat.psl", "r"))) {

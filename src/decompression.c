@@ -125,6 +125,8 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
                 expansion->offset = (int64_t)exp_start;
                 expansion->seq   = cb_seq_init(link->org_seq_id, seq->name,
                                                exp_str);
+                expansion->strand = dir ? '+' : '-';
+
                 ds_vector_append(oseqs, (void *)expansion);
 
                 free(exp_str);
