@@ -119,13 +119,9 @@ struct DSVector *cb_coarse_expand(struct cb_coarse_r *coarse_db,
                 }
                 exp_str[exp_range] = '\0';
 
-                expansion = malloc(sizeof(*expansion));
-                assert(expansion);
-
-                expansion->offset = (int64_t)exp_start;
-                expansion->seq   = cb_seq_init(link->org_seq_id, seq->name,
-                                               exp_str);
-                expansion->strand = dir ? '+' : '-';
+                expansion = cb_hit_expansion_init((int64_t)exp_start, dir,
+                                                  link->org_seq_id, seq->name,
+                                                  exp_str);
 
                 ds_vector_append(oseqs, (void *)expansion);
 

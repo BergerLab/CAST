@@ -61,6 +61,20 @@ void cb_seq_free(struct cb_seq *seq){
     free(seq);
 }
 
+struct cb_hit_expansion *
+cb_hit_expansion_init(int64_t offset, bool strand,
+                      int32_t id, char *name, char *residues){
+    struct cb_hit_expansion *expansion = malloc(sizeof(*expansion));
+    assert(expansion);
+
+    expansion->offset = offset;
+    expansion->strand = strand ? '+' : '-';
+    expansion->seq    = cb_seq_init(id, name, residues);
+
+    return expansion;
+}
+
+
 //Frees a hit expansion
 void cb_hit_expansion_free(struct cb_hit_expansion *expansion){
     cb_seq_free(expansion->seq);
