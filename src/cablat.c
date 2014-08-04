@@ -61,8 +61,9 @@ char *get_blat_args(struct opt_args *args){
 }
 
 /*Takes in the vector of hits from coarse BLAT and the database we are using
- *for CaBLAT and returns a vector of every original sequence section re-created
- *from the calls to cb_coarse_expand for the hits we are expanding.
+ *for CaBLAT and returns every original sequence section re-created from the
+ *calls to cb_coarse_expand for the hits we are expanding arranged as one vector
+ *containing the hit expansions from each coarse BLAT hit.
  */
 struct DSVector *expand_blat_hits(struct DSVector *hits,
                                   struct cb_database_r *db){
@@ -91,14 +92,9 @@ struct DSVector *expand_blat_hits(struct DSVector *hits,
         int32_t coarse_start  = h->t_start, coarse_end = h->t_end,
                 coarse_seq_id = atoi(h->t_name);
 
-        struct DSVector *oseqs =
-          cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
-                           coarse_start, coarse_end, 10);
-
-        for (int j = 0; j < oseqs->size; j++)
-            ds_vector_append(expanded_hits, ds_vector_get(oseqs, j));
-
-        ds_vector_free_no_data(oseqs);
+        ds_vector_append(expanded_hits,
+                       cb_coarse_expand(db->coarse_db,db->com_db,coarse_seq_id,
+                                        coarse_start,coarse_end,10));
     }
 
     return expanded_hits;
@@ -152,12 +148,12 @@ void blat_fine(struct opt_args *args){
     free(blat);
 }
 
-
-/*Takes in a vector of expansion structs for the expanded BLAT hits from a
- *query, a destination filename, and a bool telling whether or not to include
- *the offsets in the original sequence of each expanded hit in the file,
- *and outputs the expanded hits to the specified file in FASTA format, putting
- *the offset at the end of the FASTA header if show_offsets is true.
+/*Takes in a vector of vectors of hit expansion structs for the expanded BLAT
+ *hits from each coarse BLAT hit, a destination filename, and a bool telling
+ *whether or not to include the offsets in the original sequence of each
+ *expanded hit in the file and outputs the expanded hits to the specified file
+ *in FASTA format, putting the offset at the end of the FASTA header if
+ *show_offsets is true.
  */
 void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
     FILE *temp;
@@ -168,17 +164,21 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
     }
 
     for (int i = 0; i < oseqs->size; i++) {
-        struct cb_hit_expansion *current_expansion =
-          ((struct cb_hit_expansion *)ds_vector_get(oseqs, i));
-        struct cb_seq *current_seq = current_expansion->seq;
-        int64_t offset             = current_expansion->offset;
+        struct DSVector *expansions = (struct DSVector *)ds_vector_get(oseqs,i);
 
-        if (show_offsets)
-            fprintf(temp, "> %d.%s (offset %ld)\n%s\n", i+1, current_seq->name,
-                          offset, current_seq->residues);
-        else
-            fprintf(temp, "> %d.%s\n%s\n", i+1, current_seq->name,
-                          current_seq->residues);
+        for (int j = 0; j < expansions->size; j++) {
+            struct cb_hit_expansion *current_expansion =
+              ((struct cb_hit_expansion *)ds_vector_get(expansions, j));
+            struct cb_seq *current_seq = current_expansion->seq;
+            int64_t offset             = current_expansion->offset;
+
+            if (show_offsets)
+                fprintf(temp, "> %d.%s (offset %ld)\n%s\n", j+1,
+                              current_seq->name, offset, current_seq->residues);
+            else
+                fprintf(temp, "> %d.%s\n%s\n", j+1, current_seq->name,
+                              current_seq->residues);
+        }
     }
 
     fclose(temp);
@@ -288,12 +288,19 @@ int main(int argc, char **argv){
     write_fine_fasta(expanded_hits, "CaBLAT_fine.fasta", false);
 
     if (strcmp(cablat_flags.output_expanded_fasta, "") != 0)
-        write_fine_fasta(expanded_hits,
-                         cablat_flags.output_expanded_fasta, true);
+        write_fine_fasta(
+          expanded_hits, cablat_flags.output_expanded_fasta, true);
 
-    for (int i = 0; i < expanded_hits->size; i++)
-        cb_hit_expansion_free(
-          (struct cb_hit_expansion *)ds_vector_get(expanded_hits, i));
+    for (int i = 0; i < expanded_hits->size; i++) {
+        struct DSVector *expansions =
+          (struct DSVector *)ds_vector_get(expanded_hits, i);
+
+        for (int j = 0; j < expansions->size; j++) {
+            cb_hit_expansion_free(
+              (struct cb_hit_expansion *)ds_vector_get(expansions, j));
+        }
+        ds_vector_free_no_data(expansions);
+    }
     ds_vector_free_no_data(expanded_hits);
 
     for (int i = 0; i < coarse_hits->size; i++)
