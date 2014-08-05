@@ -98,6 +98,25 @@ void psl_entry_free(struct psl_entry *entry){
     free(entry);
 }
 
+//Output a psl entry's data in .psl format, with data fields separated by tabs.
+void psl_entry_print(struct psl_entry *p, FILE *f){
+    fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%u\t%d\t%d\t%s\t%u\t"
+               "%d\t%d\t%u\t", p->matches, p->mismatches,
+               p->rep_matches, p->n_count, p->q_num_insert, p->q_base_insert,
+               p->t_num_insert, p->t_base_insert, p->strand, p->q_name,
+               p->q_size, p->q_start, p->q_end, p->t_name, p->t_size,
+               p->t_start, p->t_end, p->block_count);
+    for (int i = 0; i < p->block_count; i++)
+        fprintf(f, "%u,", p->block_sizes[i]);
+    fprintf(f, "\t");
+    for (int i = 0; i < p->block_count; i++)
+        fprintf(f, "%u,", p->q_starts[i]);
+    fprintf(f, "\t");
+    for (int i = 0; i < p->block_count; i++)
+        fprintf(f, "%u,", p->t_starts[i]);
+    fprintf(f, "\n");
+}
+
 /*Load a psl entry from a row parsed with split_space, based on psl_load in Jim
   Kent's BLAT.*/
 struct psl_entry *psl_load(char **row){

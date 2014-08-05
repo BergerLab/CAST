@@ -42,6 +42,8 @@ psl_entry_init(int matches, int mismatches, int rep_matches, int n_count,
 
 void psl_entry_free(struct psl_entry *entry);
 
+void psl_entry_print(struct psl_entry *p, FILE *f);
+
 struct psl_entry *psl_load(char **row);
 struct DSVector *psl_read(FILE *f);
 
