@@ -138,8 +138,8 @@ void blat_fine(struct opt_args *args){
                 args->args[1], args->args[2]);
     else
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s %s CaBLAT_fine.fasta %s %s",
-                blat_args, complete_psl ? "-out=psl" : "",
-                args->args[1], args->args[2]);
+                blat_args, complete_psl ? "-out=psl" : "", args->args[1],
+                complete_psl ? "CaBLAT_fine_results.psl" : args->args[2]);
 
     if (!cablat_flags.hide_progress)
         fprintf(stderr, "\n%s\n", blat);
@@ -300,6 +300,21 @@ int main(int argc, char **argv){
           expanded_hits, cablat_flags.output_expanded_fasta, true);
 
     blat_fine(args);
+
+    if (cablat_flags.complete_psl) {
+        FILE *fine_blat_output;
+
+        if (NULL == (fine_blat_output = fopen("CaBLAT_fine_results.psl","r"))) {
+            fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                            "CaBLAT_fine_results.psl", strerror(errno));
+            exit(1);
+        }
+
+        struct DSVector *fine_hits = psl_read(coarse_blat_output);
+
+        if (!cablat_flags.no_cleanup)
+            system("rm CaBLAT_fine_results.psl");
+    }
 
     /*Free the expanded hits and the database and delete the intermediate files
       unless --no-cleanup is passed.*/
