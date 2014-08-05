@@ -128,6 +128,7 @@ void blat_coarse(char *db, char *queries){
 void blat_fine(struct opt_args *args){
     char *blat, *blat_args = get_blat_args(args);
     int command_length = 1024;
+    bool complete_psl = cablat_flags.complete_psl;
 
     blat = malloc(command_length*sizeof(*blat));
     assert(blat);
@@ -136,8 +137,9 @@ void blat_fine(struct opt_args *args){
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat CaBLAT_fine.fasta %s %s",
                 args->args[1], args->args[2]);
     else
-        sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s CaBLAT_fine.fasta %s %s",
-                blat_args, args->args[1], args->args[2]);
+        sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s %s CaBLAT_fine.fasta %s %s",
+                blat_args, complete_psl ? "-out=psl" : "",
+                args->args[1], args->args[2]);
 
     if (!cablat_flags.hide_progress)
         fprintf(stderr, "\n%s\n", blat);
