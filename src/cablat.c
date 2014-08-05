@@ -259,6 +259,7 @@ int main(int argc, char **argv){
         exit(1);
     }
 
+    //Load in the database
     db = cb_database_r_init(args->args[0],
                             (cablat_flags.load_coarse_db ||
                              cablat_flags.load_coarse_residues),
@@ -267,14 +268,17 @@ int main(int argc, char **argv){
                             cablat_flags.load_compressed_db,
                             cablat_flags.link_block_size);
 
+    //Number the queries
     write_numbered_fasta(args->args[1], "CaBLAT_numbered_queries.fasta");
 
+    //Run coarse BLAT
     blat_coarse(args->args[0], "CaBLAT_numbered_queries.fasta");
 
     struct DSVector *queries = read_queries(args->args[1]);
 
     FILE *coarse_blat_output;
 
+    //Convert the coarse BLAT output to psl_entry structs
     if (NULL == (coarse_blat_output = fopen("coarse-blat.psl", "r"))) {
         fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
                         "coarse-blat.psl", strerror(errno));
@@ -284,6 +288,8 @@ int main(int argc, char **argv){
     struct DSVector *coarse_hits = psl_read(coarse_blat_output);
     fclose(coarse_blat_output);
 
+    /*Run hit expansion on the coarse BLAT hits to create the fine BLAT target
+      file and then run fine BLAT.*/
     struct DSVector *expanded_hits = expand_blat_hits(coarse_hits, db);
     write_fine_fasta(expanded_hits, "CaBLAT_fine.fasta", false);
 
@@ -291,6 +297,10 @@ int main(int argc, char **argv){
         write_fine_fasta(
           expanded_hits, cablat_flags.output_expanded_fasta, true);
 
+    blat_fine(args);
+
+    /*Free the expanded hits and the database and delete the intermediate files
+      unless --no-cleanup is passed.*/
     for (int i = 0; i < expanded_hits->size; i++) {
         struct DSVector *expansions =
           (struct DSVector *)ds_vector_get(expanded_hits, i);
@@ -306,8 +316,6 @@ int main(int argc, char **argv){
     for (int i = 0; i < coarse_hits->size; i++)
         psl_entry_free((struct psl_entry *)ds_vector_get(coarse_hits, i));
     ds_vector_free_no_data(coarse_hits);
-
-    blat_fine(args);
 
     cb_database_r_free(db);
     opt_args_free(args);
