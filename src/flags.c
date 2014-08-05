@@ -148,7 +148,7 @@ struct opt_config *load_cablat_args(){
         &cablat_flags.hide_progress, "hide-progress",
         "Pass this flag to hide messages about the progress of CaBLAT.");
     opt_flag_bool(conf,
-        &search_flags.no_cleanup, "no-cleanup",
+        &cablat_flags.no_cleanup, "no-cleanup",
         "Pass this flag to keep the intermediate files, such as the numbered "
         "query and target files, the coarse BLAT output, and the fine query "
         "and target files.");
