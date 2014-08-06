@@ -252,6 +252,7 @@ int main(int argc, char **argv){
 
     conf = load_cablat_args();
     args = opt_config_parse(conf, argc, argv);
+    bool complete_psl = cablat_flags.complete_psl;
 
     if (args->nargs < 3) {
         fprintf(stderr, 
@@ -271,10 +272,12 @@ int main(int argc, char **argv){
                             cablat_flags.link_block_size);
 
     //Number the queries
-    write_numbered_fasta(args->args[1], "CaBLAT_numbered_queries.fasta");
+    if (complete_psl)
+        write_numbered_fasta(args->args[1], "CaBLAT_numbered_queries.fasta");
 
     //Run coarse BLAT
-    blat_coarse(args->args[0], "CaBLAT_numbered_queries.fasta");
+    blat_coarse(args->args[0], complete_psl ? "CaBLAT_numbered_queries.fasta" :
+                                              args->args[1]);
 
     struct DSVector *queries = read_queries(args->args[1]);
 
@@ -311,7 +314,13 @@ int main(int argc, char **argv){
         }
 
         struct DSVector *fine_hits = psl_read(coarse_blat_output);
+        int64_t *seq_lengths = cb_compressed_get_lengths(db->com_db);
 
+        for (int i = 0; i < fine_hits->size; i++){
+            
+        }
+
+        free(seq_lengths);
         if (!cablat_flags.no_cleanup)
             system("rm CaBLAT_fine_results.psl");
     }
