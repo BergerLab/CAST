@@ -321,12 +321,19 @@ int main(int argc, char **argv){
 
     blat_fine(args); //Run fine BLAT
 
-    /*if (cablat_flags.complete_psl) {
-        FILE *fine_blat_output;
+    //Convert the output to a complete .psl file if --complete-psl is passed
+    if (cablat_flags.complete_psl) {
+        FILE *fine_blat_output, *output_file;
 
         if (NULL == (fine_blat_output = fopen("CaBLAT_fine_results.psl","r"))) {
             fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
                             "CaBLAT_fine_results.psl", strerror(errno));
+            exit(1);
+        }
+
+        if (NULL == (output_file = fopen(args->args[2], "w"))) {
+            fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                            args->args[2], strerror(errno));
             exit(1);
         }
 
@@ -340,14 +347,25 @@ int main(int argc, char **argv){
             struct cb_hit_expansion *target_expansion =
               (struct cb_hit_expansion *)ds_vector_get(expanded_hits,
                                                        target_index);
-            fprintf(stderr, "%s\n", target_expansion->seq->name);
+            free(hit->t_name);
+            hit->t_name =
+              malloc((strlen(target_expansion->seq->name)+1)
+                     *sizeof(*(hit->t_name)));
+            strcpy(hit->t_name, target_expansion->seq->name);
+            hit->t_size = (unsigned)(seq_lengths[target_expansion->seq->id]);
+            hit->t_start += target_expansion->offset;
+            hit->t_end += target_expansion->offset;
+
+            for (int j = 0; j < hit->block_count; j++)
+                hit->t_starts[j] += target_expansion->offset;
+
+            psl_entry_print(hit, output_file);
         }
 
         free(seq_lengths);
-        if (!cablat_flags.no_cleanup)
-            system("rm CaBLAT_fine_results.psl");
         fclose(fine_blat_output);
-    }*/
+        fclose(output_file);
+    }
 
     if (complete_psl) {
         for (int i = 0; i < queries->size; i++)
@@ -373,9 +391,10 @@ int main(int argc, char **argv){
     if (!cablat_flags.no_cleanup) {
         system("rm coarse-blat.psl");
         system("rm CaBLAT_fine.fasta");
-        if (complete_psl) {
+
+        if (!cablat_flags.no_cleanup) {
             system("rm CaBLAT_numbered_queries.fasta");
-            system("rm CaBLAT_fine_results.fasta");
+            system("rm CaBLAT_fine_results.psl");
         }
     }
 
