@@ -97,7 +97,7 @@ struct DSVector *expand_blat_hits(struct DSVector *hits,
 
         for (int j = 0; j < oseqs->size; j++)
             ds_vector_append(expanded_hits,
-                             (struct cb_hit_expansion *)ds_vector_get(oseqs,i));
+                             (struct cb_hit_expansion *)ds_vector_get(oseqs,j));
 
         ds_vector_free_no_data(oseqs);
     }
@@ -156,12 +156,11 @@ void blat_fine(struct opt_args *args){
     free(blat);
 }
 
-/*Takes in a vector of vectors of hit expansion structs for the expanded BLAT
- *hits from each coarse BLAT hit, a destination filename, and a bool telling
- *whether or not to include the offsets in the original sequence of each
- *expanded hit in the file and outputs the expanded hits to the specified file
- *in FASTA format, putting the offset at the end of the FASTA header if
- *show_offsets is true.
+/*Takes in a vector of hit expansion structs for the expanded BLAT hits from
+ *each coarse BLAT hit, a destination filename, and a bool telling whether or
+ *not to include the offsets in the original sequence of each expanded hit in
+ *the file and outputs the expanded hits to the specified file in FASTA format,
+ *putting the offset at the end of the FASTA header if show_offsets is true.
  */
 void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
     FILE *temp;
@@ -173,32 +172,29 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
     }
 
     for (int i = 0; i < oseqs->size; i++) {
-        struct DSVector *expansions = (struct DSVector *)ds_vector_get(oseqs,i);
+        struct cb_hit_expansion *current_expansion =
+            (struct cb_hit_expansion *)ds_vector_get(oseqs,i);
 
-        for (int j = 0; j < expansions->size; j++) {
-            struct cb_hit_expansion *current_expansion =
-              ((struct cb_hit_expansion *)ds_vector_get(expansions, j));
-            struct cb_seq *current_seq = current_expansion->seq;
-            int64_t offset             = current_expansion->offset;
+        struct cb_seq *current_seq = current_expansion->seq;
+        int64_t offset             = current_expansion->offset;
 
-            if (!cablat_flags.complete_psl) {
-                if (show_offsets)
-                    fprintf(temp, "> %s (offset %ld)\n%s\n",
-                                   current_seq->name, offset,
-                                   current_seq->residues);
-                else
-                    fprintf(temp, "> %s\n%s\n", current_seq->name,
-                                  current_seq->residues);
-            }
-            else {
-                if (show_offsets)
-                    fprintf(temp, "> %d %s (offset %ld)\n%s\n", ++sequences,
-                                  current_seq->name, offset,
-                                  current_seq->residues);
-                else
-                    fprintf(temp, "> %d %s\n%s\n", ++sequences,
-                                  current_seq->name, current_seq->residues);
-            }
+        if (!cablat_flags.complete_psl) {
+            if (show_offsets)
+                fprintf(temp, "> %s (offset %ld)\n%s\n",
+                               current_seq->name, offset,
+                               current_seq->residues);
+            else
+                fprintf(temp, "> %s\n%s\n", current_seq->name,
+                              current_seq->residues);
+        }
+        else {
+            if (show_offsets)
+                fprintf(temp, "> %d %s (offset %ld)\n%s\n", ++sequences,
+                              current_seq->name, offset,
+                              current_seq->residues);
+            else
+                fprintf(temp, "> %d %s\n%s\n", ++sequences,
+                              current_seq->name, current_seq->residues);
         }
     }
 
@@ -353,17 +349,17 @@ int main(int argc, char **argv){
         fclose(fine_blat_output);
     }*/
 
+    if (complete_psl) {
+        for (int i = 0; i < queries->size; i++)
+            fasta_free_seq((struct fasta_seq *)ds_vector_get(queries, i));
+        ds_vector_free_no_data(queries);
+    }
+
     /*Free the expanded hits and the database and delete the intermediate files
       unless --no-cleanup is passed.*/
-    for (int i = 0; i < expanded_hits->size; i++) {
-        struct DSVector *expansions =
-          (struct DSVector *)ds_vector_get(expanded_hits, i);
-
-        for (int j = 0; j < expansions->size; j++)
-            cb_hit_expansion_free(
-              (struct cb_hit_expansion *)ds_vector_get(expansions, j));
-        ds_vector_free_no_data(expansions);
-    }
+    for (int i = 0; i < expanded_hits->size; i++)
+        cb_hit_expansion_free(
+          (struct cb_hit_expansion *)ds_vector_get(expanded_hits, i));
     ds_vector_free_no_data(expanded_hits);
 
     for (int i = 0; i < coarse_hits->size; i++)
