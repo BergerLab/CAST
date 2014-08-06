@@ -159,6 +159,7 @@ void blat_fine(struct opt_args *args){
  */
 void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
     FILE *temp;
+    int sequences = 0;
 
     if (NULL == (temp = fopen(dest, "w"))) {
         fprintf(stderr,"fopen: 'fopen %s' failed: %s\n",dest,strerror(errno));
@@ -174,12 +175,21 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
             struct cb_seq *current_seq = current_expansion->seq;
             int64_t offset             = current_expansion->offset;
 
-            if (show_offsets)
-                fprintf(temp, "> %d.%s (offset %ld)\n%s\n", j+1,
-                              current_seq->name, offset, current_seq->residues);
-            else
-                fprintf(temp, "> %d.%s\n%s\n", j+1, current_seq->name,
-                              current_seq->residues);
+            if (!cablat_flags.complete_psl) {
+                if (show_offsets)
+                    fprintf(temp, "> %s (offset %ld)\n%s\n",
+                                   current_seq->name, offset, current_seq->residues);
+                else
+                    fprintf(temp, "> %s\n%s\n", current_seq->name, current_seq->residues);
+            }
+            else {
+                if (show_offsets)
+                    fprintf(temp, "> %d.%s (offset %ld)\n%s\n", ++sequences,
+                                  current_seq->name, offset, current_seq->residues);
+                else
+                    fprintf(temp, "> %d.%s\n%s\n", ++sequences, current_seq->name,
+                                  current_seq->residues);
+            }
         }
     }
 
@@ -350,7 +360,8 @@ int main(int argc, char **argv){
     if (!cablat_flags.no_cleanup) {
         system("rm coarse-blat.psl");
         system("rm CaBLAT_fine.fasta");
-        system("rm CaBLAT_numbered_queries.fasta");
+        if (complete_psl)
+            system("rm CaBLAT_numbered_queries.fasta");
     }
 
     return 0;
