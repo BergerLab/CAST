@@ -61,16 +61,15 @@ char *get_blat_args(struct opt_args *args){
 }
 
 /*Takes in the vector of hits from coarse BLAT and the database we are using
- *for CaBLAT and returns every original sequence section re-created from the
- *calls to cb_coarse_expand for the hits we are expanding arranged as one vector
- *containing the hit expansions from each coarse BLAT hit.
+ *for CaBLAT and returns a vector containing every original sequence section
+ *re-created from the calls to cb_coarse_expand for the hits we are expanding.
  */
 struct DSVector *expand_blat_hits(struct DSVector *hits,
                                   struct cb_database_r *db){
     struct DSVector *expanded_hits = ds_vector_create();
 
     for (int i = 0; i < hits->size; i++) {
-        if (!cablat_flags.hide_progress) {
+        if (!cablat_flags.hide_progress) { //Display the progress bar
             int32_t digits_full = floor(log10((double)hits->size)),
                     digits_i    = floor(log10((double)i)),
                     spaces      = digits_full - digits_i;
@@ -92,9 +91,15 @@ struct DSVector *expand_blat_hits(struct DSVector *hits,
         int32_t coarse_start  = h->t_start, coarse_end = h->t_end,
                 coarse_seq_id = atoi(h->t_name);
 
-        ds_vector_append(expanded_hits,
-                       cb_coarse_expand(db->coarse_db,db->com_db,coarse_seq_id,
-                                        coarse_start,coarse_end,10));
+        struct DSVector *oseqs =
+          cb_coarse_expand(db->coarse_db,db->com_db, coarse_seq_id,
+                           coarse_start, coarse_end,10);
+
+        for (int j = 0; j < oseqs->size; j++)
+            ds_vector_append(expanded_hits,
+                             (struct cb_hit_expansion *)ds_vector_get(oseqs,i));
+
+        ds_vector_free_no_data(oseqs);
     }
 
     return expanded_hits;
@@ -187,11 +192,11 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
             }
             else {
                 if (show_offsets)
-                    fprintf(temp, "> %d.%s (offset %ld)\n%s\n", ++sequences,
+                    fprintf(temp, "> %d %s (offset %ld)\n%s\n", ++sequences,
                                   current_seq->name, offset,
                                   current_seq->residues);
                 else
-                    fprintf(temp, "> %d.%s\n%s\n", ++sequences,
+                    fprintf(temp, "> %d %s\n%s\n", ++sequences,
                                   current_seq->name, current_seq->residues);
             }
         }
@@ -293,7 +298,7 @@ int main(int argc, char **argv){
     blat_coarse(args->args[0], complete_psl ? "CaBLAT_numbered_queries.fasta" :
                                               args->args[1]);
 
-    struct DSVector *queries = read_queries(args->args[1]);
+    struct DSVector *queries=complete_psl ? read_queries(args->args[1]) : NULL;
 
     FILE *coarse_blat_output;
 
@@ -320,7 +325,7 @@ int main(int argc, char **argv){
 
     blat_fine(args); //Run fine BLAT
 
-    if (cablat_flags.complete_psl) {
+    /*if (cablat_flags.complete_psl) {
         FILE *fine_blat_output;
 
         if (NULL == (fine_blat_output = fopen("CaBLAT_fine_results.psl","r"))) {
@@ -329,17 +334,24 @@ int main(int argc, char **argv){
             exit(1);
         }
 
-        struct DSVector *fine_hits = psl_read(coarse_blat_output);
+        struct DSVector *fine_hits = psl_read(fine_blat_output);
         int64_t *seq_lengths = cb_compressed_get_lengths(db->com_db);
 
         for (int i = 0; i < fine_hits->size; i++){
-            
+            struct psl_entry *hit =
+              (struct psl_entry *)ds_vector_get(fine_hits, i);
+            int target_index = atoi(hit->t_name);
+            struct cb_hit_expansion *target_expansion =
+              (struct cb_hit_expansion *)ds_vector_get(expanded_hits,
+                                                       target_index);
+            fprintf(stderr, "%s\n", target_expansion->seq->name);
         }
 
         free(seq_lengths);
         if (!cablat_flags.no_cleanup)
             system("rm CaBLAT_fine_results.psl");
-    }
+        fclose(fine_blat_output);
+    }*/
 
     /*Free the expanded hits and the database and delete the intermediate files
       unless --no-cleanup is passed.*/
@@ -347,10 +359,9 @@ int main(int argc, char **argv){
         struct DSVector *expansions =
           (struct DSVector *)ds_vector_get(expanded_hits, i);
 
-        for (int j = 0; j < expansions->size; j++) {
+        for (int j = 0; j < expansions->size; j++)
             cb_hit_expansion_free(
               (struct cb_hit_expansion *)ds_vector_get(expansions, j));
-        }
         ds_vector_free_no_data(expansions);
     }
     ds_vector_free_no_data(expanded_hits);
