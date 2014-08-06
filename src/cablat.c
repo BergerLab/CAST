@@ -135,7 +135,8 @@ void blat_fine(struct opt_args *args){
 
     if (blat_args[0] == '\0')
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat CaBLAT_fine.fasta %s %s",
-                args->args[1], args->args[2]);
+                args->args[1],
+                complete_psl ? "CaBLAT_fine_results.psl" : args->args[2]);
     else
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s %s CaBLAT_fine.fasta %s %s",
                 blat_args, complete_psl ? "-out=psl" : "", args->args[1],
@@ -178,17 +179,20 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
             if (!cablat_flags.complete_psl) {
                 if (show_offsets)
                     fprintf(temp, "> %s (offset %ld)\n%s\n",
-                                   current_seq->name, offset, current_seq->residues);
+                                   current_seq->name, offset,
+                                   current_seq->residues);
                 else
-                    fprintf(temp, "> %s\n%s\n", current_seq->name, current_seq->residues);
+                    fprintf(temp, "> %s\n%s\n", current_seq->name,
+                                  current_seq->residues);
             }
             else {
                 if (show_offsets)
                     fprintf(temp, "> %d.%s (offset %ld)\n%s\n", ++sequences,
-                                  current_seq->name, offset, current_seq->residues);
-                else
-                    fprintf(temp, "> %d.%s\n%s\n", ++sequences, current_seq->name,
+                                  current_seq->name, offset,
                                   current_seq->residues);
+                else
+                    fprintf(temp, "> %d.%s\n%s\n", ++sequences,
+                                  current_seq->name, current_seq->residues);
             }
         }
     }
@@ -281,7 +285,7 @@ int main(int argc, char **argv){
                             cablat_flags.load_compressed_db,
                             cablat_flags.link_block_size);
 
-    //Number the queries
+    //Number the queries if --complete-psl is passed in
     if (complete_psl)
         write_numbered_fasta(args->args[1], "CaBLAT_numbered_queries.fasta");
 
@@ -304,15 +308,17 @@ int main(int argc, char **argv){
     fclose(coarse_blat_output);
 
     /*Run hit expansion on the coarse BLAT hits to create the fine BLAT target
-      file and then run fine BLAT.*/
+      file.*/
     struct DSVector *expanded_hits = expand_blat_hits(coarse_hits, db);
     write_fine_fasta(expanded_hits, "CaBLAT_fine.fasta", false);
 
+    /*If an expanded FASTA file with offsets is requested, also output the
+      expanded FASTA file*/
     if (strcmp(cablat_flags.output_expanded_fasta, "") != 0)
         write_fine_fasta(
           expanded_hits, cablat_flags.output_expanded_fasta, true);
 
-    blat_fine(args);
+    blat_fine(args); //Run fine BLAT
 
     if (cablat_flags.complete_psl) {
         FILE *fine_blat_output;
@@ -360,8 +366,10 @@ int main(int argc, char **argv){
     if (!cablat_flags.no_cleanup) {
         system("rm coarse-blat.psl");
         system("rm CaBLAT_fine.fasta");
-        if (complete_psl)
+        if (complete_psl) {
             system("rm CaBLAT_numbered_queries.fasta");
+            system("rm CaBLAT_fine_results.fasta");
+        }
     }
 
     return 0;
