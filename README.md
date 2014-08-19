@@ -15,6 +15,8 @@ The official Go implementation of CaBLASTP can be found here:
 https://github.com/BurntSushi/cablastp
 
 **CaBLAT is currently under development.**
+**NOTE: Because of the smaller database size in CaBLAT, CaBLAT may produce hits
+  that do not occur when running BLAT on a full uncompressed database.**
 
 Installation
 ============
