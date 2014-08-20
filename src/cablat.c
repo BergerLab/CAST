@@ -130,22 +130,20 @@ void blat_coarse(char *db, char *queries){
 }
 
 //Runs BLAT on the fine FASTA file
-void blat_fine(struct opt_args *args){
+void blat_fine(struct opt_args *args, char *queries){
     char *blat, *blat_args = get_blat_args(args);
     int command_length = 1024;
-    bool complete_psl = false;//cablat_flags.complete_psl;
+    //bool complete_psl = cablat_flags.complete_psl;
 
     blat = malloc(command_length*sizeof(*blat));
     assert(blat);
 
     if (blat_args[0] == '\0')
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat CaBLAT_fine.fasta %s %s",
-                args->args[1],
-                complete_psl ? "CaBLAT_fine_results.psl" : args->args[2]);
+                queries, args->args[2]);
     else
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s %s CaBLAT_fine.fasta %s %s",
-                blat_args, complete_psl ? "-out=psl" : "", args->args[1],
-                complete_psl ? "CaBLAT_fine_results.psl" : args->args[2]);
+                blat_args, "", queries, args->args[2]);
 
     if (!cablat_flags.hide_progress)
         fprintf(stderr, "\n%s\n", blat);
@@ -267,7 +265,11 @@ int main(int argc, char **argv){
 
     conf = load_cablat_args();
     args = opt_config_parse(conf, argc, argv);
+
+    char *file_nq = "CaBLAT_numbered_queries.fasta";
+
     bool complete_psl = false;//cablat_flags.complete_psl;
+    bool number_queries = cablat_flags.number_queries;
 
     if (args->nargs < 3) {
         fprintf(stderr, 
@@ -287,14 +289,13 @@ int main(int argc, char **argv){
                             cablat_flags.link_block_size);
 
     //Number the queries if --complete-psl is passed in
-    if (/*complete_psl*/false)
-        write_numbered_fasta(args->args[1], "CaBLAT_numbered_queries.fasta");
+    if (number_queries)
+        write_numbered_fasta(args->args[1], file_nq);
 
     //Run coarse BLAT
-    blat_coarse(args->args[0], /*complete_psl*/false ? "CaBLAT_numbered_queries.fasta" :
-                                              args->args[1]);
+    blat_coarse(args->args[0], number_queries ? file_nq : args->args[1]);
 
-    struct DSVector *queries=/*complete_psl*/false ? read_queries(args->args[1]) : NULL;
+    //struct DSVector *queries=complete_psl ? read_queries(args->args[1]) : NULL;
 
     FILE *coarse_blat_output;
 
@@ -319,7 +320,8 @@ int main(int argc, char **argv){
         write_fine_fasta(
           expanded_hits, cablat_flags.output_expanded_fasta, true);
 
-    blat_fine(args); //Run fine BLAT
+    //Run fine BLAT
+    blat_fine(args, number_queries ? file_nq : args->args[1]);
 
     /*Free the expanded hits and the database and delete the intermediate files
       unless --no-cleanup is passed.*/
