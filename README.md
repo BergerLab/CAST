@@ -17,6 +17,9 @@ https://github.com/BurntSushi/cablastp
 **CaBLAT is currently under development.**
 **NOTE: Because of the smaller database size in CaBLAT, CaBLAT may produce hits
   that do not occur when running BLAT on a full uncompressed database.**
+**NOTE: For CaBLAT, it is recommended to pass in the flags --number-queries and
+  --number-targets to prevent errors in fine BLAT related to duplicate query and
+  target sequence names.**
 
 Installation
 ============
