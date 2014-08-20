@@ -349,14 +349,26 @@ int main(int argc, char **argv){
         for (int i = 0; i < fine_hits->size; i++){
             struct psl_entry *hit =
               (struct psl_entry *)ds_vector_get(fine_hits, i);
-            int target_i = atoi(hit->t_name-1);
+            int target_i = atoi(hit->t_name-1),
+                query_i  = atoi(hit->q_name-1);
             struct cb_hit_expansion *target_expansion =
               (struct cb_hit_expansion *)ds_vector_get(expanded_hits, target_i);
+
             free(hit->t_name);
             hit->t_name =
               malloc((strlen(target_expansion->seq->name)+1)
                      *sizeof(*(hit->t_name)));
+            assert(hit->t_name);
             strcpy(hit->t_name, target_expansion->seq->name);
+
+            struct fasta_seq *query_seq =
+              (struct fasta_seq *)ds_vector_get(queries, query_i);
+            char *query_name = query_seq->name;
+            free(hit->q_name);
+            hit->q_name = malloc((strlen(query_name)+1)*sizeof(*(hit->q_name)));
+            assert(hit->q_name);
+	    strcpy(hit->q_name, query_name);
+
             hit->t_size = (unsigned)(seq_lengths[target_expansion->seq->id]);
             hit->t_start += target_expansion->offset;
             hit->t_end += target_expansion->offset;
