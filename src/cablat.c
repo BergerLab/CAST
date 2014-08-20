@@ -133,17 +133,17 @@ void blat_coarse(char *db, char *queries){
 void blat_fine(char *queries, char *out, char *blat_args){
     char *blat;
     int command_length = 1024;
-    //bool complete_psl = cablat_flags.complete_psl;
+    bool complete_psl = cablat_flags.complete_psl;
 
     blat = malloc(command_length*sizeof(*blat));
     assert(blat);
 
     if (blat_args[0] == '\0')
-        sprintf(blat, "$HOME/bin/$MACHTYPE/blat CaBLAT_fine.fasta %s %s",
-                queries, out);
+        sprintf(blat, "$HOME/bin/$MACHTYPE/blat CaBLAT_fine.fasta %s %s %s",
+                 complete_psl ? "-noHead" : "", queries, out);
     else
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s %s CaBLAT_fine.fasta %s %s",
-                blat_args, "", queries, out);
+                blat_args, complete_psl?"-out=psl -noHead":"", queries, out);
 
     if (!cablat_flags.hide_progress)
         fprintf(stderr, "\n%s\n", blat);
@@ -163,7 +163,8 @@ void blat_fine(char *queries, char *out, char *blat_args){
 void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
     FILE *temp;
     int sequences = 0;
-    bool number_targets = cablat_flags.number_targets;
+    bool number_targets =
+      cablat_flags.number_targets || cablat_flags.complete_psl;
 
     if (NULL == (temp = fopen(dest, "w"))) {
         fprintf(stderr,"fopen: 'fopen %s' failed: %s\n",dest,strerror(errno));
@@ -271,7 +272,7 @@ int main(int argc, char **argv){
          *file_fr = "CaBLAT_fine_results.psl";
 
     bool complete_psl = cablat_flags.complete_psl;
-    bool number_queries = cablat_flags.number_queries;
+    bool number_queries = cablat_flags.number_queries || complete_psl;
 
     if (args->nargs < 3) {
         fprintf(stderr, 
@@ -327,6 +328,7 @@ int main(int argc, char **argv){
     blat_fine(number_queries ? file_nq : args->args[1],
               complete_psl ? file_fr : args->args[2], get_blat_args(args));
 
+exit(0);
     //Convert the output to a complete .psl file if --complete-psl is passed
     if (cablat_flags.complete_psl) {
         FILE *fine_blat_output, *output_file;
