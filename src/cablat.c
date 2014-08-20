@@ -328,7 +328,6 @@ int main(int argc, char **argv){
     blat_fine(number_queries ? file_nq : args->args[1],
               complete_psl ? file_fr : args->args[2], get_blat_args(args));
 
-exit(0);
     //Convert the output to a complete .psl file if --complete-psl is passed
     if (cablat_flags.complete_psl) {
         FILE *fine_blat_output, *output_file;
@@ -347,14 +346,12 @@ exit(0);
 
         struct DSVector *fine_hits = psl_read(fine_blat_output);
         int64_t *seq_lengths = cb_compressed_get_lengths(db->com_db);
-
         for (int i = 0; i < fine_hits->size; i++){
             struct psl_entry *hit =
               (struct psl_entry *)ds_vector_get(fine_hits, i);
-            int target_index = atoi(hit->t_name);
+            int target_i = atoi(hit->t_name-1);
             struct cb_hit_expansion *target_expansion =
-              (struct cb_hit_expansion *)ds_vector_get(expanded_hits,
-                                                       target_index);
+              (struct cb_hit_expansion *)ds_vector_get(expanded_hits, target_i);
             free(hit->t_name);
             hit->t_name =
               malloc((strlen(target_expansion->seq->name)+1)
