@@ -152,6 +152,16 @@ struct opt_config *load_cablat_args(){
         "Pass this flag to keep the intermediate files, such as the numbered "
         "query and target files, the coarse BLAT output, and the fine query "
         "and target files.");
+    opt_flag_bool(conf,
+        &cablat_flags.number_queries, "number-queries",
+        "Pass this flag to add a step for numbering the query sequences.  "
+        "Recommended to be passed in to prevent errors in BLAT due to "
+        "duplicate query sequence names.");
+    opt_flag_bool(conf,
+        &cablat_flags.number_targets, "number-targets",
+        "Pass this flag to add a step for numbering the target sequences.  "
+        "Recommended to be passed in to prevent errors in BLAT due to "
+        "duplicate target sequence names.");
     /*opt_flag_bool(conf,
         &cablat_flags.complete_psl, "complete-psl",
         "Pass this flag to output a .psl file for the final output that "
