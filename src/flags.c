@@ -162,13 +162,13 @@ struct opt_config *load_cablat_args(){
         "Pass this flag to add a step for numbering the target sequences.  "
         "Recommended to be passed in to prevent errors in BLAT due to "
         "duplicate target sequence names.");
-    /*opt_flag_bool(conf,
+    opt_flag_bool(conf,
         &cablat_flags.complete_psl, "complete-psl",
         "Pass this flag to output a .psl file for the final output that "
         "contains information that is normally removed from .psl output in "
         "BLAT, including the names of queries and target sequences past the "
         "first whitespace character as well as the location of the hit within "
-        "the original uncompressed sequence");*/
+        "the original uncompressed sequence");
 
 
     return conf;

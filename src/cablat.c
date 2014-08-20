@@ -267,9 +267,10 @@ int main(int argc, char **argv){
     conf = load_cablat_args();
     args = opt_config_parse(conf, argc, argv);
 
-    char *file_nq = "CaBLAT_numbered_queries.fasta";
+    char *file_nq = "CaBLAT_numbered_queries.fasta",
+         *file_fr = "CaBLAT_fine_results.psl";
 
-    bool complete_psl = false;//cablat_flags.complete_psl;
+    bool complete_psl = cablat_flags.complete_psl;
     bool number_queries = cablat_flags.number_queries;
 
     if (args->nargs < 3) {
@@ -296,7 +297,8 @@ int main(int argc, char **argv){
     //Run coarse BLAT
     blat_coarse(args->args[0], number_queries ? file_nq : args->args[1]);
 
-    //struct DSVector *queries=complete_psl ? read_queries(args->args[1]) : NULL;
+    struct DSVector *queries =
+      complete_psl ? read_queries(args->args[1]) : NULL;
 
     FILE *coarse_blat_output;
 
@@ -323,7 +325,59 @@ int main(int argc, char **argv){
 
     //Run fine BLAT
     blat_fine(number_queries ? file_nq : args->args[1],
-              args->args[2], get_blat_args(args));
+              complete_psl ? file_fr : args->args[2], get_blat_args(args));
+
+    //Convert the output to a complete .psl file if --complete-psl is passed
+    if (cablat_flags.complete_psl) {
+        FILE *fine_blat_output, *output_file;
+
+        if (NULL == (fine_blat_output = fopen(file_fr, "r"))) {
+            fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                            file_fr, strerror(errno));
+            exit(1);
+        }
+
+        if (NULL == (output_file = fopen(args->args[2], "w"))) {
+            fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
+                            args->args[2], strerror(errno));
+            exit(1);
+        }
+
+        struct DSVector *fine_hits = psl_read(fine_blat_output);
+        int64_t *seq_lengths = cb_compressed_get_lengths(db->com_db);
+
+        for (int i = 0; i < fine_hits->size; i++){
+            struct psl_entry *hit =
+              (struct psl_entry *)ds_vector_get(fine_hits, i);
+            int target_index = atoi(hit->t_name);
+            struct cb_hit_expansion *target_expansion =
+              (struct cb_hit_expansion *)ds_vector_get(expanded_hits,
+                                                       target_index);
+            free(hit->t_name);
+            hit->t_name =
+              malloc((strlen(target_expansion->seq->name)+1)
+                     *sizeof(*(hit->t_name)));
+            strcpy(hit->t_name, target_expansion->seq->name);
+            hit->t_size = (unsigned)(seq_lengths[target_expansion->seq->id]);
+            hit->t_start += target_expansion->offset;
+            hit->t_end += target_expansion->offset;
+
+            for (int j = 0; j < hit->block_count; j++)
+                hit->t_starts[j] += target_expansion->offset;
+
+            psl_entry_print(hit, output_file);
+        }
+
+        free(seq_lengths);
+        fclose(fine_blat_output);
+        fclose(output_file);
+    }
+
+    if (complete_psl) {
+        for (int i = 0; i < queries->size; i++)
+            fasta_free_seq((struct fasta_seq *)ds_vector_get(queries, i));
+        ds_vector_free_no_data(queries);
+    }
 
     /*Free the expanded hits and the database and delete the intermediate files
       unless --no-cleanup is passed.*/

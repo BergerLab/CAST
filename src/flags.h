@@ -48,7 +48,7 @@ struct cablat_flags {
     bool    no_cleanup;
     bool    number_queries;
     bool    number_targets;
-    //bool    complete_psl;
+    bool    complete_psl;
 } cablat_flags;
 
 
