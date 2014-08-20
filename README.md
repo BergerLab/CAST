@@ -16,9 +16,9 @@ The official Go implementation of CaBLASTP can be found here:
 https://github.com/BurntSushi/cablastp
 
 **Notes about CaBLAT:**
-*Because of the smaller database size in CaBLAT, CaBLAT may produce hits
+* Because of the smaller database size in CaBLAT, CaBLAT may produce hits
   that do not occur when running BLAT on a full uncompressed database.
-*For CaBLAT, it is recommended to pass in the flags --number-queries and
+* For CaBLAT, it is recommended to pass in the flags --number-queries and
   --number-targets to prevent errors in fine BLAT related to duplicate query and
   target sequence names.
 
