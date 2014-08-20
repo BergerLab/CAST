@@ -163,6 +163,7 @@ void blat_fine(struct opt_args *args, char *queries){
 void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
     FILE *temp;
     int sequences = 0;
+    bool number_targets = cablat_flags.number_targets;
 
     if (NULL == (temp = fopen(dest, "w"))) {
         fprintf(stderr,"fopen: 'fopen %s' failed: %s\n",dest,strerror(errno));
@@ -176,7 +177,7 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
         struct cb_seq *current_seq = current_expansion->seq;
         int64_t offset             = current_expansion->offset;
 
-        if (false/*!cablat_flags.complete_psl*/) {
+        if (!number_targets) {
             if (show_offsets)
                 fprintf(temp, "> %s (offset %ld)\n%s\n",
                                current_seq->name, offset,
