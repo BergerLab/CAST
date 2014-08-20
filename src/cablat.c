@@ -349,8 +349,8 @@ int main(int argc, char **argv){
         for (int i = 0; i < fine_hits->size; i++){
             struct psl_entry *hit =
               (struct psl_entry *)ds_vector_get(fine_hits, i);
-            int target_i = atoi(hit->t_name-1),
-                query_i  = atoi(hit->q_name-1);
+            int target_i = atoi(hit->t_name)-1,
+                query_i  = atoi(hit->q_name)-1;
             struct cb_hit_expansion *target_expansion =
               (struct cb_hit_expansion *)ds_vector_get(expanded_hits, target_i);
 
