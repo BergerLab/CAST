@@ -130,8 +130,8 @@ void blat_coarse(char *db, char *queries){
 }
 
 //Runs BLAT on the fine FASTA file
-void blat_fine(struct opt_args *args, char *queries){
-    char *blat, *blat_args = get_blat_args(args);
+void blat_fine(char *queries, char *out, char *blat_args){
+    char *blat;
     int command_length = 1024;
     //bool complete_psl = cablat_flags.complete_psl;
 
@@ -140,10 +140,10 @@ void blat_fine(struct opt_args *args, char *queries){
 
     if (blat_args[0] == '\0')
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat CaBLAT_fine.fasta %s %s",
-                queries, args->args[2]);
+                queries, out);
     else
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s %s CaBLAT_fine.fasta %s %s",
-                blat_args, "", queries, args->args[2]);
+                blat_args, "", queries, out);
 
     if (!cablat_flags.hide_progress)
         fprintf(stderr, "\n%s\n", blat);
@@ -322,7 +322,8 @@ int main(int argc, char **argv){
           expanded_hits, cablat_flags.output_expanded_fasta, true);
 
     //Run fine BLAT
-    blat_fine(args, number_queries ? file_nq : args->args[1]);
+    blat_fine(number_queries ? file_nq : args->args[1],
+              args->args[2], get_blat_args(args));
 
     /*Free the expanded hits and the database and delete the intermediate files
       unless --no-cleanup is passed.*/
