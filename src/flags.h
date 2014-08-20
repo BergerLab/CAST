@@ -46,7 +46,7 @@ struct cablat_flags {
     char    *output_expanded_fasta;
     bool    hide_progress;
     bool    no_cleanup;
-    bool    complete_psl;
+    //bool    complete_psl;
 } cablat_flags;
 
 

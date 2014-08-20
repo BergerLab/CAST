@@ -152,13 +152,13 @@ struct opt_config *load_cablat_args(){
         "Pass this flag to keep the intermediate files, such as the numbered "
         "query and target files, the coarse BLAT output, and the fine query "
         "and target files.");
-    opt_flag_bool(conf,
+    /*opt_flag_bool(conf,
         &cablat_flags.complete_psl, "complete-psl",
         "Pass this flag to output a .psl file for the final output that "
         "contains information that is normally removed from .psl output in "
         "BLAT, including the names of queries and target sequences past the "
         "first whitespace character as well as the location of the hit within "
-        "the original uncompressed sequence");
+        "the original uncompressed sequence");*/
 
 
     return conf;

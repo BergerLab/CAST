@@ -133,7 +133,7 @@ void blat_coarse(char *db, char *queries){
 void blat_fine(struct opt_args *args){
     char *blat, *blat_args = get_blat_args(args);
     int command_length = 1024;
-    bool complete_psl = cablat_flags.complete_psl;
+    bool complete_psl = false;//cablat_flags.complete_psl;
 
     blat = malloc(command_length*sizeof(*blat));
     assert(blat);
@@ -178,7 +178,7 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
         struct cb_seq *current_seq = current_expansion->seq;
         int64_t offset             = current_expansion->offset;
 
-        if (!cablat_flags.complete_psl) {
+        if (false/*!cablat_flags.complete_psl*/) {
             if (show_offsets)
                 fprintf(temp, "> %s (offset %ld)\n%s\n",
                                current_seq->name, offset,
@@ -267,7 +267,7 @@ int main(int argc, char **argv){
 
     conf = load_cablat_args();
     args = opt_config_parse(conf, argc, argv);
-    bool complete_psl = cablat_flags.complete_psl;
+    bool complete_psl = false;//cablat_flags.complete_psl;
 
     if (args->nargs < 3) {
         fprintf(stderr, 
@@ -287,14 +287,14 @@ int main(int argc, char **argv){
                             cablat_flags.link_block_size);
 
     //Number the queries if --complete-psl is passed in
-    if (complete_psl)
+    if (/*complete_psl*/false)
         write_numbered_fasta(args->args[1], "CaBLAT_numbered_queries.fasta");
 
     //Run coarse BLAT
-    blat_coarse(args->args[0], complete_psl ? "CaBLAT_numbered_queries.fasta" :
+    blat_coarse(args->args[0], /*complete_psl*/false ? "CaBLAT_numbered_queries.fasta" :
                                               args->args[1]);
 
-    struct DSVector *queries=complete_psl ? read_queries(args->args[1]) : NULL;
+    struct DSVector *queries=/*complete_psl*/false ? read_queries(args->args[1]) : NULL;
 
     FILE *coarse_blat_output;
 
@@ -320,58 +320,6 @@ int main(int argc, char **argv){
           expanded_hits, cablat_flags.output_expanded_fasta, true);
 
     blat_fine(args); //Run fine BLAT
-
-    //Convert the output to a complete .psl file if --complete-psl is passed
-    if (cablat_flags.complete_psl) {
-        FILE *fine_blat_output, *output_file;
-
-        if (NULL == (fine_blat_output = fopen("CaBLAT_fine_results.psl","r"))) {
-            fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
-                            "CaBLAT_fine_results.psl", strerror(errno));
-            exit(1);
-        }
-
-        if (NULL == (output_file = fopen(args->args[2], "w"))) {
-            fprintf(stderr, "fopen: 'fopen %s' failed: %s\n",
-                            args->args[2], strerror(errno));
-            exit(1);
-        }
-
-        struct DSVector *fine_hits = psl_read(fine_blat_output);
-        int64_t *seq_lengths = cb_compressed_get_lengths(db->com_db);
-
-        for (int i = 0; i < fine_hits->size; i++){
-            struct psl_entry *hit =
-              (struct psl_entry *)ds_vector_get(fine_hits, i);
-            int target_index = atoi(hit->t_name);
-            struct cb_hit_expansion *target_expansion =
-              (struct cb_hit_expansion *)ds_vector_get(expanded_hits,
-                                                       target_index);
-            free(hit->t_name);
-            hit->t_name =
-              malloc((strlen(target_expansion->seq->name)+1)
-                     *sizeof(*(hit->t_name)));
-            strcpy(hit->t_name, target_expansion->seq->name);
-            hit->t_size = (unsigned)(seq_lengths[target_expansion->seq->id]);
-            hit->t_start += target_expansion->offset;
-            hit->t_end += target_expansion->offset;
-
-            for (int j = 0; j < hit->block_count; j++)
-                hit->t_starts[j] += target_expansion->offset;
-
-            psl_entry_print(hit, output_file);
-        }
-
-        free(seq_lengths);
-        fclose(fine_blat_output);
-        fclose(output_file);
-    }
-
-    if (complete_psl) {
-        for (int i = 0; i < queries->size; i++)
-            fasta_free_seq((struct fasta_seq *)ds_vector_get(queries, i));
-        ds_vector_free_no_data(queries);
-    }
 
     /*Free the expanded hits and the database and delete the intermediate files
       unless --no-cleanup is passed.*/
