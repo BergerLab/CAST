@@ -414,7 +414,8 @@ int main(int argc, char **argv){
         system("rm CaBLAT_fine.fasta");
 
         if (!cablat_flags.no_cleanup) {
-            system("rm CaBLAT_numbered_queries.fasta");
+            if (number_queries)
+              system("rm CaBLAT_numbered_queries.fasta");
             system("rm CaBLAT_fine_results.psl");
         }
     }

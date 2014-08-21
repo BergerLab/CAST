@@ -170,7 +170,6 @@ struct opt_config *load_cablat_args(){
         "first whitespace character as well as the location of the hit within "
         "the original uncompressed sequence");
 
-
     return conf;
 }
 
