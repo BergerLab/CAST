@@ -101,6 +101,8 @@ struct DSVector *expand_blat_hits(struct DSVector *hits,
 
         ds_vector_free_no_data(oseqs);
     }
+    if (!cablat_flags.hide_progress)
+        fprintf(stderr, "\n");
 
     return expanded_hits;
 }
@@ -121,7 +123,7 @@ void blat_coarse(char *db, char *queries){
             target_path, queries, "coarse-blat.psl");
 
     if (!cablat_flags.hide_progress)
-        fprintf(stderr, "%s\n", coarse_blat_command);
+        fprintf(stderr, "Running coarse BLAT\n%s\n\n", coarse_blat_command);
 
     system(coarse_blat_command);
 
@@ -150,7 +152,7 @@ void blat_fine(char *queries, char *out, char *blat_args){
                 queries, out);
 
     if (!cablat_flags.hide_progress)
-        fprintf(stderr, "\n%s\n", blat);
+        fprintf(stderr, "\nRunning fine BLAT\n%s\n", blat);
 
     system(blat); //Run fine BLAT
 
