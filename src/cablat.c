@@ -92,8 +92,8 @@ struct DSVector *expand_blat_hits(struct DSVector *hits,
                 coarse_seq_id = atoi(h->t_name);
 
         struct DSVector *oseqs =
-          cb_coarse_expand(db->coarse_db,db->com_db, coarse_seq_id,
-                           coarse_start, coarse_end,10);
+          cb_coarse_expand(db->coarse_db, db->com_db, coarse_seq_id,
+                           coarse_start, coarse_end, 10);
 
         for (int j = 0; j < oseqs->size; j++)
             ds_vector_append(expanded_hits,
@@ -129,7 +129,10 @@ void blat_coarse(char *db, char *queries){
     free(coarse_blat_command);
 }
 
-//Runs BLAT on the fine FASTA file
+/*Takes in the name of the queries file, the destination filename for the fine
+ *BLAT output, and a string of any BLAT arguments passed in and uses those
+ *arguments to run BLAT on the fine FASTA file.
+ */
 void blat_fine(char *queries, char *out, char *blat_args){
     char *blat;
     int command_length = 1024;
@@ -140,10 +143,11 @@ void blat_fine(char *queries, char *out, char *blat_args){
 
     if (blat_args[0] == '\0')
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat CaBLAT_fine.fasta %s %s %s",
-                 complete_psl ? "-noHead" : "", queries, out);
+                complete_psl ? "-noHead" : "", queries, out);
     else
         sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s %s CaBLAT_fine.fasta %s %s",
-                blat_args, complete_psl?"-out=psl -noHead":"", queries, out);
+                blat_args, complete_psl ? "-out=psl -noHead" : "",
+                queries, out);
 
     if (!cablat_flags.hide_progress)
         fprintf(stderr, "\n%s\n", blat);
@@ -201,10 +205,8 @@ void write_fine_fasta(struct DSVector *oseqs, char *dest, bool show_offsets){
     fclose(temp);
 }
 
-/*Takes in the name of a FASTA file and the name of a destination file and
- *converts the FASTA file to a file at that destination with its headers
- *numbered.
- */
+/*Takes in the name of a FASTA file and a destination filename and converts the
+  FASTA file to a FASTA file at that destination with its headers numbered.*/
 void write_numbered_fasta(char *fname, char *dest){
     assert(fname);
     assert(dest);
@@ -271,8 +273,8 @@ int main(int argc, char **argv){
     char *file_nq = "CaBLAT_numbered_queries.fasta",
          *file_fr = "CaBLAT_fine_results.psl";
 
-    bool complete_psl = cablat_flags.complete_psl;
-    bool number_queries = cablat_flags.number_queries || complete_psl;
+    bool complete_psl = cablat_flags.complete_psl,
+         number_queries = cablat_flags.number_queries || complete_psl;
 
     if (args->nargs < 3) {
         fprintf(stderr, 
