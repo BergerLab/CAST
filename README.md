@@ -36,8 +36,8 @@ in src but is modified to produce .a files instead of .so files.
 Briefly, the following commands should get CAST into a working state:
 
 ```bash
-git clone git://github.com/BergerLab/c_cablast
-cd c_cablast/src/clibs
+git clone git://github.com/BergerLab/CAST
+cd CAST/src/clibs
 make
 cd ../..
 make
