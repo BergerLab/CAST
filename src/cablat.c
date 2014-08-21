@@ -377,8 +377,10 @@ int main(int argc, char **argv){
                 hit->t_starts[j] += target_expansion->offset;
 
             psl_entry_print(hit, output_file);
+            psl_entry_free(hit);
         }
 
+        ds_vector_free_no_data(fine_hits);
         free(seq_lengths);
         fclose(fine_blat_output);
         fclose(output_file);
