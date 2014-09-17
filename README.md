@@ -50,12 +50,31 @@ The usage of `cablast-compress` is:
 cablast-compress [flags] database-directory fasta-file [fasta-file ...]
 ```
 
+* database-directory is the directory cablast-compress will create
+* The FASTA file(s) being passed in are the database you want to compress. 
+
+
+
 The usage of `cablast-search` is:
 ```bash
-./cablast-search [flags] database-dir fasta-file [ --blast_args BLASTN_ARGUMENTS ]
+./cablast-search [flags] database-dir query-fasta-file [ --blast_args BLASTN_ARGUMENTS ]
 ```
+
+* query-fasta-file is a file containing the query sequences you wish to use for the CaBLAST
+  search against a database previously compressed.
+* --blast_args takes in any arguments to be passed directly to fine BLAST
+
+**We recommend that the query FASTA file not contain a large number of sequences because
+  of a limitation with overlapping BLAST hits.  We are working on fixing this limitation.**
+
 
 The usage of `cablat` is:
 ```bash
-./cablat [flags] database-dir fasta-file results-file [ --blat_args BLAT_ARGUMENTS ]
+./cablat [flags] database-dir query-fasta-file results-file [ --blat_args BLAT_ARGUMENTS ]
 ```
+* database-dir is the directory resulting from cablast-compress
+* query-fasta-file is a file containing the query sequences you wish to use for the CaBLAST
+  search against a database previously compressed.a
+* results-file is the file that will contain the results of fine BLAT
+* --blat_args takes in any arguments to be passed directly to fine BLAT
+
