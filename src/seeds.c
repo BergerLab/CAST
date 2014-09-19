@@ -93,7 +93,7 @@ struct cb_seeds *cb_seeds_init(int32_t seed_size){
     int32_t *loc_counts = seeds->loc_counts;
 
     for (int i = 0; i < locs_length; i++)
-        loc_counts[i] = 0;
+        loc_counts[i] = -1;
 
     return seeds;
 }
@@ -163,15 +163,16 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
       don't have a locations array in the seeds table.*/
     for (int i = 0; i <= seq_length - seed_size; i++) {
         hash = hashes[i];
-        if (locs[hash] == NULL) {
+        if (loc_counts[hash] == -1) {
             pthread_rwlock_wrlock(&(seeds->alloc_locks[hash%256]));
 
             /*Make sure the locations array was not allocated by another thread
               before this thread got the lock.*/
             if (locs[hash] == NULL)
                 locs[hash] =
-                  malloc(compress_flags.max_kmer_freq*sizeof(locs[hash]));
+                  malloc(compress_flags.max_kmer_freq*sizeof(*(locs[hash])));
             assert(locs[hash]);
+            loc_counts[hash] = 0;
             pthread_rwlock_unlock(&(seeds->alloc_locks[hash%256]));
         }
     }
@@ -184,7 +185,7 @@ void cb_seeds_add(struct cb_seeds *seeds, struct cb_coarse_seq *seq,
         if (locs_to_add[i] != NULL &&
               loc_counts[hash] < compress_flags.max_kmer_freq) {
             locs[hash][loc_counts[hash]] = locs_to_add[i];
-            (loc_counts[hash])++;
+            __sync_fetch_and_add(&(loc_counts[hash]), 1);
         }
     }
     pthread_rwlock_unlock(&seeds->lock);

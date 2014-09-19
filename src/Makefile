@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-g -O3 -std=c99 -Wall -Wextra -pedantic -lpthread -I. \
        -I/usr/include/libxml2
-LDLIBS=clibs/libds/libds.a -lpthread clibs/libopt/libopt.a -lxml2
+LDLIBS=clibs/libds/libds.a -lpthread clibs/libopt/libopt.a -lxml2 -lm
 
 COMPRESS_OBJS=align.o bitpack.o coarse.o compressed.o compression.o database.o \
               DNAutils.o edit_scripts.o fasta.o flags.o link_to_coarse.o \

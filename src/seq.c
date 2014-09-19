@@ -41,7 +41,7 @@ struct cb_seq *cb_seq_init_range(int32_t id, char *name, char *residues,
     if (seq->length > 0) {
         assert(start >= 0 && start < end);
 
-        seq->residues = malloc((1+seq->length)*sizeof(*seq->residues));
+        seq->residues = malloc((1+seq->length)*sizeof(*(seq->residues)));
         assert(seq->residues);
 
         strncpy(seq->residues, residues + start, seq->length);
