@@ -76,7 +76,7 @@ void cb_coarse_free(struct cb_coarse *coarse_db){
     }
 
     //Free each coarse sequence
-    for (i = 0; i < coarse_db->seqs->size; i++)
+    for (i = 0; i < coarse_db->seqs->data->size; i++)
         cb_coarse_seq_free(
           (struct cb_coarse_seq *)cb_vector_get(coarse_db->seqs, i));
     cb_vector_free_no_data(coarse_db->seqs);
@@ -99,7 +99,7 @@ struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
     struct cb_coarse_seq *seq = cb_coarse_seq_init(-1, residues, start, end);
 
     pthread_rwlock_wrlock(&coarse_db->lock_seq);
-    seq->id = coarse_db->seqs->size;
+    seq->id = coarse_db->seqs->data->size;
     cb_vector_append(coarse_db->seqs, (void *)seq);
     pthread_rwlock_unlock(&coarse_db->lock_seq);
 
@@ -142,7 +142,7 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
     uint64_t link_index = (uint64_t)0, base_index = (uint64_t)0;
 
     //ds_vector_sort(coarse_db->seqs, by_index);
-    for (i = 0; i < coarse_db->seqs->size; i++) {
+    for (i = 0; i < coarse_db->seqs->data->size; i++) {
         uint64_t coarse_fasta_index, link_count = 0;
         char *fasta_output;
 
@@ -200,7 +200,7 @@ void cb_coarse_save_plain(struct cb_coarse *coarse_db){
     struct cb_coarse_seq *seq;
     struct cb_link_to_compressed *link;
 
-    for (int32_t i = 0; i < coarse_db->seqs->size; i++) {
+    for (int32_t i = 0; i < coarse_db->seqs->data->size; i++) {
         seq = (struct cb_coarse_seq *)cb_vector_get(coarse_db->seqs, i);
         fprintf(coarse_db->file_fasta, "> %d\n%s\n", i, seq->seq->residues);
 

@@ -48,7 +48,7 @@ void *cb_vector_array_get(struct cb_vector_array *array, int index){
     /*When getting the data, increment the number of threads accessing the
       array*/
     __sync_fetch_and_add(&(array->th), 1);
-    el = (index >= array->size || index < 0) ? NULL : (array->data)[index];
+    el = index >= array->size ? NULL : array->data[index];
     __sync_fetch_and_sub(&(array->th), 1);
 
     return el;
@@ -56,8 +56,7 @@ void *cb_vector_array_get(struct cb_vector_array *array, int index){
 
 //Append an element to the array
 void cb_vector_array_append(struct cb_vector_array *array, void *data){
-    array->data[array->size] = data;
-    (array->size)++;
+    array->data[array->size++] = data;
 }
 
 
@@ -68,8 +67,6 @@ struct cb_vector *cb_vector_init(int capacity){
     struct cb_vector *vector = malloc(sizeof(*vector));
     assert(vector);
 
-    vector->size     = 0;
-    vector->capacity = capacity;
     vector->data     = cb_vector_array_init(capacity);
 
     if (0 != (errno = pthread_rwlock_init(&vector->lock_add, NULL))) {
@@ -118,18 +115,16 @@ void *cb_vector_get(struct cb_vector *vector, int index){
  *threads are accessing it.
  */
 void cb_vector_expand(struct cb_vector *vector){
-    struct cb_vector_array *old_array=vector->data, 
-                           *new_array=cb_vector_array_init(vector->capacity*2);
+    struct cb_vector_array
+      *old_array = vector->data, 
+      *new_array = cb_vector_array_init(vector->data->capacity*2);
     void **old_data = old_array->data, **new_data = new_array->data;
-    int size = vector->size;
-
-    vector->capacity *= 2;
+    int size = old_array->size;
 
     new_array->size = size;
 
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++)
         new_data[i] = old_data[i];
-    }
 
     __sync_val_compare_and_swap(&vector->data, vector->data, new_array);
     cb_vector_array_free_no_data(old_array);
@@ -139,9 +134,8 @@ void cb_vector_expand(struct cb_vector *vector){
   vector if it has reached its capacity.*/
 void cb_vector_append(struct cb_vector *vector, void *data){
     pthread_rwlock_wrlock(&vector->lock_add);
-    if (vector->size == vector->capacity)
+    if (vector->data->size == vector->capacity)
         cb_vector_expand(vector);
     cb_vector_array_append(vector->data, data);
-    (vector->size)++;
     pthread_rwlock_unlock(&vector->lock_add);
 }

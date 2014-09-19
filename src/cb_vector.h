@@ -14,7 +14,6 @@ struct cb_vector_array {
 };
 
 struct cb_vector {
-    int size;
     int capacity;
     struct cb_vector_array *data;
 
