@@ -28,7 +28,7 @@ cb_coarse_init(int32_t seed_size,
     struct cb_coarse *coarse_db = malloc(sizeof(*coarse_db));
     assert(coarse_db);
 
-    coarse_db->seqs   = cb_vector_init(10);
+    coarse_db->seqs   = cb_vector_init(10000000);
 
     /*Only create a seeds table if we are using this coarse database for
       compression.*/
