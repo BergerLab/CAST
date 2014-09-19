@@ -26,9 +26,15 @@ void cb_vector_array_free(struct cb_vector_array *array){
 
     for (int i = 0; i < array->size; i++)
         free(array->data[i]);
+    cb_vector_array_free_no_data(array);
+}
+
+//Free a cb_vector_array struct without freeing its data
+void cb_vector_array_free_no_data(struct cb_vector_array *array){
     free(array->data);
     free(array);
 }
+
 
 /*Takes in a cb_vector_array struct and an index and returns the element at
   that index or NULL if no element exists at that index.*/
@@ -81,6 +87,24 @@ void cb_vector_free(struct cb_vector *vector){
     }
 
     cb_vector_array_free(vector->data);
+}
+
+//Get a cb_vector_struct's array of data, used for manually freeing the data
+void **cb_vector_get_data(struct cb_vector *vector){
+    return vector->data->data;
+}
+
+//Free a cb_vector struct without freeing its data
+void cb_vector_free_no_data(struct cb_vector *vector){
+    int errno;
+
+    //Destroy the lock
+    if (0 != (errno = pthread_rwlock_destroy(&vector->lock_add))) {
+        fprintf(stderr, "Could not destroy rwlock. Errno: %d\n", errno);
+        exit(1);
+    }
+
+    cb_vector_array_free_no_data(vector->data);
 }
 
 /*Takes in a vector and an index and gets the element in the vector at that
