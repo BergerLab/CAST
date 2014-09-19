@@ -32,7 +32,7 @@ void cb_coarse_seq_addlink(struct cb_coarse_seq *seq,
                            struct cb_link_to_compressed *newlink);
 
 struct cb_coarse {
-    struct DSVector *seqs;
+    struct cb_vector *seqs;
     struct cb_seeds *seeds;
     uint64_t dbsize;
     pthread_rwlock_t lock_seq;

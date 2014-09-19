@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "bitpack.h"
+#include "cb_vector.h"
 #include "coarse.h"
 #include "DNAutils.h"
 #include "fasta.h"
@@ -27,7 +28,7 @@ cb_coarse_init(int32_t seed_size,
     struct cb_coarse *coarse_db = malloc(sizeof(*coarse_db));
     assert(coarse_db);
 
-    coarse_db->seqs   = ds_vector_create_capacity(10000000);
+    coarse_db->seqs   = cb_vector_init(10);
 
     /*Only create a seeds table if we are using this coarse database for
       compression.*/
@@ -77,8 +78,8 @@ void cb_coarse_free(struct cb_coarse *coarse_db){
     //Free each coarse sequence
     for (i = 0; i < coarse_db->seqs->size; i++)
         cb_coarse_seq_free(
-          (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i));
-    ds_vector_free_no_data(coarse_db->seqs);
+          (struct cb_coarse_seq *)cb_vector_get(coarse_db->seqs, i));
+    cb_vector_free_no_data(coarse_db->seqs);
 
     //Free the seeds table
     if (coarse_db->seeds != NULL)
@@ -99,7 +100,7 @@ struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
 
     pthread_rwlock_wrlock(&coarse_db->lock_seq);
     seq->id = coarse_db->seqs->size;
-    ds_vector_append(coarse_db->seqs, (void *)seq);
+    cb_vector_append(coarse_db->seqs, (void *)seq);
     pthread_rwlock_unlock(&coarse_db->lock_seq);
 
     cb_seeds_add(coarse_db->seeds, seq, seeds_mem);
@@ -110,7 +111,7 @@ struct cb_coarse_seq *cb_coarse_add(struct cb_coarse *coarse_db, char *residues,
 /*Get the coarse sequence in the coarse database at index i.*/
 extern inline struct cb_coarse_seq *cb_coarse_get(struct cb_coarse *coarse_db,
                                                   int32_t i){
-    return (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i);
+    return (struct cb_coarse_seq *)cb_vector_get(coarse_db->seqs, i);
 }
 
 //Increments the coarse database's dbsize
@@ -140,7 +141,7 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
       coarse_fasta_base_index.*/
     uint64_t link_index = (uint64_t)0, base_index = (uint64_t)0;
 
-    ds_vector_sort(coarse_db->seqs, by_index);
+    //ds_vector_sort(coarse_db->seqs, by_index);
     for (i = 0; i < coarse_db->seqs->size; i++) {
         uint64_t coarse_fasta_index, link_count = 0;
         char *fasta_output;
@@ -148,7 +149,7 @@ void cb_coarse_save_binary(struct cb_coarse *coarse_db){
         fasta_output = malloc(30000*sizeof(*fasta_output));
         assert(fasta_output);
 
-        seq = (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i);
+        seq = (struct cb_coarse_seq *)cb_vector_get(coarse_db->seqs, i);
 
         coarse_fasta_index = ftell(coarse_db->file_fasta);
 
@@ -200,7 +201,7 @@ void cb_coarse_save_plain(struct cb_coarse *coarse_db){
     struct cb_link_to_compressed *link;
 
     for (int32_t i = 0; i < coarse_db->seqs->size; i++) {
-        seq = (struct cb_coarse_seq *)ds_vector_get(coarse_db->seqs, i);
+        seq = (struct cb_coarse_seq *)cb_vector_get(coarse_db->seqs, i);
         fprintf(coarse_db->file_fasta, "> %d\n%s\n", i, seq->seq->residues);
 
         fprintf(coarse_db->file_links, "> %d\n", i);

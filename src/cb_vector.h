@@ -23,7 +23,6 @@ struct cb_vector {
 
 struct cb_vector *cb_vector_init(int capacity);
 void cb_vector_free(struct cb_vector *vector);
-void **cb_vector_get_data(struct cb_vector *vector);
 void cb_vector_free_no_data(struct cb_vector *vector);
 void *cb_vector_get(struct cb_vector *vector, int index);
 void cb_vector_append(struct cb_vector *vector, void *data);

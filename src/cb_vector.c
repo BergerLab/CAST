@@ -35,7 +35,6 @@ void cb_vector_array_free_no_data(struct cb_vector_array *array){
     free(array);
 }
 
-
 /*Takes in a cb_vector_array struct and an index and returns the element at
   that index or NULL if no element exists at that index.*/
 void *cb_vector_array_get(struct cb_vector_array *array, int index){
@@ -87,11 +86,6 @@ void cb_vector_free(struct cb_vector *vector){
     }
 
     cb_vector_array_free(vector->data);
-}
-
-//Get a cb_vector_struct's array of data, used for manually freeing the data
-void **cb_vector_get_data(struct cb_vector *vector){
-    return vector->data->data;
 }
 
 //Free a cb_vector struct without freeing its data
