@@ -371,7 +371,7 @@ int main(int argc, char **argv){
             free(hit->q_name);
             hit->q_name = malloc((strlen(query_name)+1)*sizeof(*(hit->q_name)));
             assert(hit->q_name);
-	    strcpy(hit->q_name, query_name);
+            strcpy(hit->q_name, query_name);
 
             hit->t_size = (unsigned)(seq_lengths[target_expansion->seq->id]);
             hit->t_start += target_expansion->offset;
