@@ -33,6 +33,9 @@ found in Andrew Gallant's [clibs respository]
 (https://github.com/BurntSushi/clibs), which is included in the clibs directory
 in src but is modified to produce .a files instead of .so files.
 
+Additionally, to run CAST, `blastn`, `makeblastdb` and `blat` need to be
+installed in your PATH.
+
 Briefly, the following commands should get CAST into a working state:
 
 ```bash

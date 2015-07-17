@@ -114,12 +114,12 @@ void blat_coarse(char *db, char *queries){
     char *target_path = path_join(db, CABLAST_COARSE_FASTA),
          *coarse_blat_command =
             malloc(
-              (strlen("$HOME/bin/$MACHTYPE/blat    -noHead -minIdentity=80")
+              (strlen("blat    -noHead -minIdentity=80")
                +strlen(target_path)+strlen(queries)+strlen("coarse-blat.psl")+1)
               *sizeof(*coarse_blat_command));
 
     sprintf(coarse_blat_command,
-            "$HOME/bin/$MACHTYPE/blat %s %s %s -noHead -minIdentity=80",
+            "blat %s %s %s -noHead -minIdentity=80",
             target_path, queries, "coarse-blat.psl");
 
     if (!cablat_flags.hide_progress)
@@ -144,10 +144,10 @@ void blat_fine(char *queries, char *out, char *blat_args){
     assert(blat);
 
     if (blat_args[0] == '\0')
-        sprintf(blat, "$HOME/bin/$MACHTYPE/blat CaBLAT_fine.fasta %s %s %s",
+        sprintf(blat, "blat CaBLAT_fine.fasta %s %s %s",
                 complete_psl ? "-noHead" : "", queries, out);
     else
-        sprintf(blat, "$HOME/bin/$MACHTYPE/blat %s %s CaBLAT_fine.fasta %s %s",
+        sprintf(blat, "blat %s %s CaBLAT_fine.fasta %s %s",
                 blat_args, complete_psl ? "-out=psl -noHead" : "",
                 queries, out);
 
