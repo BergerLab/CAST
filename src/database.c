@@ -157,7 +157,7 @@ cb_database_r_init(char *dir, bool load_coarse_residues, bool load_coarse_links,
 
     //Make sure the database directory exists.
     if (0 != stat(dir, &buf)) {
-        fprintf(stderr, "Could not open '%s' database for reading.", dir);
+        fprintf(stderr, "Could not open '%s' database for reading.\n", dir);
         exit(1);
     }
 
