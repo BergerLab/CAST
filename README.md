@@ -18,9 +18,12 @@ https://github.com/BurntSushi/cablastp
 **Notes about CaBLAT:**
 * Because of the smaller database size in CaBLAT, CaBLAT may produce hits
   that do not occur when running BLAT on a full uncompressed database.
-* For CaBLAT, it is recommended to pass in the flags `--number-queries` and
-  `--number-targets` to prevent errors in fine BLAT related to duplicate query
+* For CaBLAT, it is recommended to pass in the flags **`--number-queries`** and
+  **`--number-targets`** to prevent errors in fine BLAT related to duplicate query
   and target sequence names.
+    * To get a final .psl file in fine BLAT that contains the full names of the sequences in the
+      query and target FASTA files and the locations of fine BLAT results in their original
+      uncompressed sequences, pass in the option **`--complete-psl`**.
 * Because of the differences between how fine BLAT is implemented in this
   version of CaBLAT and in Po-Ru's prototype version, there are some
   differences in the results of this version and the prototype.
