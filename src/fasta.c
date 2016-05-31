@@ -99,8 +99,10 @@ fasta_generator_start(const char *file_name, const char *exclude,
     int errno;
 
     assert(buffer_capacity > 0);
-
-    if (NULL == (fp = fopen(file_name, "r"))) {
+    if (file_name[0] == '-'){
+      printf("Reading from stdin...\n");
+      fp = stdin;
+    } else if (NULL == (fp = fopen(file_name, "r"))) {
         perror("fasta_start_generator");
         exit(1);
     }
